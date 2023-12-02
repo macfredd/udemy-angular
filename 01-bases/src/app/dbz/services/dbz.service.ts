@@ -33,4 +33,8 @@ export class DbzService {
     this._personajes.push(personaje);
   }
 
+  eliminarPersonaje( index: number ) {
+    this._personajes.splice(index, 1);
+  }
+
 }

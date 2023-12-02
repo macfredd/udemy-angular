@@ -13,4 +13,8 @@ export class PersonajesComponent {
   get personajes() {
     return this.dbzService.personajes;
   }
+
+  public onEliminarPersonaje(index: number): void {
+    this.dbzService.eliminarPersonaje(index);
+  }
 }

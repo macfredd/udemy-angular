@@ -14,6 +14,15 @@ export class DbzService {
       nombre: 'Vegeta',
       poder: 7500
     },
+    {
+      nombre: 'Blade',
+      poder: 8600
+    },
+    {
+      nombre: 'Messi',
+      poder: 21000
+    },
+    
   ];
 
   get personajes(): Personaje[] {

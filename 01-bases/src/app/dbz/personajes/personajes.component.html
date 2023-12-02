@@ -1,6 +1,19 @@
 <h3>Personajes</h3>
-<ul>
-  <li *ngFor="let personaje of personajes">
-    {{personaje.nombre}} - {{personaje.poder | number}}
+<ul class="list-group">
+  <li *ngFor="let personaje of personajes; let pos = index; let isEven = even;" 
+  class="list-group-item d-flex justify-content-between align-items-center" 
+  [ngClass] = "{'list-group-item-success': isEven}">
+
+  <div>
+    <span class="text-primary">{{pos + 1}}.</span>
+    <span>{{personaje.nombre}}</span>
+    <span> - </span>
+    <strong>Power: </strong>
+    <span>{{personaje.poder | number}}</span>
+    
+  </div>
+
+  <button class="btn btn-danger" >X</button>
+    
    </li>
 </ul>

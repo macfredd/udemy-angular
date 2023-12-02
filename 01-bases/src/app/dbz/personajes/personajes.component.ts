@@ -14,7 +14,7 @@ export class PersonajesComponent {
     return this.dbzService.personajes;
   }
 
-  public onEliminarPersonaje(index: number): void {
-    this.dbzService.eliminarPersonaje(index);
+  public onEliminarPersonaje(id: string): void {
+    this.dbzService.eliminarPersonaje(id);
   }
 }

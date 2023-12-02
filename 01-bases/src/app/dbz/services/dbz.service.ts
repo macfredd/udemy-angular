@@ -38,8 +38,8 @@ export class DbzService {
     this._personajes.push(personaje);
   }
 
-  eliminarPersonaje( index: number ) {
-    this._personajes.splice(index, 1);
+  eliminarPersonaje( id: string ) {
+    this._personajes = this._personajes.filter( personaje => personaje.id !== id );
   }
 
 }

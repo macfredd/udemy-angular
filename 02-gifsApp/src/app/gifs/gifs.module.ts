@@ -1,22 +1,22 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { GifsPageComponent } from './gifs-page/gifs-page.component';
-import { SearchComponent } from './search/search.component';
-import { ResultsComponent } from './results/results.component';
+import { HomePageComponent } from './pages/home/home-page.component';
+import { SearchBoxComponent } from './components/search-box/search-box.component';
+import { ResultsComponent } from './components/results/results.component';
 
 
 
 @NgModule({
   declarations: [
-    GifsPageComponent,
-    SearchComponent,
+    HomePageComponent,
+    SearchBoxComponent,
     ResultsComponent
   ],
   imports: [
     CommonModule
   ],
   exports: [
-    GifsPageComponent,
+    HomePageComponent,
   ]
 })
 export class GifsModule { }

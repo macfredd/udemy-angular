@@ -1,10 +1,10 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 
 @Component({
-  selector: 'app-search',
-  templateUrl: './search.component.html'
+  selector: 'gifs-search-box',
+  templateUrl: './search-box.component.html'
 })
-export class SearchComponent {
+export class SearchBoxComponent {
 
 @ViewChild('txtBuscar') txtBuscar!:ElementRef<HTMLInputElement>;
 

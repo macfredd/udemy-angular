@@ -1,0 +1,4 @@
+GET https://api.giphy.com/v1/gifs/search?api_key=KTsjcCoEj7zWZC0vEgmQDtFd6Fegr8ta&q=funny+cat&limit=10
+
+
+

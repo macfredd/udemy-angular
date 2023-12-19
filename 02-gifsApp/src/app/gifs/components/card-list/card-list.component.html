@@ -1,30 +1,10 @@
 <div class="row">
-    <div class="col-md-2 col-sm-6">
+    <div *ngFor="let gif of gifs " class="col-md-2 col-sm-6">
         <div class="card mb-2 text-center bg-dark">
             <div class="card-body text-white">
-                <img src="https://media4.giphy.com/avatars/Packly/C4AvqGR2zXrN.gif" class="img-fluid">
+                <img [src]="gif.images.downsized_medium.url" [alt]="gif.title" class="card-img-top">
                 <p class="card-text">
-                    Ojos
-                </p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-2 col-sm-6">
-        <div class="card mb-2 text-center bg-dark">
-            <div class="card-body text-white">
-                <img src="https://media.tenor.com/d84rut6ckyoAAAAd/aliz%C3%A9e-face-m%C3%BAsica-francesa-hermosa.gif" class="img-fluid">
-                <p class="card-text">
-                    Cantante
-                </p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-2 col-sm-6">
-        <div class="card mb-2 text-center bg-dark">
-            <div class="card-body text-white">
-                <img src="https://i.giphy.com/YoW1jRACETz6isLOzC.webp" class="img-fluid">
-                <p class="card-text">
-                    Messi
+                    {{ gif.title }}
                 </p>
             </div>
         </div>

@@ -12,10 +12,6 @@
 
 <div class="row">
     <div class="col">
-        <ul>
-            <li *ngFor="let country of getCountries">
-                 {{ country.name.common }} - {{ country.capital}}
-            </li>
-        </ul>
+        <countries-country-table [countries]="getCountries"> </countries-country-table>
     </div>
 </div>

@@ -7,4 +7,7 @@ import { Component } from '@angular/core';
 })
 export class ByCapitalPageComponent {
 
+  public searchByCapital(term: string) {
+    //TODO call the service
+  }
 }

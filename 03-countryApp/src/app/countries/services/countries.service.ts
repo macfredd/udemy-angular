@@ -19,7 +19,7 @@ export class CountriesService {
    */
   searchByCapital(term: string): Observable<Country[]> {
     const url = `${this.apiUrl}/capital/${term}`;
-    return this.httpClient.get<Country[]>(url).pipe( catchError( (err) => of([]) ) );
+    return this.searchCountries(term, url);
   }
 
   /**
@@ -29,7 +29,7 @@ export class CountriesService {
    */
   searchByName(term: string): Observable<Country[]> {
     const url = `${this.apiUrl}/name/${term}`;
-    return this.httpClient.get<Country[]>(url).pipe( catchError( (err) => of([]) ) );
+    return this.searchCountries(term, url);
   }
 
   /**
@@ -37,8 +37,18 @@ export class CountriesService {
    * @param term string
    * @returns Observable<Country>
    */
-  searchByRegion(term: string): Observable<Country[]> {
-    const url = `${this.apiUrl}/region/${term}`;
-    return this.httpClient.get<Country[]>(url).pipe( catchError( (err) => of([]) ) );
+    searchByRegion(term: string): Observable<Country[]> {
+      const url = `${this.apiUrl}/region/${term}`;
+      return this.searchCountries(term, url);
+    }
+
+    /**
+     * Search countries by Term and URL
+     * @param term string
+     * @param url string
+     * @returns Observable<Country>
+     */
+    private searchCountries(term: string, url: string): Observable<Country[]> {
+      return this.httpClient.get<Country[]>(url).pipe( catchError( (err) => of([]) ) );
+    }
   }
-}

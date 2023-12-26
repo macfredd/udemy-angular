@@ -9,9 +9,9 @@
             <tr>
                 <th>#</th>
                 <th>Icon</th>
-                <th>Name</th>
+                <th>Name (code)</th>
                 <th>Capital</th>
-                <th>Population</th>
+                <th class="text-end">Population</th>
                 <th>Region</th>
                 <th>  </th>
             </tr>
@@ -22,11 +22,15 @@
                 <td>
                     {{country.flag}}
                 </td>
-                <td>{{country.name.common}}</td>
+                <td>{{country.name.common}} ({{ country.cca3}})</td>
                 <td>{{country.capital}}</td>
-                <td>{{country.population | number}}</td>
+                <td class="text-end">{{country.population | number}}</td>
                 <td>{{country.region}}</td>
-                <td></td>
+                <td>
+                    <a [routerLink]="['/countries/by', country.cca3]" class="btn btn-outline-primary btn-sm">
+                        View
+                    </a>
+                </td>
             </tr>
         </tbody>
     </table>

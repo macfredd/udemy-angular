@@ -1,0 +1,9 @@
+.country-flags-alt {
+  display: flex;
+  font-family: fantasy;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+  color: rgba(59, 9, 0, 0.804);
+}

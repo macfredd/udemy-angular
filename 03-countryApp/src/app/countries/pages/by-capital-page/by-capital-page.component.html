@@ -1,3 +1,5 @@
+<shared-loading-spinner *ngIf="isLoading"></shared-loading-spinner>
+
 <h2>By Capital</h2>
 <hr>
 
@@ -12,6 +14,7 @@
 
 <div class="row">
     <div class="col">
+        <hr>
         <countries-country-table [countries]="getCountries"> </countries-country-table>
     </div>
 </div>

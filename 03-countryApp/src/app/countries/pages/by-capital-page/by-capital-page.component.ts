@@ -11,6 +11,8 @@ export class ByCapitalPageComponent {
 
   private countries: Country[] = [];
 
+  public isLoading: boolean = false;
+
   constructor(private countryService: CountriesService) { }
 
   public get getCountries(): Country[] {  
@@ -18,10 +20,12 @@ export class ByCapitalPageComponent {
   }
 
   public searchByCapital(term: string) {
+    this.isLoading = true;
     this.countryService.searchByCapital(term)
       .subscribe(
         (countries) => {
           this.countries = countries;
+          this.isLoading = false;
         });
   }
 }

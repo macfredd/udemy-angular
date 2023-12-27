@@ -11,6 +11,8 @@ export class ByCountryPageComponent {
 
   private countries: Country[] = [];
 
+  public isLoading: boolean = false;
+
   constructor(private countryService: CountriesService) { }
 
   public get getCountries(): Country[] {  
@@ -18,10 +20,12 @@ export class ByCountryPageComponent {
   }
 
   public searchByName(term: string) {
+    this.isLoading = true;
     this.countryService.searchByName(term)
       .subscribe(
         (countries) => {
           this.countries = countries;
+          this.isLoading = false;
         });
   }
 }

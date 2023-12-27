@@ -19,7 +19,10 @@ export class CountryPageComponent  implements OnInit{
 
   public country?: Country;
 
+  public isLoading: boolean = false;
+
   ngOnInit(): void {
+    this.isLoading = true;
     this.activatedRoute.params
     .pipe(switchMap( ({ id }) => this.countriesService.getCountryByAlpha(id)))
     .subscribe( country => {
@@ -29,6 +32,7 @@ export class CountryPageComponent  implements OnInit{
       }
 
       this.country = country;
+      this.isLoading = false;
     });
   }
 }

@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, catchError, delay, map, of } from 'rxjs';
+import { Observable, catchError, tap, map, of } from 'rxjs';
 import { Country } from '../interfaces/country.interface';
+import { cacheStorage } from '../interfaces/cache-storage.interface';
+import { Regions } from '../types/regions.types';
 
 @Injectable({
   providedIn: 'root'
@@ -9,6 +11,12 @@ import { Country } from '../interfaces/country.interface';
 export class CountriesService {
 
   private apiUrl: string = 'https://restcountries.com/v3.1';
+
+  public cacheCountries: cacheStorage = {
+    byCapital: { term: '', countries: [] },
+    byCountry: { term: '', countries: [] },
+    byRegion : { region: undefined, countries: [] },
+  }
 
   constructor(private httpClient: HttpClient) { }
 
@@ -19,7 +27,12 @@ export class CountriesService {
    */
   searchByCapital(term: string): Observable<Country[]> {
     const url = `${this.apiUrl}/capital/${term}`;
-    return this.searchCountries(term, url);
+    return this.searchCountries(term, url)
+    .pipe(
+      tap( (countries) => {
+        this.cacheCountries.byCapital = { term, countries };
+      })
+    );
   }
 
   /**
@@ -29,17 +42,27 @@ export class CountriesService {
    */
   searchByName(term: string): Observable<Country[]> {
     const url = `${this.apiUrl}/name/${term}`;
-    return this.searchCountries(term, url);
+    return this.searchCountries(term, url)
+    .pipe(
+      tap( countries => {
+        this.cacheCountries.byCountry = { term, countries };
+      })
+    );
   }
 
   /**
    * Search countries by Region
-   * @param term string
+   * @param region Region
    * @returns Observable<Country>
    */
-  searchByRegion(term: string): Observable<Country[]> {
-    const url = `${this.apiUrl}/region/${term}`;
-    return this.searchCountries(term, url);
+  searchByRegion(region: Regions): Observable<Country[]> {
+    const url = `${this.apiUrl}/region/${region}`;
+    return this.searchCountries(region, url)
+    .pipe(
+      tap( (countries) => {
+        this.cacheCountries.byRegion = { region: region, countries };
+      })
+    );
   }
 
   /**

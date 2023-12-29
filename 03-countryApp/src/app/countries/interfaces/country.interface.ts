@@ -38,6 +38,16 @@ export interface Country {
     postalCode:   PostalCode;
 }
 
+export interface CountryMap {
+    name:         string;
+    cca2:         string;
+    ccn3:         string;
+    cca3:         string;
+    cioc:         string;
+    latlng:       number[];
+    maps:         Maps;
+}
+
 export interface CapitalInfo {
     latlng: number[];
 }

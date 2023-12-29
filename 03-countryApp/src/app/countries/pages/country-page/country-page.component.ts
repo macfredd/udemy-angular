@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CountriesService } from '../../services/countries.service';
 import { switchMap } from 'rxjs';
-import { Country } from '../../interfaces/country.interface';
+import { Country, CountryMap } from '../../interfaces/country.interface';
 
 @Component({
   selector: 'countries-country-page',
@@ -19,6 +19,8 @@ export class CountryPageComponent  implements OnInit{
 
   public country?: Country;
 
+  public countryMap: CountryMap[] = [];
+
   public isLoading: boolean = false;
 
   ngOnInit(): void {
@@ -32,7 +34,20 @@ export class CountryPageComponent  implements OnInit{
       }
 
       this.country = country;
+      this.countryMap = [this.CountryMapMapper(country)];
       this.isLoading = false;
     });
+  }
+
+  private CountryMapMapper(country: Country): CountryMap {
+    return {
+      name: country.name.common,
+      cca2: country.cca2,
+      ccn3: country.ccn3,
+      cca3: country.cca3,
+      cioc: country.cioc,
+      latlng: country.latlng,
+      maps: country.maps,
+    }
   }
 }

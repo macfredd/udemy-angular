@@ -50,20 +50,22 @@
                         </span>
                     </div>
                 </li>
+                <li class="list-group-item">
+                    <h4>Translations</h4>
+
+                    <div class="d-flex flex-wrap">
+                        <span class="badge bg-primary m-1"
+                        *ngFor="let translations of country.translations| keyvalue" >
+                        {{translations.key | uppercase}} {{ country.translations[translations.key].common }}
+                        </span>
+                    </div>
+                </li>
             </ul>
         </div>
     </div>
 
-    <div class="row mt-2">
-        <div class="col">
-            <h4>Translations</h4>
 
-            <div class="d-flex flex-wrap">
-                <span class="badge bg-primary m-1"
-                *ngFor="let translations of country.translations| keyvalue" >
-                {{translations.key | uppercase}} {{ country.translations[translations.key].common }}
-                </span>
-            </div>
-        </div>
+    <div class="map-component-container">
+        <shared-map [countries]="countryMap"></shared-map>
     </div>
 </div>

@@ -8,6 +8,7 @@ import { HomePageComponent } from './pages/homePage/homePage.component';
 import { LoadingSpinnerComponent } from './components/loading-spinner/loading-spinner.component';
 import { SearchBoxComponent } from './components/search-box/search-box.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
+import { MapComponent } from './components/map/map.component';
 
 
 @NgModule({
@@ -16,6 +17,7 @@ import { SidebarComponent } from './components/sidebar/sidebar.component';
     ContactPageComponent,
     HomePageComponent,
     LoadingSpinnerComponent,
+    MapComponent,
     SearchBoxComponent,
     SidebarComponent,
   ],
@@ -28,6 +30,7 @@ import { SidebarComponent } from './components/sidebar/sidebar.component';
     ContactPageComponent,
     HomePageComponent,
     LoadingSpinnerComponent,
+    MapComponent,
     SearchBoxComponent,
     SidebarComponent,
   ]

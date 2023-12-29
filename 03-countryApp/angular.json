@@ -35,9 +35,14 @@
               "src/assets"
             ],
             "styles": [
+              "node_modules/leaflet/dist/leaflet.css",
+              "node_modules/leaflet-minimap/dist/Control.MiniMap.css",
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/leaflet/dist/leaflet.js",
+              "node_modules/leaflet-minimap/dist/Control.MiniMap.js"
+            ]
           },
           "configurations": {
             "production": {
@@ -94,9 +99,14 @@
               "src/assets"
             ],
             "styles": [
+              "node_modules/leaflet/dist/leaflet.css",
+              "node_modules/leaflet-minimap/dist/Control.MiniMap.css",
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/leaflet/dist/leaflet.js",
+              "node_modules/leaflet-minimap/dist/Control.MiniMap.js"
+            ]
           }
         }
       }

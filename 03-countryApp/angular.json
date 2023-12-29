@@ -36,12 +36,10 @@
             ],
             "styles": [
               "node_modules/leaflet/dist/leaflet.css",
-              "node_modules/leaflet-minimap/dist/Control.MiniMap.css",
               "src/styles.css"
             ],
             "scripts": [
-              "node_modules/leaflet/dist/leaflet.js",
-              "node_modules/leaflet-minimap/dist/Control.MiniMap.js"
+              "node_modules/leaflet/dist/leaflet.js"
             ]
           },
           "configurations": {
@@ -100,12 +98,10 @@
             ],
             "styles": [
               "node_modules/leaflet/dist/leaflet.css",
-              "node_modules/leaflet-minimap/dist/Control.MiniMap.css",
               "src/styles.css"
             ],
             "scripts": [
-              "node_modules/leaflet/dist/leaflet.js",
-              "node_modules/leaflet-minimap/dist/Control.MiniMap.js"
+              "node_modules/leaflet/dist/leaflet.js"
             ]
           }
         }

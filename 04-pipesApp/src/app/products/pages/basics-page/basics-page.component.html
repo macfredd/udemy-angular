@@ -1,1 +1,62 @@
-<p>basics-page works!</p>
+<p-panel [toggleable]="true">
+    <p-header>
+        <h2>Basics Angular Pipes</h2>
+    </p-header>
+   
+    <p>
+        Basics Angular Pipes, included in CommonModule.
+    </p>
+    <p>
+        Consider having the following publics properties in your component:
+    </p>
+    <pre>
+        <code style="white-space: nowrap;">
+            <span style="color: blue;">public</span>
+            <span style="color: #333;"> name</span>
+            <span style="color: #333;">: string = </span>
+            <span style="color: green;">'fReddY cRuz'</span>
+        </code>
+        <code style="white-space: nowrap;">
+            <span style="color: blue;">public</span>
+            <span style="color: #333;"> customDate</span>
+            <span style="color: #333;">: date = </span>
+            <span style="color: rgb(16, 141, 183);">'new Date();'</span>
+        </code>
+    </pre>
+    
+    <div class="grid">
+        <div class="col-12 md:col-4">
+            <p-card header="Uppercase">
+                <pre class="wrapper">{{ "{{ name | uppercase }}" }} produces {{ name | uppercase }}</pre> 
+            </p-card>
+        </div>
+        <div class="col-12 md:col-4">
+            <p-card header="Lowecase">
+                <pre class="wrapper">{{ "{{ name | lowercase }}" }} produces {{ name | lowercase }}</pre>
+            </p-card>
+        </div>
+        <div class="col-12 md:col-4">
+            <p-card header="TitleCase">
+                <pre class="wrapper">{{ "{{ name | titlecase }}" }} produces {{ name | titlecase }}</pre>
+            </p-card>
+        </div>
+            <div class="col-12 md:col-6">
+                <p-card header="Date">
+                    <pre class="wrapper">{{ "{{ customDate | date }}" }} produces {{ customDate | date }}</pre>
+                    <pre class="wrapper">{{ "{{ customDate | date:'short' }}" }} produces {{ customDate | date: 'short' }}</pre>
+                    <pre class="wrapper">{{ "{{ customDate | date:'medium' }}" }} produces {{ customDate | date: 'medium' }}</pre>
+                    <pre class="wrapper">{{ "{{ customDate | date:'long' }}" }} produces {{ customDate | date: 'long' }}</pre>
+                    <pre class="wrapper">{{ "{{ customDate | date:'full' }}" }} produces {{ customDate | date: 'full' }}</pre>
+                    <pre class="wrapper">{{ "{{ customDate | date:'shortDate' }}" }} produces {{ customDate | date: 'shortDate' }}</pre>
+                    <pre class="wrapper">{{ "{{ customDate | date:'mediumDate' }}" }} produces {{ customDate | date: 'mediumDate' }}</pre>
+                    <pre class="wrapper">{{ "{{ customDate | date:'shortTime' }}" }} produces {{ customDate | date: 'shortTime' }}</pre>
+                </p-card>
+            </div>
+        <div class="col-12 md:col-6">
+            <p-card header="TitleCase">
+                <pre class="wrapper">{{ "{{ name | titlecase }}" }} produces {{ name | titlecase }}</pre>
+            </p-card>
+        </div>
+    </div>
+</p-panel>
+

@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { LOCALE_ID, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -6,6 +6,11 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { SharedModule } from './shared/shared.module';
+
+import localEsNI from '@angular/common/locales/es-NI';
+import { registerLocaleData } from '@angular/common';
+
+registerLocaleData(localEsNI);
 
 @NgModule({
   declarations: [
@@ -17,7 +22,9 @@ import { SharedModule } from './shared/shared.module';
     AppRoutingModule,
     SharedModule, 
   ],
-  providers: [],
+  providers: [
+    { provide: LOCALE_ID, useValue: 'es-NI' }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

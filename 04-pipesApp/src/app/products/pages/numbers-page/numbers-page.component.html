@@ -1,1 +1,47 @@
-<p>numbers-page works!</p>
+<p-panel [toggleable]="true">
+    <p-header>
+        <h2>Basics Angular Pipes</h2>
+    </p-header>
+   
+    <p>
+        Basics Angular Pipes, included in CommonModule.
+    </p>
+    <p>
+        Consider having the following publics properties in your component:
+    </p>
+    <pre>
+        <code style="white-space: nowrap;">
+            <span style="color: blue;">public</span>
+            <span style="color: #333;"> amount</span>
+            <span style="color: #333;">: number = </span>
+            <span style="color: green;">123456.789</span>
+        </code>
+        
+    </pre>
+    
+    <div class="grid">
+        <div class="col-12 md:col-6">
+            <p-card header="Number">
+                <pre class="wrapper">{{ "{{ amount | number }}" }} produces {{ amount | number }}</pre>
+                <pre class="wrapper">{{ "{{ amount | number: '1.0-2' }}" }} produces {{ amount | number: '1.0-2' }}</pre>   
+            </p-card>
+        </div>
+        <div class="col-12 md:col-6">
+            <p-card header="Currency">
+                <pre class="wrapper">{{ "{{ amount | currency: 'NIO' }}" }} produces {{ amount | currency: 'NIO' }}</pre>
+                <pre class="wrapper">{{ "{{ amount | currency: 'EUR': 'symbol-narrow' }}" }} produces {{ amount | currency: 'EUR': 'symbol-narrow' }}</pre>
+                <pre class="wrapper">{{ "{{ amount | currency: 'USD': 'symbol-narrow': '1.4-4' }}" }} produces {{ amount | currency: 'USD': 'symbol-narrow': '1.4-4' }}</pre>
+                
+            </p-card>
+        </div>
+        <div class="col-12 md:col-6">
+            <p-card header="Percent">
+                <pre class="wrapper">{{ "{{ percent | percent }}" }} produces {{ percent | percent }}</pre>
+                <pre class="wrapper">{{ "{{ percent | percent: '1.0-2' }}" }} produces {{ percent | percent: '1.0-2' }}</pre>
+                <pre class="wrapper">{{ "{{ percent | percent: '1.4-4' }}" }} produces {{ percent | percent: '1.4-4' }}</pre>
+            </p-card>
+        </div>   
+    </div>
+</p-panel>
+
+

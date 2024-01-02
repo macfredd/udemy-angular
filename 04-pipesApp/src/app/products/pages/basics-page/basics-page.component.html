@@ -50,13 +50,9 @@
                     <pre class="wrapper">{{ "{{ customDate | date:'shortDate' }}" }} produces {{ customDate | date: 'shortDate' }}</pre>
                     <pre class="wrapper">{{ "{{ customDate | date:'mediumDate' }}" }} produces {{ customDate | date: 'mediumDate' }}</pre>
                     <pre class="wrapper">{{ "{{ customDate | date:'shortTime' }}" }} produces {{ customDate | date: 'shortTime' }}</pre>
+                    <pre class="wrapper">{{ "{{ customDate | date: 'full':'':'es-NI' }}" }} produces {{ customDate | date: 'full':'':'es-NI' }}</pre>
                 </p-card>
             </div>
-        <div class="col-12 md:col-6">
-            <p-card header="TitleCase">
-                <pre class="wrapper">{{ "{{ name | titlecase }}" }} produces {{ name | titlecase }}</pre>
-            </p-card>
-        </div>
     </div>
 </p-panel>
 

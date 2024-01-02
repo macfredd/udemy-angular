@@ -5358,3 +5358,115 @@ Produce esta salida:
 
 <br/>
 <img src="./imagenes/pipesApp04.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 80%; height: auto; border: 1px solid black" />
+
+## Configuración del Locale
+
+Para usar el PIPE Date con Locale, es necesario agregar un par de configuraciones, necesitamos importar el Locale que nuestra app va a usar y luego usar la función **registerLocaleData** para registrarlo.
+
+```typescript
+import localEsNI from '@angular/common/locales/es-NI';
+import { registerLocaleData } from '@angular/common';
+
+registerLocaleData(localEsNI);
+
+@NgModule({})
+```
+
+Ahora ya podemos usar el Locale ES-Ni en nuestra app.
+
+
+```
+{{ customDate | date: 'full':'':'es-NI' }} produces lunes, 1 de enero de 2024, 17:04:54 GMT-06:00
+```
+
+## Definir globalmente el Locale
+
+Podemos definir un Locale de forma global, para evitar tener que definirlo en cada lugar, por defecto está configurado el en-US, si queremos cambiarlo por otro, debemos cambiar nuestro app.module.ts, 
+
+Debemos mantener los cambios anteriores, es decir importar el Locales y registrarlo, pero para hacerlo que sea el default, debemos agregar un **providers** en el mismo app.module.ts
+
+
+```typescript
+providers: [
+    { provide: LOCALE_ID, useValue: 'es-NI' }
+  ],
+```
+
+Ahora podemos ver las fechas con el locale es-NI.
+
+<br/>
+<img src="./imagenes/pipesApp05.png" alt="Barra Lateral" style="margin-right: 10px; max-width: 60%; height: auto; border: 1px solid black" />
+
+NOTA: El LOCALE_ID se importa del **@angular/core**
+
+```typescript
+import { LOCALE_ID, NgModule } from '@angular/core';
+```
+
+## Pipes para Números
+
+Creamos un nuevo componente para mostrar la funcionalidad de los Pipes de Números. (Son los mismos pasos y el mismo template, varían únicamente los Pipes a mostrar.)
+
+
+En el caso de Number, si tenemos esta variable:
+
+```typescript
+public amount: number = 123456.789;
+```
+
+Y aplicamos el pipe `number: '1.0-2'` obtendremos el valor `123,456.79`
+
+El DecimalPipe se define de esta forma
+
+```      
+{{ value_expression | number [ : digitsInfo [ : locale ] ] }}
+```
+
+**digitsInfo** se define como:
+
+```
+{minIntegerDigits}.{minFractionDigits}-{maxFractionDigits}
+```
+
+**minIntegerDigits**: el número mínimo de dígitos enteros antes del punto decimal. El valor predeterminado es 1.
+
+**minFractionDigits**: el número mínimo de dígitos después del punto decimal. El valor predeterminado es 0.
+
+**maxFractionDigits**: el número máximo de dígitos después del punto decimal. El valor predeterminado es 3.
+
+
+De modo que `'1.0-2'` va a generar un número con:
+- Al menos un dígito antes del punto decimal
+- Un mínimo de 0 decimales
+- Un máximo de 2 decimales
+
+Dado que el número original contiene 3 decimales `123456.789` el valor transformado será `123,456.79`
+
+
+## Pipes de Moneda
+
+Consultar la documentación oficial para obtener más información sobre los parámetros de monedas. Estos son un par de ejemplos:
+
+```
+{{ amount | currency: 'NIO' }} produces C$123,456.79
+{{ amount | currency: 'EUR': 'symbol-narrow' | currency }} produces €123,456.79
+{{ amount | currency: 'USD': 'symbol-narrow': '1.4-4' }} produces $123,456.7890
+```
+
+NOTA: la configuración `1.4-4` indica, al menos 4 decimales (puede agregar ceros) y máximo 4 decimales (puede aplicar redondeos)
+
+## Pipe de Porcentaje
+
+Definida la siguiente propiedad:
+
+```typescript
+public percent: number = 0.712;
+```
+
+Estos son un par de ejemplos:
+
+```
+{{ percent | percent }} produces 71 %
+{{ percent | percent: '1.0-2' }} produces 71.2 %
+{{ percent | percent: '1.4-4' }} produces 71.2000 %
+```

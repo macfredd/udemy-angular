@@ -5470,3 +5470,97 @@ Estos son un par de ejemplos:
 {{ percent | percent: '1.0-2' }} produces 71.2 %
 {{ percent | percent: '1.4-4' }} produces 71.2000 %
 ```
+
+
+## Uncommon Pipes
+
+Iniciemos con el **i18nSelect**: Selector genérico que muestra la cadena que coincide con el valor actual. Por ejemplo, si vamos a enviar correos de invitación a personas, podemos cambiar algunos textos dependiendo del género.
+
+Creamos este componente:
+
+```typescript
+import { Component, OnInit } from '@angular/core';
+
+type gender = 'male' | 'female';
+export
+interface Client {
+  name: string;
+  gender: gender;
+}
+
+@Component({
+  selector: 'app-uncommon-page',
+  templateUrl: './uncommon-page.component.html',
+  styleUrl: './uncommon-page.component.css'
+})
+export class UncommonPageComponent {
+
+  //i18nSelect
+  public clients: Client[] = [
+    { name: 'Freddy', gender: 'male'},
+    { name: 'Adrea', gender: 'female'},
+    { name: 'Martin', gender: 'male'},
+    { name: 'Ana', gender: 'female'}
+  ];
+
+  public selectedClient: Client = this.clients[0];
+
+  public changeClient(): void {
+    this.selectedClient = this.clients[Math.floor(Math.random() * this.clients.length)];
+  }
+}
+```
+
+En resumen un arreglo de Clientes (nombre y género), un método que cambia aleatoriamente el cliente seleccionado. 
+
+
+
+Ahora veamos el Template:
+
+```html
+<p-fieldset legend="i18nSelect Pipe" [toggleable]="true">
+    <p>
+      Saludos {{selectedClient.name}} es un placer invitarlo
+      a nuestro evento anual de programadores.
+    </p>
+
+    <p-button (onClick)="changeClient()" label="Change Client">
+    </p-button>
+</p-fieldset>
+```
+
+Veamos algunas salidas:
+
+<br/>
+<img src="./imagenes/pipesApp06.png" alt="Barra Lateral" style="margin-right: 10px; max-width: 60%; height: auto; border: 1px solid black" />
+
+<br/>
+<img src="./imagenes/pipesApp07.png" alt="Barra Lateral" style="margin-right: 10px; max-width: 60%; height: auto; border: 1px solid black" />
+
+
+Como podemos ver, en la segunda imagen, el nombre "Andrea" no se corresponde con "Invitarlo", podríamos agregar un **ngIf** que valide el género e imprima **Invitarla** pero para eso tenemos el pipe **i18nSelect**
+
+
+Agreguemos un MAP, el **invitationMap* que tiene el género como Key, y la palabra a cambiar como el Value.
+
+```typescript
+public invitationMap = {
+    male: 'invitarlo',
+    female: 'invitarla'
+  };
+```
+
+y cambiemos nuestro template por:
+
+```html
+<p>
+  Saludos {{selectedClient.name}} es un placer 
+  {{ selectedClient.gender | i18nSelect: invitationMap }}
+  a nuestro evento anual de programadores.
+</p>
+```
+
+El resultado: 
+P
+<br/>
+<img src="./imagenes/pipesApp08.png" alt="Barra Lateral" style="margin-right: 10px; max-width: 60%; height: auto; border: 1px solid black" />

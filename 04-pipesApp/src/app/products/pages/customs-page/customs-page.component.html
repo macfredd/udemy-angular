@@ -1,0 +1,18 @@
+<p-panel [toggleable]="true">
+    <p-header>
+        <h2>Custom Angular Pipes</h2>
+    </p-header>
+   
+    <p>
+        Custom Angular Pipes.
+    </p>
+
+    <div class="grid">
+        <div class="col-12 md:col-4">
+            <p-card header="My TogleCase">
+                <pre class="wrapper">{{ "{{ 'Testing' | toggleCase }}" }} produces {{ 'Testing' | toggleCase }}</pre>
+                <pre class="wrapper">{{ "{{ 'TESTING' | toggleCase }}" }} produces {{ 'TESTING' | toggleCase }}</pre>
+            </p-card>
+        </div>
+    </div>
+</p-panel>

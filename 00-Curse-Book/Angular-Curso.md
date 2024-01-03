@@ -1554,7 +1554,7 @@ probar link:
 
 [http://udemy-angular.com](http://udemy-angular.com)
 
-
+<div style="page-break-after: always;"></div>
 ## Nueva Sección: Nueva Aplicación:
 
 ¿Qué veremos en esta sección?
@@ -2792,7 +2792,7 @@ Se agregan los iconos al template del _sideBarComponent_
     </div>
 ```
 
-
+<div style="page-break-after: always;"></div>
 ## Nueva Seccion - Image Loader 
 
 ¿Qué veremos en esta sección?
@@ -5759,3 +5759,193 @@ Observaremos que cada 1 segundo se imprimer un valor,  0,1,2,... esto se debe a 
 
 Además, si navegamos a otra página, y si colocamos un console.log con el valor emitido por el observable, veremos que la app deja de recibir los eventos, esto signidica que **async** no solamente se suscribe, sino, que también elimia la suscripcón una vez se destruye el componente.
 
+<div style="page-break-after: always;"></div>
+
+## Nueva sección: Pipes Personalizados
+
+¿Qué veremos en esta sección?
+
+Este es un breve listado de los temas fundamentales:
+
+- Pipes personalizados
+- Argumentos hacia los Pipes
+- SortableTable manual y usando PrimeNg
+
+
+## Creando un Custom Pipe: Toggle-Case 
+
+Vamos a crear un módulo para tener nuestros customs Pipes en un lugar independiente
+
+
+```
+[fcruz@fedora 04-pipesApp]$ ng g m custom-pipes
+CREATE src/app/custom-pipes/custom-pipes.module.ts
+```
+
+Procedemos a crear el Custom Pipe
+
+```
+[fcruz@fedora 04-pipesApp]$ ng g p custom-pipes/toggle-case/toggle-case
+CREATE src/app/custom-pipes/toggle-case/toggle-case.pipe.spec.ts (204 bytes)
+CREATE src/app/custom-pipes/toggle-case/toggle-case.pipe.ts (225 bytes)
+UPDATE src/app/custom-pipes/custom-pipes.module.ts (284 bytes)
+```
+
+Analicemos el código autogenerado
+
+```typescript
+import { Pipe, PipeTransform } from '@angular/core';
+
+@Pipe({
+  name: 'toggleCase'
+})
+export class ToggleCasePipe implements PipeTransform {
+
+  transform(value: unknown, ...args: unknown[]): unknown {
+    return null;
+  }
+
+}
+```
+
+Nuevamente observamos una simple clase con una anotación y una que otra implementación.
+
+La Clase **ToggleCasePipe** tiene una anotación **@Pipe** que recibe como argumento requerido el **name** del pipe. Además esta misma clase implementa el **PipeTransform** y por lo tanto debe de implementar el método **transform**
+
+Dicho método acepta un parámetro **value** que es el valor que se desea transformar. Además acepta ninguno o varios parámetros adicionales **args**
+
+Podemos implementar un CustomPipe Simple que cambie una Cadena de Minúsculas a Mayúsculas o lo contrario. Ese es el objetivo de nuestro Pipe.
+
+Podemos cambiar el tipo del **value** porque solo aceptaremos un **string** y podemos remover los **args** porque no vamos a ocupar parámetros adicionales.
+
+Definamos nuestro transform de la siguiente forma:
+
+```typescript
+transform(value: string): string {
+    if (!value || typeof value !== 'string' || value.length === 0 ) {
+      return '';
+    }
+
+    if (value === value.toUpperCase()) {
+      return value.toLowerCase();
+    } else {
+      return value.toUpperCase();
+    }
+  }
+```
+
+Si el valor recibido no está definido, o no es un string o es un string vacío, retornamos un string vacío. El resto del código se explica por si mismo.
+
+Ahora usemos el Custom Pipe, como es un módulo, el componente que dese usarlo, su módulo debe importarlo.
+
+Como deseamos implementarlo en el componente **CustomsPageComponent** y este pertenece al módulo **ProductsModule** este último debe importar el módulo **CustomPipesModule**
+
+**NOTA: Dado que aún no implementamos los standalone, debemos usar los módulos por el momento.**
+
+Una vez importado en el **ProductsModule** ya podemos usarlo en nuestro template:
+
+```html
+<p-card header="My TogleCase">
+      <pre class="wrapper">{{ "{{ 'Testing' | toggleCase }}" }} produces {{ 'Testing' | toggleCase }}</pre>
+      <pre class="wrapper">{{ "{{ 'TESTING' | toggleCase }}" }} produces {{ 'TESTING' | toggleCase }}</pre>
+  </p-card>
+```
+
+<br/>
+<img src="./imagenes/pipesApp09.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 60%; height: auto; border: 1px solid black" />
+
+
+## Aagumentos en Custom Pipes
+
+Creemos un nuevo Pipe, uno que reciba un string, y tres parámetros, el primero un número, y los otros boolean, el primero define el ancho del texto generado, el segundo si el usuario quiere usar números y el tercero si quiere usar caractéres especiales. El objetivo del Pipe es generar un RandomPassword de ancho N con o sin Números y caracteres especiales.
+
+
+      
+```
+{{value_expression | randomPassword [ : lenght [ : useNumer [ : useSpecialCharacter ]]]}}
+```
+
+Creamos el Pipe
+
+```[fcruz@fedora 04-pipesApp]$ ng g p custom-pipes/random-password/random-password
+CREATE src/app/custom-pipes/random-password/random-password.pipe.spec.ts (220 bytes)
+CREATE src/app/custom-pipes/random-password/random-password.pipe.ts (233 bytes)
+UPDATE src/app/custom-pipes/custom-pipes.module.ts (421 bytes)
+```
+
+Implementamos el código:
+
+```typescript
+import { Pipe, PipeTransform } from '@angular/core';
+
+@Pipe({
+  name: 'randomPassword'
+})
+export class RandomPasswordPipe implements PipeTransform {
+
+  private symbols = "~`!@#$%^&*()/|:;.,+-*"
+  private alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+  transform(value: string, ...args: unknown[]): string {
+    const [length, allowNumbers, allowSpecial] = args as [number, boolean, boolean];
+
+    let randomNumber = '';
+    if (allowNumbers) {
+      randomNumber = this.generateRandomNumber();
+    }
+
+    let randomSpecialChars = '';
+    if (allowSpecial) {
+      randomSpecialChars = this.generateRandomString(Math.floor(length / 2) , this.symbols);
+    }
+
+    let characters: string[] = value.split("")
+    .concat(randomNumber.split(""))
+    .concat(randomSpecialChars.split(""));
+
+   
+    let refill = '';
+    if (characters.length < length) {
+      refill = this.generateRandomString(length - characters.length, this.alphabet);
+    }
+
+    characters = characters.concat(refill.split(""));
+    return this.shuffleArray(characters).join("").slice(0,length);
+  }
+
+  private generateRandomNumber(): string {
+    return (Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000).toString();
+  }
+
+  private generateRandomString(length: number, charset: string): string {
+    let returnString = '';
+    for (let i = 0; i < length; i++) {
+      const indiceAleatorio = Math.floor(Math.random() * charset.length);
+      returnString += charset.charAt(indiceAleatorio);
+    }
+    return returnString;
+  }
+
+  private shuffleArray(array: string[]): string[] {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+}
+```
+
+Ahora lo implementamos en nuestro template:
+
+```html
+<p-card header="My RandomPassword">
+    <pre class="wrapper">{{ "{{ 'Testing' | randomPassword:15:true:true }}" }} produces '{{ 'Testing' | randomPassword:15:true:true }}'</pre>
+    <pre class="wrapper">{{ "{{ 'BASE' | randomPassword:20:true:false }}" }} produces '{{ 'BASE' | randomPassword:20:true:false }}'</pre>
+    <pre class="wrapper">{{ "{{ 'BASE' | randomPassword:20:false:false }}" }} produces '{{ 'BASE' | randomPassword:20:false:false }}'</pre>
+</p-card>
+```
+La Salida Sería:
+
+<br/>
+<img src="./imagenes/pipesApp10.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 80%; height: auto; border: 1px solid black" />

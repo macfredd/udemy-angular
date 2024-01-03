@@ -8,10 +8,17 @@
     </p>
 
     <div class="grid">
-        <div class="col-12 md:col-4">
+        <div class="col-12 md:col-6">
             <p-card header="My TogleCase">
                 <pre class="wrapper">{{ "{{ 'Testing' | toggleCase }}" }} produces {{ 'Testing' | toggleCase }}</pre>
                 <pre class="wrapper">{{ "{{ 'TESTING' | toggleCase }}" }} produces {{ 'TESTING' | toggleCase }}</pre>
+            </p-card>
+        </div>
+        <div class="col-12 md:col-6">
+            <p-card header="My RandomPassword">
+                <pre class="wrapper">{{ "{{ 'Testing' | randomPassword:15:true:true }}" }} produces '{{ 'Testing' | randomPassword:15:true:true }}'</pre>
+                <pre class="wrapper">{{ "{{ 'BASE' | randomPassword:20:true:false }}" }} produces '{{ 'BASE' | randomPassword:20:true:false }}'</pre>
+                <pre class="wrapper">{{ "{{ 'BASE' | randomPassword:20:false:false }}" }} produces '{{ 'BASE' | randomPassword:20:false:false }}'</pre>
             </p-card>
         </div>
     </div>

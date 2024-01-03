@@ -5564,3 +5564,198 @@ El resultado:
 P
 <br/>
 <img src="./imagenes/pipesApp08.png" alt="Barra Lateral" style="margin-right: 10px; max-width: 60%; height: auto; border: 1px solid black" />
+
+## i18nPlural Pipe
+
+Creamos el siguiente template, 
+
+```html
+<p-fieldset legend="i18nPlural Pipe" [toggleable]="true">
+  <p>
+    Actualmente tenemos {{clients.length}} clientes esperando. 
+  </p>
+  <p-button
+    (onClick)="deleteClient()"
+    label="Delete Client">
+  </p-button>
+</p-fieldset>
+```
+
+El método **deleteClient()** simplemente elimina un cliente de la lista, si ejecutamos varias veces el eliminar hasta dejar un solo cliente en el arreglo, se leerá:
+
+```
+Actualmente tenemos 1 clientes esperando.
+```
+
+Al igual que el **i18nSelect**, podemos proporcionar un Mapa y usar el pipe **i18nPlural**
+
+Creamos el mapa:
+
+```typescript
+public totalClientsMap = {
+    '=0': 'no tenemos ningún cliente esperando.',
+    '=1': 'tenemos un cliente esperando.',
+    'other': 'tenemos # clientes esperando.'
+  };
+```
+
+Cambiamos nuestro Template a esto:
+
+```html
+<p>
+  Actualmente {{clients.length | i18nPlural: totalClientsMap}}
+</p>
+```
+
+Esto genera las siguientes salidas:
+
+```
+Actualmente tenemos 4 clientes esperando.
+Actualmente tenemos 3 clientes esperando.
+Actualmente tenemos 2 clientes esperando.
+Actualmente tenemos un cliente esperando.
+Actualmente no tenemos ningún cliente esperando.
+```
+
+## Slice Pipe
+
+El **SlicePipe** Crea un nuevo Array o cadena que contiene un subconjunto (porción) de los elementos.
+
+Creamos este métdo, crea un arreglo con los nombres de los clientes:
+
+```typescript
+public clientNames(): string[] {
+    return this.clients.map(client => client.name);
+  }
+```
+
+
+El siguiente Template:
+
+```html
+<p-fieldset legend="Slice Pipe" [toggleable]="true">
+  <b>Originals</b>
+  <pre> {{ clientNames() }}</pre>
+    <b>Slice:0:1</b>
+    <pre> {{ clientNames() | slice:0:1 }}<
+    <b>Slice:1:1</b>
+    <pre> {{ clientNames() | slice:1:2 }}<
+    <b>Slice:2:3</b>
+    <pre> {{ clientNames() | slice:2:3 }}<
+    <b>Slice:3</b>
+    <pre> {{ clientNames() | slice:3 }}</pre>
+</p-fieldset>
+```
+
+Genera:
+
+```
+Originals
+ Freddy,Adrea,Martin,Ana
+Slice:0:1
+ Freddy
+Slice:1:1
+ Adrea
+Slice:2:3
+ Martin
+Slice:3
+ Ana
+ ```
+## Json Pipe
+
+El siguiente template:
+
+```html
+<p-fieldset legend="Json Pipe" [toggleable]="true">
+    <pre> {{ clients | json }}</pre>
+</p-fieldset> 
+```
+
+Genera el contenido del arreglo de objetos Clients en formato JSON:
+
+```json
+ [
+  {
+    "name": "Freddy",
+    "gender": "male"
+  },
+  {
+    "name": "Adrea",
+    "gender": "female"
+  },
+  {
+    "name": "Martin",
+    "gender": "male"
+  },
+  {
+    "name": "Ana",
+    "gender": "female"
+  }
+]
+```
+
+ ## Key-Value Pipe
+
+El keyValue permite transformar un Objeto tipo Mapa, Key - Value, en interable. Por ejemplo
+
+```typescript
+<p-fieldset legend="KeyValue Pipe" [toggleable]="true">
+    <ul *ngFor="let client of clients[0] | keyvalue">
+        <li>
+            {{client | json }}
+        </li>
+    </ul>
+</p-fieldset> 
+```
+Dato que **clients[0]** retorna un objeto de tipo client
+
+```typescript
+interface Client {
+  name: string;
+  gender: gender;
+}
+```
+
+Este no es iterable, si omitimos el **keyvalue** obtenemos un error:
+
+```
+Type 'Client' is not assignable to type 'NgIterable<any>
+```
+
+En resumen, **keyvalue** transforma Objeto o Mapa en un arreglo de pares Key-Value.
+
+La salida del Template es:
+
+```html
+{ "key": "gender", "value": "male" }
+{ "key": "name", "value": "Freddy" }
+```
+
+## Async Pipe
+
+DEfinamos un Observable en el componente
+
+```typescript
+public myObservableTimer = interval(1000);
+```
+
+Cada 1 segundo, emitirá un evento. 
+
+Si colocamos esto en el Template:
+
+```html
+<p-fieldset legend="Async Pipe" [toggleable]="true">
+    <pre>{{ myObservableTimer }}</pre>
+</p-fieldset>  
+```
+
+No se emite ningún resultado, esto se debe a que no nos hemos suscrito al observable, si agregamos el pipe async
+
+```typescript
+<pre>{{ myObservableTimer | async }}</pre>
+```
+
+Observaremos que cada 1 segundo se imprimer un valor,  0,1,2,... esto se debe a que **async** automáticamente se suscribe al OBservable y recibe los eventos. 
+
+Además, si navegamos a otra página, y si colocamos un console.log con el valor emitido por el observable, veremos que la app deja de recibir los eventos, esto signidica que **async** no solamente se suscribe, sino, que también elimia la suscripcón una vez se destruye el componente.
+

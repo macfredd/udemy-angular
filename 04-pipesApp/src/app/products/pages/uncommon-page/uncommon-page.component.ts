@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { interval } from 'rxjs';
 
 type gender = 'male' | 'female';
 export
@@ -29,7 +30,23 @@ export class UncommonPageComponent {
     female: 'invitarla'
   };
 
+  public totalClientsMap = {
+    '=0': 'no tenemos ningún cliente esperando.',
+    '=1': 'tenemos un cliente esperando.',
+    'other': 'tenemos # clientes esperando.'
+  };
+
   public changeClient(): void {
     this.selectedClient = this.clients[Math.floor(Math.random() * this.clients.length)];
   }
+
+  public deleteClient(): void {
+    this.clients.shift();
+  }
+
+  public clientNames(): string[] {
+    return this.clients.map(client => client.name);
+  }
+
+  public myObservableTimer = interval(1000);
 }

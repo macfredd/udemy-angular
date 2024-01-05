@@ -5875,6 +5875,8 @@ UPDATE src/app/custom-pipes/custom-pipes.module.ts (421 bytes)
 
 Implementamos el código:
 
+NOTA: Colocar un  RandomPasswordGenerator en un Pipe quizás no es la mejor idea, pero solo se hace con propósitos educativos, para indicar como usar los parámetros.
+
 ```typescript
 import { Pipe, PipeTransform } from '@angular/core';
 
@@ -5949,3 +5951,179 @@ La Salida Sería:
 
 <br/>
 <img src="./imagenes/pipesApp10.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 80%; height: auto; border: 1px solid black" />
+
+## El SortBy Pipe
+
+El siguiente ejemplo simplemente es para demostrar que el PIPE puede ser usado para transformar más que simples datos, podemos aplicarlo para cambiar los datos en un arreglo de objetos. El siguiente pipe ordena datos en una tabla, los datos provienen de un arreglo de productos. Además se implementa un toolbar de PrimeNG para mostrar botones que inician las acciones de ordenamiento, el código completo es el siguiente:
+
+Primero necesitamos una interfaz para los productos.
+
+```typescript
+export interface Product {
+    code: string;
+    name: string;
+    category: string;
+    quantity: number;
+    discount: boolean;
+}
+```
+
+Luego implementamos el código del componente Table.
+
+
+```typescript
+Component({
+  selector: 'app-tables-page',
+  templateUrl: './tables-page.component.html',
+  styleUrl: './tables-page.component.css'
+})
+export class TablesPageComponent {
+
+  public sortBy?: keyof Product | '' = '';
+
+  public products: Product[] = [{
+    code: 'AAA-1111',
+    name: 'PlayStation 5',
+    category: 'Games',
+    quantity: 10,
+    discount: true
+  }]
+
+  public changeSort(sortBy: keyof Product | ''): void {
+    console.log(sortBy);
+    this.sortBy = sortBy;
+  }
+}
+```
+
+NOTA: **products** contiene más datos, aca se muestra un solo registro para reducir el código en la documentación.
+
+La propiedad **sortBy** únicamente puede tomar los valores de los KEY del tipo de datos Products, es decir: **code, name, category, quantity y discount** El valor de dicha proiedad es modificado por el método **changeSort**
+
+Luego implementamos el PIPE **SortByPipe**
+
+```typescript
+@Pipe({
+  name: 'sortBy'
+})
+export class SortByPipe implements PipeTransform {
+
+  transform(value: Product[], sortBy?: keyof Product | ''): Product[] {
+
+    if (sortBy === '')
+      return value;
+
+    if (sortBy !== undefined)
+      return value.sort((a, b) => (a[sortBy] > b[sortBy]) ? 1 : -1);
+
+    return value;
+    
+  } 
+}
+```
+
+y otro Pipe para transformar el true:false del campo **discount** en algo mas legible
+
+```typescript
+@Pipe({
+  name: 'booleanConverter'
+})
+export class BooleanConverterPipe implements PipeTransform {
+
+  transform(value: boolean, ...args: string[]): string {
+    return (value) ? args[0] : args[1];
+  }
+}
+```
+
+Finalmente el Template del Componente que muestra la tabla:
+
+```html
+<p-panel [toggleable]="true">
+    <p-header>
+        <h2>Custom Angular Pipes</h2>
+    </p-header>
+   
+    <p>
+        Implementing custom Pipes in a table feature.
+    </p>
+
+</p-panel>
+
+<p-toolbar>
+    <div class="p-toolbar-group-start">
+
+    </div>
+    <div class="p-toolbar-group-end">
+        <button pButton 
+                label="By Name"
+                icon="pi pi-sort-amount-down"   
+                class="mr-2"
+                (click) = "changeSort('name')" >
+        </button>
+        <button pButton 
+                label="By Category"
+                icon="pi pi-sort-amount-down" 
+                class="p-button-success mr-2"
+                (click) = "changeSort('category')" >
+        </button>
+        <button pButton 
+                label="By Quantity"
+                icon="pi pi-sort-amount-down"    
+                class="p-button-warning mr-2"
+                (click) = "changeSort('quantity')" >
+        </button>
+    </div>
+</p-toolbar>
+
+<div class="grid">
+    <div class="col mt-2">
+        <p-table [value]="products | sortBy:sortBy" [tableStyle]="{ 'min-width': '50rem' }">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Discount</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-product>
+                <tr>
+                    <td>{{ product.code }}</td>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.category }}</td>
+                    <td>{{ product.quantity }}</td>
+                    <td>{{ product.discount | booleanConverter:'discount available':'No'}}</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</div>
+```
+
+El resultado:
+
+<br/>
+<img src="./imagenes/pipesApp11.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 80%; height: auto; border: 1px solid black" />
+
+
+Se importaron dos nuevos módulos de primeNG para este componente **TableModule y  ToolbarModule**
+
+El **sortBy** pipe se implementa sobre el arreglo productos:
+
+```typescript
+[value]="products | sortBy:sortBy"
+```
+
+Donde **sortBy** (el parámetro) viene de la propiedad pública definida por el componente y que es modificada por cada botón:
+
+```html
+(click) = "changeSort('quantity')
+```
+
+Listo, con esto hemos creado un SortBy mediante un Pipe, el cual puede ser extendido, como agregar parámetros ASC / DESC o incluso hacerlo genérico para que ordede otro tipo de arreglos.
+
+
+
+

@@ -8,6 +8,8 @@ import { UncommonPageComponent } from './pages/uncommon-page/uncommon-page.compo
 import { PrimeNgModule } from '../prime-ng/prime-ng.module';
 import { CustomsPageComponent } from './pages/customs-page/customs-page.component';
 import { CustomPipesModule } from '../custom-pipes/custom-pipes.module';
+import { TablesPageComponent } from './pages/tables-page/tables-page.component';
+import { SortByPipe } from './pipes/sort-by.pipe';
 
 
 @NgModule({
@@ -15,7 +17,11 @@ import { CustomPipesModule } from '../custom-pipes/custom-pipes.module';
     BasicsPageComponent,
     NumbersPageComponent,
     UncommonPageComponent,
-    CustomsPageComponent
+    CustomsPageComponent,
+    TablesPageComponent,
+
+    // Local Pipes
+    SortByPipe
   ],
   imports: [
     CommonModule,

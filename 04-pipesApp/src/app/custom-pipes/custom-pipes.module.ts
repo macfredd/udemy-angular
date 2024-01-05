@@ -2,19 +2,22 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToggleCasePipe } from './toggle-case/toggle-case.pipe';
 import { RandomPasswordPipe } from './random-password/random-password.pipe';
+import { BooleanConverterPipe } from './boolean-converter/boolean-converter.pipe';
 
 
 @NgModule({
   declarations: [
     ToggleCasePipe,
-    RandomPasswordPipe
+    RandomPasswordPipe,
+    BooleanConverterPipe
   ],
   imports: [
     CommonModule
   ],
   exports: [
     ToggleCasePipe,
-    RandomPasswordPipe
+    RandomPasswordPipe,
+    BooleanConverterPipe
   ]
 })
 export class CustomPipesModule { }

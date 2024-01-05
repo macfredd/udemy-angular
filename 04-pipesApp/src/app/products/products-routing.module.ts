@@ -4,6 +4,7 @@ import { BasicsPageComponent } from './pages/basics-page/basics-page.component';
 import { NumbersPageComponent } from './pages/numbers-page/numbers-page.component';
 import { UncommonPageComponent } from './pages/uncommon-page/uncommon-page.component';
 import { CustomsPageComponent } from './pages/customs-page/customs-page.component';
+import { TablesPageComponent } from './pages/tables-page/tables-page.component';
 
 const routes: Routes = [
   {
@@ -21,6 +22,10 @@ const routes: Routes = [
   {
     path: 'customs',
     component: CustomsPageComponent
+  },
+  {
+    path: 'table',
+    component: TablesPageComponent
   },
   {
     path: '**',

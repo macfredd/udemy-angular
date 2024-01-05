@@ -38,6 +38,11 @@ export class MenuComponent implements OnInit{
             label: 'Customs',
             icon: 'pi pi-cog',
             routerLink: 'customs',
+          },
+          {
+            label: 'Table',
+            icon: 'pi pi-table',
+            routerLink: 'table',
           }
         ]
         

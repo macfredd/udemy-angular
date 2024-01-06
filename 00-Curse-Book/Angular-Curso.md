@@ -1555,9 +1555,10 @@ probar link:
 [http://udemy-angular.com](http://udemy-angular.com)
 
 <div style="page-break-after: always;"></div>
-## Nueva Sección: Nueva Aplicación:
 
-¿Qué veremos en esta sección?
+# Nueva Sección: Nueva Aplicación:
+
+## ¿Qué veremos en esta sección?
 
 La sección contendrá nuestra primera aplicación real de Angular, este es un breve listado de los temas fundamentales:
 
@@ -3041,6 +3042,7 @@ Y luego podemos usar las classes para agregar efectos, por ejemplo, agregar un F
 <div style="page-break-after: always;"></div>
 
 # Nueva Sección: SPA
+
 _Single Page Application_
 
 ## ¿Qué veremos en esta sección?
@@ -4177,9 +4179,9 @@ Listo, con esto tenemos un link al final de la tabla que abre el componente **Co
 
 <div style="page-break-after: always;"></div>
 
-### Nueva Sección: Mejoras y Funcionalidades Extras
+# Nueva Sección: Mejoras y Funcionalidades Extras
 
-¿Qué veremos en esta sección?
+## ¿Qué veremos en esta sección?
 
 Aquí continuaremos la aplicación de países, pero enfocados en la parte de las sugerencias, debounce y mantener el estado de las consultas, este es un breve listado de los temas fundamentales:
 
@@ -4802,9 +4804,9 @@ Los resultados:
 
 <div style="page-break-after: always;"></div>
 
-### Nueva Sección: PIPES en Angular
+# Nueva Sección: PIPES en Angular
 
-¿Qué veremos en esta sección?
+## ¿Qué veremos en esta sección?
 
 Esta sección es de mis favoritas del curso, veremos temas sobre Pipes y transformación visual de la data, pero también decidí mezclarlo con otro tema muy solicitado que es PrimeNG (Más adelante hay también una sección con muchos componentes de Angular Material), pero esta sección pretende enseñarles muchas cosas interesantes, aparte de los Pipes de Angular
 
@@ -5761,9 +5763,9 @@ Además, si navegamos a otra página, y si colocamos un console.log con el valor
 
 <div style="page-break-after: always;"></div>
 
-## Nueva sección: Pipes Personalizados
+# Nueva sección: Pipes Personalizados
 
-¿Qué veremos en esta sección?
+## ¿Qué veremos en esta sección?
 
 Este es un breve listado de los temas fundamentales:
 
@@ -6124,6 +6126,609 @@ Donde **sortBy** (el parámetro) viene de la propiedad pública definida por el 
 
 Listo, con esto hemos creado un SortBy mediante un Pipe, el cual puede ser extendido, como agregar parámetros ASC / DESC o incluso hacerlo genérico para que ordede otro tipo de arreglos.
 
+<div style="page-break-after: always;"></div>
+
+# Nueva Sección: LazyLoad y Layouts
+
+## ¿Qué veremos en esta sección?
+
+Este es un breve listado de los temas fundamentales:
+
+- Rutas Hijas
+- Rutas Principales
+- LazyLoad
+- Multiples estilos en la misma SPA
+
+Esta sección es fundamental para seguir el curso, ya que de aquí en adelante, implementaremos la carga perezosa en cada módulo principal de las futuras aplicaciones que haremos.
+
+Comprender el Lazyload no es difícil, y la forma como lo veremos aquí nos ayudará a manejar los dos posibles casos de uso. Uno de ellos es cuando la ruta hija no tiene estilo especial y otra en la que requiere un estilo diferente por cada módulo.
+
+## Nueva APP
+
+Crearemos una nueva APP para mostrar el uso de Componentes Layouts y con especial enfasis en ruteo.
+
+```
+ng new herosApp --standalone false
+```
+
+## Generar módulos iniciales
+
+
+```
+ng g m auth --routing
+CREATE src/app/auth/auth-routing.module.ts (247 bytes)
+CREATE src/app/auth/auth.module.ts (272 bytes)
+
+ng g m heros --routing
+CREATE src/app/heros/heros-routing.module.ts (248 bytes)
+CREATE src/app/heros/heros.module.ts (276 bytes)
+
+ng g m shared
+CREATE src/app/shared/shared.module.ts (192 bytes)
+
+ng g m material
+CREATE src/app/material/material.module.ts (194 bytes)
+```
+
+El módulo **shared** es el único que vamos a importar dentro de **app.module.ts**
+
+Todo lo demás se hará con LazyLoad.
+
+## Creando Componentes:
+
+Agregamos la estructura básica de los compomentes para el módulo **Auth**
+
+```
+$ ng g c auth/pages/layout-page --skip-tests
+$ ng g c auth/pages/login-page --skip-tests
+$ ng g c auth/pages/register-page --skip-tests
+```
+
+Creamos los componentes para el módulo **Heros**
+
+```
+$ ng g c heros/pages/hero-page --skip-tests
+$ ng g c heros/pages/layout-page --skip-tests
+$ ng g c heros/pages/list-page --skip-tests
+$ ng g c heros/pages/new-page --skip-tests
+$ ng g c heros/pages/search-page --skip-tests
+```
+
+Creamos los componentes para el módulo **Shared**
+
+```
+$ ng g c shared/pages/Error404-page --skip-tests
+```
+En este caso si vamos a exportar el  **Error404PageComponent** en el módulo **SharedModule** porque vamos a usarlos en una ruta por default en el **app.routing.module.ts**
+
+```typescript
+@NgModule({
+  declarations: [Error404PageComponent],
+  imports: [  CommonModule],
+  exports: [Error404PageComponent]
+})
+export class SharedModule { }
+```
+
+## Material
+
+En este módulo vamos a importar todo lo referente a Angular Materia, similar a lo que hicimos con PrimeNG, removemos el **CommonModule** de **material.module.ts**
+
+## Estructura final
+
+Por el momento esta sería la estructura de nuestro proyecto:
+
+```
+[fcruz@fedora app]$ tree
+.
+├── app.component.css
+├── app.component.html
+├── app.component.spec.ts
+├── app.component.ts
+├── app.module.ts
+├── app-routing.module.ts
+├── auth
+│   ├── auth.module.ts
+│   ├── auth-routing.module.ts
+│   └── pages
+│       ├── layout-page
+│       │   ├── layout-page.component.css
+│       │   ├── layout-page.component.html
+│       │   └── layout-page.component.ts
+│       ├── login-page
+│       │   ├── login-page.component.css
+│       │   ├── login-page.component.html
+│       │   └── login-page.component.ts
+│       └── register-page
+│           ├── register-page.component.css
+│           ├── register-page.component.html
+│           └── register-page.component.ts
+├── heros
+│   ├── heros.module.ts
+│   ├── heros-routing.module.ts
+│   └── pages
+│       ├── hero-page
+│       │   ├── hero-page.component.css
+│       │   ├── hero-page.component.html
+│       │   └── hero-page.component.ts
+│       ├── layout-page
+│       │   ├── layout-page.component.css
+│       │   ├── layout-page.component.html
+│       │   └── layout-page.component.ts
+│       ├── list-page
+│       │   ├── list-page.component.css
+│       │   ├── list-page.component.html
+│       │   └── list-page.component.ts
+│       ├── new-page
+│       │   ├── new-page.component.css
+│       │   ├── new-page.component.html
+│       │   └── new-page.component.ts
+│       └── search-page
+│           ├── search-page.component.css
+│           ├── search-page.component.html
+│           └── search-page.component.ts
+├── material
+│   └── material.module.ts
+└── shared
+    ├── pages
+    │   └── error404-page
+    │       ├── error404-page.component.css
+    │       ├── error404-page.component.html
+    │       └── error404-page.component.ts
+    └── shared.module.ts
+```
+
+## Configuración de Rutas
+
+Iniciamos con la configuración de las rutas, primeramente nos vamos al **AuthRoutingModule**.
+
+```typescript
+// localhost:4200/auth
+const routes: Routes = [
+  {
+    path: '',
+    component: LayoutPageComponent, 
+  }
+];
+
+@NgModule({
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule]
+})
+export class AuthRoutingModule { }
+```
+
+Y luego en el de **HerosRoutingModule**
+
+```typescript
+// localhost:4200/heros
+const routes: Routes = [
+  {
+    path: '',
+    component: LayoutPageComponent,
+  }
+];
+
+@NgModule({
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule]
+})
+export class HerosRoutingModule { }
+```
+
+NOTA: cada **LayoutPageComponent** corresponde al propio de cada módulo.
+
+Luego definimos la rutas principales, en el **AppRoutingModule**
+
+```typescript
+//localhost:4200
+const routes: Routes = [
+  {
+    path: 'auth',
+    loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule),
+  },
+  {
+    path: 'heros',
+    loadChildren: () => import('./heros/heros.module').then(m => m.HerosModule),
+  },
+  {
+    path: '404',
+    component: Error404PageComponent,
+  },
+  {
+    path: '',
+    redirectTo: 'heros',
+    pathMatch: 'full',
+  },
+  {
+    path: '**',
+    redirectTo: '404',
+   }
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }
+```
+
+**auth** y **heros** son cargado de modo Lazy. 
+
+Por el momento tenemos creadas ciertas Rutas las cuales responden a estas URL:
+
+```
+http://localhost:4200/
+http://localhost:4200/auth 
+http://localhost:4200/heros 
+http://localhost:4200/404 
+```
+
+Aún debemos configurar las rutas internas, las que responden por ejemplo a **auth/login** 
+
+## Rutas Children
+
+El módulo **AuthRoutingModule** actualmente tiene configurada la ruta padre _localhost:4200/auth_ podemos agregar las rutas hijas con el arreglo **children**
+
+
+```typescript
+// localhost:4200/auth
+const routes: Routes = [
+  {
+    path: '',
+    component: LayoutPageComponent, 
+    children: [
+      // localhost:4200/auth/login
+      {
+        path: 'login', component: LoginPageComponent
+      },
+      // localhost:4200/auth/register
+      {
+        path: 'register', component: RegisterPageComponent
+      },
+      {
+        path: '**', redirectTo: 'login',
+      }
+    ]
+  }
+];
+
+@NgModule({
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule]
+})
+export class AuthRoutingModule { }
+```
+
+También aplicamos el mismo cambio en el módulo **HerosRoutingModule**
+
+```typescript
+// localhost:4200/heros
+const routes: Routes = [
+  {
+    path: '',
+    component: LayoutPageComponent,
+    children: [
+      // localhost:4200/heros/list
+      { path: 'list', component: ListPageComponent },
+      // localhost:4200/heros/create
+      { path: 'create', component: NewPageComponent },
+      // localhost:4200/heros/edit/1
+      { path: 'edit/:id', component: NewPageComponent},
+      // localhost:4200/heros/search
+      { path: 'search/', component: SearchPageComponent },
+      // localhost:4200/heros/1
+      { path: ':id', component: HeroPageComponent },      
+      { path: '**', redirectTo: 'list' }
+    ]
+  }
+];
+
+@NgModule({
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule]
+})
+export class HerosRoutingModule { }
+```
+
+
+NOTA: Es importante el orden de los paths, vemos que el último corresponde a **:id**, si colocamos este path de primero en la lista, cualquier otro path va a cohincidir con este, de modo que se coloca al final.
+
+
+Con estos cambios, ya tenemos las rutas listas:
+
+```
+// Parents
+
+http://localhost:4200/
+http://localhost:4200/auth 
+http://localhost:4200/heros 
+http://localhost:4200/404 
+
+// Nuevos 
+
+// Auth
+http://localhost:4200/auth/login
+http://localhost:4200/auth/register
+
+// Heros
+http://localhost:4200/heros/list
+http://localhost:4200/heros/create
+http://localhost:4200/heros/edit/1
+http://localhost:4200/heros/search
+http://localhost:4200/heros/1
+```
+
+## Router Outlet
+
+Con estas rutas, si cargamos cualquier ruta hija, por ejemplo: _http://localhost:4200/auth/login_ vemos unicamente el **Layout-page works!** Esto corresponde al **LayoutPageComponent** del **AuthModule**, pero, ¿Cómo mostramos la página o componente hijo? usaremos nuevamente el **router-outlet**
+
+Agregamos esto al template de cada **LayoutPageComponent** tanto del Auth como del Heros
+
+
+```html
+<router-outlet></router-outlet>
+```
+
+Ahora si cargamos el mismo URL _http://localhost:4200/auth/login_ Vemos:
+
+```
+layout-page works!
+
+login-page works!
+```
+
+
+<div style="page-break-after: always;"></div>
+
+# Nueva Sección: Continuación de Heros APP / Con Angular Material:
+
+## ¿Qué veremos en esta sección?
+
+Este es un breve listado de los temas fundamentales:
+
+- Angular Material
+- Interfaces y tipado
+- Pipes personalizados
+- Variables de entorno
+- Autocomplete de AngularMaterial
+- Peticiones HTTP
+- JSON-Server
+- Prime Flex
+
+Esta sección tiene por objetivo principal aprender a utilizar Angular Material, es la primera de varias secciones donde lo usaremos. Al final del día trabajaremos con muchos componentes de Angular material que les ayudará a ver cualquier otro tipo de paquete modularizado de la misma manera y ustedes sabrán aplicarlo.
+
+En la siguiente sección después de esta, continuaremos la aplicación pero realizaremos un CRUD.
+
+## Instalación de Material
+
+Vamos a usar dos cosas
+
+- Angular Material
+- PrimeFlex
+
+De Angular Materials vamos a usar sus componentes y de PrimerFlex algunos estilos.
+
+```
+$ ng add @angular/material
+```
+
+Salida del Comando:
+
+```
+ℹ Using package manager: npm
+✔ Found compatible package version: @angular/material@17.0.4.
+✔ Package information loaded.
+
+The package @angular/material@17.0.4 will be installed and executed.
+Would you like to proceed? Yes
+✔ Packages successfully installed.
+? Choose a prebuilt theme name, or "custom" for a custom theme: Indigo/Pink
+[ Preview: https://material.angular.io?theme=indigo-pink ]
+? Set up global Angular Material typography styles? Yes
+? Include the Angular animations module? Include and enable animations
+UPDATE package.json (1112 bytes)
+✔ Packages installed successfully.
+UPDATE src/app/app.module.ts (576 bytes)
+UPDATE angular.json (3005 bytes)
+UPDATE src/index.html (519 bytes)
+UPDATE src/styles.css (181 bytes)
+[fcruz@fedora 05-herosApp]$ 
+```
+
+
+En **src/app/app.module.ts** se importa el **BrowserAnimationsModule** porque hemos habilitado las animaciones, también se agregan unas fuentes en **src/index.html** (Roboto) que son agregadas tambien en nuestro archivo **src/styles.css** y se debe a que aceptamos esta sección **"Set up global Angular Material typography styles"**
+
+
+## Instalación de PrimeFlex
+
+En este caso lo instalaremos desde el CDN 
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/primeflex@latest/primeflex.css">   
+```
+
+No vamos a instalar los themes de PrimeFlex para usar el de Angular Material.
+
+
+## Importar los módulos de Material
+
+Importaremos los módulos que vamos a usar en la APP:
+
+```typescript
+import { NgModule } from '@angular/core';
+
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatListModule } from '@angular/material/list';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatToolbarModule } from '@angular/material/toolbar';
+
+@NgModule({
+  exports: [
+    MatAutocompleteModule,
+    MatButtonModule,
+    MatCardModule,
+    MatChipsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatGridListModule,
+    MatIconModule,
+    MatInputModule,
+    MatListModule,
+    MatProgressSpinnerModule,
+    MatSelectModule,
+    MatSidenavModule,
+    MatSnackBarModule,
+    MatToolbarModule,
+  ]
+})
+export class MaterialModule { }
+```
+
+
+## Pantalla del Login (Auth)
+
+Dado que usaremos componente de Material en el **AuthModule** debemos importar el **MaterialModule**
+
+Luego, apliquemos un cambio en el template del **LayoutPageComponent**
+
+
+```html
+<div class="grid p-3">
+    <div class="col-12 mt-5 md:col-6 md:col-offset-3 md:mt-8">
+        <router-outlet></router-outlet>
+    </div>
+</div>
+```
+
+NOTA: Las Clases son de PrimeFlex
+
+En el **LoginPageComponent** template:
+
+```html
+<div class="flex flex-column">
+ <span class="text-lg mb-4">Login</span>
+
+ <mat-form-field>
+    <mat-label>Usuario</mat-label>
+    <input type="text" matInput placeholder="User Name">
+ </mat-form-field>
+ <mat-form-field>
+    <mat-label>Password</mat-label>
+    <input type="password" matInput placeholder="Password">
+ </mat-form-field>
+
+ <button mat-button mat-flat-button color="primary">
+    <mat-icon>login</mat-icon>
+    Login
+ </button>
+</div>
+
+<div class="flex justify-content-end mt-5">
+    <a routerLink="/auth/register">SingIn</a>
+</div>
+```
+
+De nuevo, estamos usando clases de PrimeFlex y los controles de Material:
+- mat-form
+- mat-label
+- matInput
+- mat-icon
+
+De esta misma forma podemos crear otra pantalla para el create, con un campo adicional para confirmar password.
+
+El resultado:
 
 
 
+<br/>
+<img src="./imagenes/herosApp01.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 40%; height: auto; border: 1px solid black" />
+<br/>
+<img src="./imagenes/herosApp02.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 40%; height: auto; border: 1px solid black" />
+
+
+## SideNav
+
+Continuamos aplicando cambios, esta vez trabajamos en el LayoutPage del HerosModule, vamos a crear un SideNav y un Menu, el cual va a ser mostrado por todas las vistas renderizadas bajo HerosModule, entonces debemos de colocar esto en el compomente padre del módulo, es decir en el template del **LayoutPageComponent** 
+
+Antes, debemos importar el **MaterialModule** en nuestro **HerosModule**
+
+Luego creamos un Arreglo para las opciones del menú:
+
+```typescript
+export class LayoutPageComponent {
+
+  public sidebarItems = [
+    {label: 'List',   icon: 'list',   url: './list'},
+    {label: 'New',    icon: 'add',    url: './create'},
+    {label: 'Search', icon: 'search', url: './search'},
+  ];
+}
+```
+
+Y luego creamos el Template del **LayoutPageComponent**
+
+```html 
+<mat-sidenav-container fullscreen>
+    <mat-sidenav #sidenav mode="push" [ngStyle]="{width: '250px'}">
+        <mat-toolbar color="accent">
+            <span>Menu</span>
+            <span class="spacer"></span>
+            <button mat-icon-button (click)="sidenav.toggle()">
+                <mat-icon>menu</mat-icon>
+            </button>
+        </mat-toolbar>
+        
+        <mat-nav-list>
+            <mat-list-item *ngFor="let item of sidebarItems"
+            [routerLink]="item.url"
+            (click)="sidenav.toggle()">
+                <mat-icon matListItemIcon>{{item.icon}}</mat-icon>
+                {{item.label}}
+            </mat-list-item>
+        </mat-nav-list>
+    </mat-sidenav>
+
+    <mat-toolbar color="primary">
+        <button mat-icon-button (click)="sidenav.toggle()">
+            <mat-icon>menu</mat-icon>
+        </button>
+        <span class="spacer"></span>
+        <button mat-button>
+            Logout
+        </button>
+    </mat-toolbar>
+
+    <div class="container">
+        <router-outlet></router-outlet> 
+    </div>
+</mat-sidenav-container>
+```
+
+Todo el contenido está dentro del **mat-sidenav-container**  el cual contiene 3 secciones:
+
+- Un SideBar (mat-sidenav)
+- Un Toolbar (mat-toolbar)
+- Un container para renderizar los componentes (router-outlet)
+
+El Toolbar tiene un botón que hace aparecer el SideBar y viceversa
+
+El Sidebar internamente cuenta con dos elementos
+- mat-toolbar (Muestra el título y el boton para ocultar la sección)
+- mat-nav-list (El que muestra las opciones del menú)
+
+Veamos el resultado:
+
+<br/>
+<img src="./imagenes/herosApp03.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 80%; height: auto; border: 1px solid black" />

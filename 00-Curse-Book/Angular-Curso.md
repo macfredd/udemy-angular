@@ -6732,3 +6732,71 @@ Veamos el resultado:
 
 <br/>
 <img src="./imagenes/herosApp03.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 80%; height: auto; border: 1px solid black" />
+
+## Json Server
+
+Implementaremos un Servidor JSON unicamente en desarrollo, [https://www.npmjs.com/package/json-server](https://www.npmjs.com/package/json-server)
+
+```
+npm install --save-dev json-server
+```
+
+Creamos un directorio **data** en el root de nuestro proyecto y agregamos un json con datos para mostrar, por ejemplo:
+
+```json
+{
+  "users": [
+    {
+      "id": 1,
+      "usuario": "John Doe",
+      "email": "john.due@gmail.com"
+    }
+  ],
+  "heroes": [
+    {
+      "id": "dc-batman",
+      "superhero": "Batman",
+      "publisher": "DC Comics",
+      "alter_ego": "Bruce Wayne",
+      "first_appearance": "Detective Comics #27",
+      "characters": "Bruce Wayne"
+    },
+    {
+      "id": "dc-superman",
+      "superhero": "Superman",
+      "publisher": "DC Comics",
+      "alter_ego": "Kal-El",
+      "first_appearance": "Action Comics #1",
+      "characters": "Kal-El"
+    }
+  ]
+}```
+
+En nuestro Package JSON, agregamos un script:
+
+```json
+"backend": "json-server --watch data/db.json --port 3004"
+```
+
+Y finalmente ejecutamos el script en la línea de comandos: (En el root del proyecto)
+
+```
+$ npm run  backend
+
+> 05-heros-app@0.0.0 backend
+> json-server --watch data/db.json --port 3004
+
+
+  \{^_^}/ hi!
+
+  Loading data/db.json
+  Done
+
+  Resources
+  http://localhost:3004/users
+  http://localhost:3004/heroes
+
+  Home
+  http://localhost:3004
+```
+

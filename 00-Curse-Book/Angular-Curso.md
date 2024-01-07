@@ -6800,3 +6800,210 @@ $ npm run  backend
   http://localhost:3004
 ```
 
+## Variables de Entorno
+
+Angular 17 ya no incluye por defecto la configuración de los environmnets, haremos la configuración manual.
+
+Primero, dentro de _src_ creamos un directorio _environments_ con dos archivos
+
+- environments.ts
+- environments.prod.ts
+
+Creamos las configuraciones de acuerdo al ambiente, por ejemplo nuestro URL para consumir el JSON Server
+
+```typescript
+export const environments = {
+    baseUrl: 'http://localhost:3004'    
+}
+```
+
+Y luego en el archivo **angular.json** en la sección:
+
+```
+Projects
+  05-herosApp
+    architect
+      build
+        configurations
+          production
+```
+Agreamos el **fileReplacements**:
+
+```json
+configurations": {
+  "production": {
+    "fileReplacements": [
+      {
+        "replace": "src/environments/environment.ts",
+        "with": "src/environments/environment.prod.ts"
+      }
+    ],
+```
+
+## Crear Interfaz
+
+Primero debemos crear algunas interfaces, en el direcotrio _src/app/heroes/_ creamos **interfaces** y dentro de este el archivo **heroes.interface.ts**
+
+
+
+
+Usaremos la extensión **Paste JSON as code**, ejecutamos en la linea de comandos :
+
+```
+curl http://localhost:3004/heroes
+```
+
+Copiamos la salida y en el archivo **heroes.interface.ts** ejecutamos  el comando **Paste JSON as code**  se genera el siguiente código:
+
+
+```typescript
+
+export interface Heroe {
+    id:               string;
+    superhero:        string;
+    publisher:        Publisher;
+    alter_ego:        string;
+    first_appearance: string;
+    characters:       string;
+}
+
+export enum Publisher {
+    DCComics = "DC Comics",
+    MarvelComics = "Marvel Comics",
+}
+```
+
+## Crear Servicio
+
+Creamos un servicio:
+
+```typescript
+@Injectable({providedIn: 'root'})
+export class HeroesService {
+    constructor(private httpClient: HttpClient) { }
+
+    private baseUrl: string = environments.baseUrl;
+    
+    getHeroes(): Observable<Heroe[]> {
+        return this.httpClient.get<Heroe[]>(`${this.baseUrl}/heroes`);
+    }
+
+}
+```
+NOTA: El HttpClientModule debe ser importado, lo haremos en el app.module.ts
+
+## Nuevo Componente
+
+Vamos a consumir el servicio, para mostrar el listado de Heroes, pero antes, necesitamos un componente para mostrar la información de un Heroe en específico, 
+
+
+```
+ng g c heros/components/hero-card
+```
+
+Este componente recibirá la información de un Hero (@Input)
+
+```typescript
+@Component({
+  selector: 'heros-hero-card',
+  templateUrl: './hero-card.component.html',
+  styleUrl: './hero-card.component.css'
+})
+export class HeroCardComponent implements OnInit{
+
+  @Input() 
+  public hero!: Heroe;
+
+  ngOnInit(): void {
+    if(!this.hero){
+      throw new Error('HeroCardComponent: Hero is required');
+    }
+  }
+}
+```
+
+Su Template:
+
+```html
+<mat-card>
+    <mat-card-header>
+        <mat-card-title>{{ hero.superhero}}</mat-card-title>
+        <mat-card-subtitle>{{ hero.alter_ego}}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content class="mt-2">
+        <h4>{{ hero.publisher }}</h4>
+        <p><strong>First apparition</strong> {{ hero.first_appearance }}</p>
+        <br>
+        <mat-chip-listbox>
+            <mat-chip *ngFor="let character of hero.characters.split(',') | slice:0:3">
+                {{ character }}
+            </mat-chip>
+        </mat-chip-listbox>
+    </mat-card-content>
+    <mat-divider></mat-divider>
+    
+    <mat-card-actions>
+        <button 
+            mat-button 
+            mat-raised
+            color="primary"
+            [routerLink]="['/heroes/edit', hero.id]">
+            <mat-icon>edit</mat-icon>
+            View
+        </button>
+
+        <span class="spacer"></span>
+        
+        <button 
+            mat-button 
+            mat-raised
+            color="primary"
+            [routerLink]="['/heroes', hero.id]">
+            <mat-icon>more_horiz</mat-icon>
+            More
+        </button>
+    </mat-card-actions>
+</mat-card>
+```
+
+Luego necesitamos mostrar esta información, lo haremos en el **ListPageComponent**
+
+```typescript
+@Component({
+  selector: 'app-list-page',
+  templateUrl: './list-page.component.html',
+  styleUrl: './list-page.component.css'
+})
+export class ListPageComponent implements OnInit{
+
+  public heroes: Heroe[] = [];
+
+  constructor(private heroesService: HeroesService) { }
+  ngOnInit(): void {
+    this.heroesService.getHeroes().subscribe(heroes => this.heroes = heroes);
+  }
+
+}
+```
+
+Y finalmente el Template:
+
+```html
+<h1>Heroes List</h1>
+
+<mat-divider></mat-divider>
+
+<div class="grid mb-8 pt-2">
+    <div 
+        *ngFor="let hero of heroes" 
+        class="col-12 sm:col-4 md:col-3 xl:col-2">
+
+        <heros-hero-card [hero]="hero"></heros-hero-card>
+    </div>
+</div>
+```
+
+
+
+<br/>
+<img src="./imagenes/herosApp04.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 80%; height: auto; border: 1px solid black" />

@@ -74,7 +74,7 @@ NOTA: Luego de retomar el curso debí instalar la última versión estable sopor
 
 ## Introducción a Angular
 
-Angular es un framework, mantenido por google, viene con todo lo que se necesite para trabajar las aplicaciones. Las aplicaciones Angular son Modulares, es decir, todo el código se escribe en módulos independientes.
+Angular es un framework, mantenido por google, viene con todo lo que se necesite para trabajar las aplicaciones. Las aplicaciones Angular son Modulares, es decir, todo el código se escribe en módulos independientes. (Antes de la V17 cuando se incuyen los standalone)
 
 Existe 5 bloques fundamentales
 
@@ -86,25 +86,25 @@ Existe 5 bloques fundamentales
 
 **Los componentes:**
 
-- Es un bloque de codigo con segmento de HTML más una clase de Typescript. El objetivo es que cada componente sean bloques simples de código.
+- Es un bloque de código con segmento de HTML más una clase de Typescript. El objetivo es que cada componente sean bloques simples de código.
 
 **Servicio**
 
-- Son Singleton que permiten trabajar la aplicacion con información centralizada. Los componentes hacen uso de los serivcios, Los servicios exponen funcionalidades a otros servicios o componentes.
+- Son Singleton que permiten trabajar la aplicación con información centralizada. Los componentes hacen uso de los serivcios, Los servicios exponen funcionalidades a otros servicios o componentes.
 
 **Directivas:**
 
 - Existen 3 tipos de Directivas de Componentes, de estructuras y de atributos.
 
-Directivas de Atributo
+**Directivas de Atributo**
 
 Alteran la apariencia o comportamiento de un elemento del DOM y son usados como atributos de los elementos. (ngModel, ngClass, ngStyle)
 
-Directivas Estructurales
+**Directivas Estructurales**
 
 Alteran la estructura del DOM, agregando, eliminando y manipulando los elementos a los que están unidos. (*ngIf, *ngFor, ngSwitch, ngPlural )
 
-Directivas de Componente
+**Directivas de Componente**
 
 Las Directivas de Componente son directivas con un Template. Los componentes tienen decoradores “@Component”, el componente es un decorador @Directive que es extendido con características propias de los templates.
 
@@ -113,7 +113,7 @@ Las Directivas de Componente son directivas con un Template. Los componentes tie
 Inidican que componentes renderizar dependiendo el URL ingresado por el usuario. Una Ruta típica de Angular tiene dos propiedades: path : una cadena que coincide con la URL en la barra de direcciones del navegador. component : el componente que el enrutador debe crear al navegar a esta ruta.
 
 **Módulos:**
-Permiten agrupar componentes, incluso otros módulos. SE pueden descargar módulos existentes para usarlo dentro de la APP. Por ejemplo un módulo de Calendario.
+Permiten agrupar componentes, incluso otros módulos. Se pueden descargar módulos existentes para usarlo dentro de la APP. Por ejemplo un módulo de Calendario.
 
 ## Instalar el CLI
 
@@ -131,7 +131,7 @@ para crear un nuevo proyecto con el CLI usamos el siguiente comando:
 $ ng new 01-bases --standalone false
 ```
 
-`--standalone false` Las últimas versiones de Angular (2023) ya no usan por dafault NGModule, pero durante el curso se usa la version con NGModule, por lo tanto, esta parametro en false permite crear los proyectos tal como se hacia en las versiones anteriores, es decir de forma tradicional.
+`--standalone false` Las últimas versiones de Angular (2023) ya no usan por dafault NGModule, pero durante el curso se usa la versión con NGModule, por lo tanto, esta parametro en false permite crear los proyectos tal como se hacia en las versiones anteriores, es decir de forma tradicional.
 
 Esto genera el proyecto de pruebas y puede ejecutrase con el siguiente comando
 
@@ -166,7 +166,7 @@ El proyecto cuenta con varios directorios y archivos
 
 `dist`  Directorio de distribución
 
-`node_modules` Modulos de Node, dependencias.
+`node_modules` Módulos de Node, dependencias.
 
 `src` Código fuente
 
@@ -206,7 +206,7 @@ export class AppComponent {
 }
 ```
 
-Title puede luego usarse en el template de la siguiente forma:
+**Title** puede luego usarse en el template de la siguiente forma:
 
 ```html
 <h1>Hola Mundo</h1>
@@ -315,7 +315,7 @@ Y su template:
 
 Notar como se usan las propiedades **nombre** y **edad** asi como una propiedad especial **get** llamada **nombreCapitalizado** y un método **obtenerNombre** Observe como se consumen esos elementos en el template.
 
-Los métodos cambiarNombre() y cambiarEdad() cambian las propiedades nombre y edad del componente respectivamente. Al cambiar una propiedad, el componente volverá a renderizar todas aquellas partes (elementos del DOM) que dependen de la propiedad modificada.
+Los métodos **cambiarNombre()** y **cambiarEdad()** cambian las propiedades nombre y edad del componente respectivamente. Al cambiar una propiedad, el componente volverá a renderizar todas aquellas partes (elementos del DOM) que dependen de la propiedad modificada.
 
 ## Crear Componente de forma automática.
 
@@ -405,7 +405,7 @@ Y nuestro Template:
 </ul>
 ```
 
-Recorremos el arreglo Heroes y luego imprimimos el contenido en un _\<ul\>_
+Recorremos el arreglo Heroes y luego imprimimos el contenido en un _<ul>_
 
 ## Directivas \*ngIf y else
 
@@ -434,11 +434,11 @@ Actualicemos nuestra plantilla con el siguiente código:
 </ul>
 ```
 
-la derctiva \*ng-if="expresion" permite mostrar un elemento dependiendo del valor retornado al evaluar la expresión.
+La derctiva **ng-if="expresion"** permite mostrar un elemento dependiendo del valor retornado al evaluar la expresión.
 
-En el caso de los botones, se mostrará uno u otro en dependencia de la expresion "this.heroes.length y "this.heroes.length == 0 respectivamente.
+En el caso de los botones, se mostrará uno u otro en dependencia de la expresión "this.heroes.length y "this.heroes.length == 0 respectivamente.
 
-Tambien podemos incorporar un Else con una referencia local (hacia una plantilla local) tal como se hace con el mensage de borrado:
+También podemos incorporar un **Else** con una referencia local (hacia una plantilla local) tal como se hace con el mensage de borrado:
 
 ```typescript
 <h2 *ngIf="heroeBorrado.length; else noBorrado" >Héroe Borrado: {{heroeBorrado}}</h2>
@@ -448,11 +448,11 @@ Tambien podemos incorporar un Else con una referencia local (hacia una plantilla
 </ng-template>
 ```
 
-Si heroeBorrado.length es true ejecutará el bloque inicial H2, caso contrario renderizará la plantilla con nombre noBorrado la cual imprimer un H2 con texto No Borrado.
+Si **heroeBorrado.length** es true ejecutará el bloque inicial H2, caso contrario renderizará la plantilla con nombre **noBorrado** la cual imprimer un H2 con texto No Borrado.
 
 ## Modulos
 
-Implementaremos esta pantalla que consta de varios componentes, un listado y un formulario para agregar nueos elementos al listado.
+Implementaremos esta pantalla que consta de varios componentes, un listado y un formulario para agregar nuevos elementos al listado.
 
 <br/>
 <img src="./imagenes/basicapp.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 60%; height: auto; border: 1px solid black" />
@@ -482,7 +482,7 @@ Todos estos componentes son manajedos en el módulo principal de la APP:
 })
 ```
 
-Notar como los componentes ContadorComponent, HeroeComponent, ListadoComponent son agregados al arreglo de las declarations, que pasa si nuestra app tiene 100 componentes? no podemos manejar 100 Componentes desde el APP Module, de modo que aca es donde entra la importancia de organizar el código en módulos.
+Notar como los componentes **ContadorComponent**, **HeroeComponent**, **ListadoComponent** son agregados al arreglo de las **declarations**, que pasa si nuestra app tiene 100 componentes? no podemos manejar 100 Componentes desde el APP Module, de modo que aca es donde entra la importancia de organizar el código en módulos.
 
 Vamos a crear un nuevo Módulo para los componentes de Heroes:
 
@@ -554,7 +554,7 @@ CREATE src/app/dbz/main-page/main-page.component.ts (286 bytes)
 UPDATE src/app/dbz/dbz.module.ts (283 bytes)
 ```
 
-Ahora en la sección de declarations de nuestro módulo tenemos el nuevo componente.
+Ahora en la sección de **declarations** de nuestro módulo tenemos el nuevo componente.
 
 ```typescript
 declarations: [MainPageComponent];
@@ -622,7 +622,7 @@ Ahora podemos usar el evento **ngSubmit**
 </form>
 ```
 
-Notar como se ha quitado el paramentro **event** y en la función agregar ya no es necesario agregar el preventDefault. Con estos cambios logramos el mismo efecto, no recargar la página, pero en este caso lo está manejando Angular.
+Notar como se ha quitado el paramentro **event** y en la función agregar ya no es necesario agregar el _preventDefault_. Con estos cambios logramos el mismo efecto, no recargar la página, pero en este caso lo está manejando Angular.
 
 ## Ngmodel
 
@@ -645,7 +645,7 @@ Notar el uso de [] en value, esto hace que la expresión del otro lado del signo
 
 Esto se denomina Enlace de datos unidireccional (**One Way Data Binding**) ya que el componente envía los datos al input, pero si cambiamos el input, el objeto en el componente NO cambia.
 
-Para lograr que cualquier cambio en el input afecte el valor del objeto a nivel de componente podriamos agregar un evenListener y llamar un metodo para actualizar el valor:
+Para lograr que cualquier cambio en el input afecte el valor del objeto a nivel de componente podriamos agregar un _evenListener_ y llamar un metodo para actualizar el valor:
 
 ```html
 <input
@@ -656,7 +656,7 @@ Para lograr que cualquier cambio en el input afecte el valor del objeto a nivel 
 />
 ```
 
-Y del lado del componente podríamos leer el event.target.value y actualizar el objeto.
+Y del lado del componente podríamos leer el **event.target.value** y actualizar el objeto.
 
 ```typescript
 cambiarNombre(event: any) {
@@ -665,7 +665,7 @@ cambiarNombre(event: any) {
 }
 ```
 
-Nuevamente angular viene al rescate y nos hace la vida mas simple, podemos usar el ngModel, este crea una instancia de FormControl a partir de un modelo de dominio y la vincula a un elemento de control de formulario.
+Nuevamente angular viene al rescate y nos hace la vida mas simple, podemos usar el **ngModel**, este crea una instancia de **FormControl** a partir de un modelo de dominio y la vincula a un elemento de control de formulario.
 
 Cambiemos nuestro input a esto:
 
@@ -726,7 +726,7 @@ Cambiemos nuestra template para renderizar la lista de personajes desde un arreg
 </ul>
 ```
 
-Notar que luego de personajes.poder estamos usando un pipe, number, el cual hace que el valor poder se imprima como un nùmero (separador de miles, decimales, etc.)
+Notar que luego de personajes poder estamos usando un pipe, number, el cual hace que el valor **poder** se imprima como un nùmero (separador de miles, decimales, etc.)
 
 Otro elemento a notar es el `let pos = index` dentro del ngFor, hay otras variables que se pueden usar como el _isFirst_, _isLast_, etc.
 

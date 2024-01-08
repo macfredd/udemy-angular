@@ -7007,3 +7007,138 @@ Y finalmente el Template:
 
 <br/>
 <img src="./imagenes/herosApp04.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 80%; height: auto; border: 1px solid black" />
+
+## Mostrar la imagen del heroe.
+
+Los archivos de cada heroe lo tenemos almacenados en el directorio:
+
+```
+src/assets/heros/
+```
+
+El nombre del archivo es el `hero.id` y todos tienen una extensión jpg. Este es un URL válido a una de las imágenes
+
+```
+http://localhost:4200/assets/heros/dc-superman.jpg
+```
+
+Podríamos aregar al cardComponent, en el template el siguiente código:
+
+```html
+<img mat-card-image [src]="'../assets/heros/' + hero.id + '.jpg'" alt="">
+```
+
+Ahora ya podemos ver la imagen del Heroe en nuestro Card:
+
+<br/>
+<img src="./imagenes/herosApp05.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 60%; height: auto; border: 1px solid black" />
+
+otra opción sería agregar un PIPE, el cual recibe le `hero.id` y genera el URL de la imagen.
+
+## Creando HeroImage Pipe
+
+En la línea de comandos:
+
+```
+[fcruz@fedora 05-herosApp]$ ng g p heros/pipes/hero-image --flat --skip-tests
+CREATE src/app/heros/pipes/hero-image.pipe.ts (223 bytes)
+UPDATE src/app/heros/heros.module.ts (1043 bytes)
+```
+
+```typescript
+@Pipe({
+  name: 'heroImage'
+})
+export class HeroImagePipe implements PipeTransform {
+
+  transform(hero: Heroe): string {
+
+    if (!hero.id && !hero.alt_img) {
+      return 'assets/no-image.png';
+    }
+
+    if (hero.alt_img) {
+      return hero.alt_img;
+    }
+    return `assets/heroes/${hero.id}.jpg`;
+  }
+}
+```
+
+Y ahora cambiamos nuestro template del **HeroCardComponent**
+
+
+```html
+<img mat-card-image [src]="hero | heroImage">
+```
+
+De esta forma, tendremos un único lugar donde cambiar en el caso de que nuestro directorio de imáges cambie.
+
+## Obtener Heroe
+
+Agregamos un método para obtener la información de un heroe:
+
+```typescript
+getHeroById(id: string): Observable<Heroe | undefined> {
+    return this.httpClient.get<Heroe>(`${this.baseUrl}/heroes/${id}`)
+    .pipe(catchError(err => of(undefined)));
+}
+```
+
+El método **getHeroById** retorna un **Observable** que puede ser un heroes (si lo encuentra) o un **undefined**
+
+Luego consumimos esto en el **HeroPageComponent**
+
+```typescript
+@Component({
+  selector: 'app-hero-page',
+  templateUrl: './hero-page.component.html',
+  styleUrl: './hero-page.component.css'
+})
+export class HeroPageComponent implements OnInit{
+
+  public hero?: Heroe;
+
+  constructor(private heroService: HeroesService, 
+    private activatedRoute: ActivatedRoute,
+    private router: Router) { }
+  
+  ngOnInit(): void {
+    this.activatedRoute.params
+    .pipe(
+      switchMap(({id}) => this.heroService.getHeroeById(id))
+    ).subscribe(hero => {
+      if (!hero) {
+        return this.router.navigateByUrl('/heroes/list');
+      }
+      this.hero = hero; 
+
+      return;
+    });
+  }
+}
+```
+
+El constructor inyecta 3 servicios:
+
+- **HeroesService** para obtener la información del Héroe
+
+- **ActivatedRoute** para acceder al URL activo, y más especificamente a los parametros, dado que necesitamos el ID del Héroe.
+
+- **Router** para redireccionar al usuario en caso de que la búsqueda no retorne nada.
+
+Toda la lógica está en el **ngOnInit**: Accedemos al parámetro ID mediante el **activatedRoute**, luego usamos el **switchMap** para generar otro Observable con el resultado de la búsqueda y finalmente nos suscribimos para analizar si se ha encontrado resultados o no. 
+
+
+Recuerden, esta implementación es incorrecta, ya que genera un **CallbackHell**, o un Subscribe dentro de otro Subsribe:
+
+```typescript
+ngOnInit(): void {
+    this.activatedRoute.params.subscribe(({id}) => {
+      this.heroService.getHeroeById(id).subscribe((heroe) => {
+        this.hero = heroe;
+      });
+    });
+  }
+```
+

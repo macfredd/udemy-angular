@@ -1,8 +1,19 @@
-<mat-card>
+<ng-template #divLoading>
+    <mat-grid-list cols="1">
+        <mat-grid-tile>
+            <mat-spinner></mat-spinner>
+        </mat-grid-tile>
+    </mat-grid-list>
+</ng-template>
+
+<mat-card *ngIf="hero" else divLoading>
     <mat-card-header>
         <mat-card-title>{{ hero.superhero}}</mat-card-title>
         <mat-card-subtitle>{{ hero.alter_ego}}</mat-card-subtitle>
     </mat-card-header>
+
+    <img mat-card-image [src]="hero | heroImage">
+
     <mat-card-content class="mt-2">
         <h4>{{ hero.publisher }}</h4>
         <p><strong>First apparition</strong> {{ hero.first_appearance }}</p>
@@ -20,9 +31,9 @@
             mat-button 
             mat-raised
             color="primary"
-            [routerLink]="['/heroes/edit', hero.id]">
+            [routerLink]="['/heros/edit', hero.id]">
             <mat-icon>edit</mat-icon>
-            View
+            Edit
         </button>
 
         <span class="spacer"></span>
@@ -31,9 +42,9 @@
             mat-button 
             mat-raised
             color="primary"
-            [routerLink]="['/heroes', hero.id]">
+            [routerLink]="['/heros/', hero.id]">
             <mat-icon>more_horiz</mat-icon>
-            More
+            View
         </button>
     </mat-card-actions>
 </mat-card>

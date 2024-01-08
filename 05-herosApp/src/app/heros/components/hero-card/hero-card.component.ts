@@ -9,7 +9,7 @@ import { Heroe } from '../../interfaces/heros.interface';
 export class HeroCardComponent implements OnInit{
 
   @Input() 
-  public hero!: Heroe;
+  public hero?: Heroe;
 
   ngOnInit(): void {
     if(!this.hero){

@@ -7142,3 +7142,7 @@ ngOnInit(): void {
   }
 ```
 
+Finalmente podemos trabajar en el template para mostrar información de un Héroe en especifico.
+
+
+

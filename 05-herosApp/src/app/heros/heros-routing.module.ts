@@ -19,7 +19,7 @@ const routes: Routes = [
       // localhost:4200/heros/edit/1
       { path: 'edit/:id', component: NewPageComponent},
       // localhost:4200/heros/search
-      { path: 'search/', component: SearchPageComponent },
+      { path: 'search', component: SearchPageComponent },
       // localhost:4200/heros/1
       { path: ':id', component: HeroPageComponent },      
       { path: '**', redirectTo: 'list' }

@@ -9,9 +9,10 @@
         (input)="searchHero()"
         [matAutocomplete]="auto"/>
 
-        <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
-            <mat-option *ngFor="let option of heros" [value]="option.id">
-                {{option.superhero}}
+        <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete"
+        (optionSelected)="onOptionSelected( $event)">
+            <mat-option *ngFor="let hero of heros" [value]="hero">
+                {{hero.superhero}}
             </mat-option>
             <mat-option 
             *ngIf="heros.length === 0 && searchControl.pristine === false"
@@ -28,3 +29,5 @@
         </mat-autocomplete>
     </mat-form-field>
 </div>
+
+{{ heroSelected | json}}

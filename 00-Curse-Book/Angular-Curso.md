@@ -7145,4 +7145,88 @@ ngOnInit(): void {
 Finalmente podemos trabajar en el template para mostrar información de un Héroe en especifico.
 
 
+## Autocomplete con Material
 
+Iniciemos con la plantillas:
+
+```html
+<div class="flex flex-column p-2">
+    <h3>Searcher</h3>
+    <mat-form-field>
+        <mat-label>Hero Searcher</mat-label>
+        <input 
+        type="text" 
+        matInput 
+        [formControl]="searchControl"
+        (input)="searchHero()"
+        [matAutocomplete]="auto"/>
+
+        <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+            <mat-option *ngFor="let option of heros" [value]="option.id">
+                {{option.superhero}}
+            </mat-option>
+            <mat-option 
+            *ngIf="heros.length === 0 && searchControl.pristine === false"
+            value="">
+                No Hero found!
+            </mat-option>
+
+            <mat-option 
+            *ngIf="heros.length === 0 && searchControl.pristine === true"
+            value="">
+                Search your hero!
+            </mat-option>
+            
+        </mat-autocomplete>
+    </mat-form-field>
+</div>
+```
+
+Estamos usando componentes de material para mostrar un texto con AutoComplete. El template necesita una lista de **heros** para rellenar las opciones deacuerdo a los criterios de búsqueda.
+
+Ademas controlamos el texto inicial **Search your hero!** el cual se muestra únicamente al inicio, una vez que el usuario ingresa cualquier término, se mostraran los resultados o el texto **No Hero found!** eso se controla con los datos en el arreglo **hero** y con la propiedad **pristine** la cual es TRUE solamente cuando el control se encuentra en su estado inicial.
+
+En cuando al Componente, (TS code):
+
+```typescript
+export class SearchPageComponent {
+
+  public searchControl = new FormControl('');
+
+  public heros: Heroe[] = [];
+
+  constructor( private herosService: HeroesService) { }
+
+  searchHero() {
+    const value: string = this.searchControl.value || '';
+
+    this.herosService.getSuggestions( value.trim() )
+    .subscribe( heros => this.heros = heros)
+  }
+}
+```
+
+Dado que estamos usando **ReactiveForms** de Angular, para enlazar nuestro **matInput** debemos importar el módulo **ReactiveFormsModule**, lo haremos en el **HerosModule**
+
+```typescript
+import { ReactiveFormsModule } from '@angular/forms';
+```
+
+Y lo agregamos a los **Imports**
+
+Con esto ya tenemos un autoComplete, 
+
+Estado inicial:
+
+<br/>
+<img src="./imagenes/herosApp06.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 80%; height: auto; border: 1px solid black" />
+
+Tras buscar un obtener resultados
+
+<br/>
+<img src="./imagenes/herosApp07.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 80%; height: auto; border: 1px solid black" />
+
+Sin resultados
+
+<br/>
+<img src="./imagenes/herosApp08.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 80%; height: auto; border: 1px solid black" />

@@ -7230,3 +7230,232 @@ Sin resultados
 
 <br/>
 <img src="./imagenes/herosApp08.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 80%; height: auto; border: 1px solid black" />
+
+
+<div style="page-break-after: always;"></div>
+
+# Nueva Sección: CRUD con Json-Server:
+
+## ¿Qué veremos en esta sección?
+
+Este es un breve listado de los temas fundamentales:
+
+CRUD
+
+Pipes puros e impuros
+
+Snacks
+
+Dialogs
+
+Inyección de servicios manualmente
+
+Esta sección les dará las bases para poder realizar CRUD completos hacia cualquier backend basado en servicios web, mediante comunicación JSON
+
+## Agregando los Métodos al Servicio
+
+Agregamos los métodos: Add/Update/Delete
+
+```typescript
+addHeroe(heroe: Heroe): Observable<Heroe> {
+    return this.httpClient.post<Heroe>(`${this.baseUrl}/heroes`, heroe);
+
+updateHeroe(heroe: Heroe) : Observable<Heroe> {
+    if (!heroe.id) throw new Error('Hero id is requierd to Update');
+    return this.httpClient.put<Heroe>(`${this.baseUrl}/heroes/${heroe.id}`, heroe);
+
+deleteHeroe(id: string): Observable<boolean> {
+    return this.httpClient.delete(`${this.baseUrl}/heroes/${id}`)
+    .pipe(
+        catchError(err => of(false)),
+        map(resp => true));
+}
+```
+
+En el caso del **deleteHeroe** el API retorna un arreglo vacío **[]** con status 200 cuando se borra un Heroe, y retorna un objeto vacío **{}** con status 404 cuado se intenta borrar un Heroe con ID inexistente, por lo tanto, en ese caso retornaremos un Observable con valor **true/false** 
+
+Para ello usamos el **catchError** para enviar un **false** o caso contraio enviamos un **true**
+
+## Formularios Reactivos
+
+Los formularios reactivos permite mover la mayor parte de la lógica del lado del componente.
+
+Vamos a usar un Formulario Reactivo para enlazar nuestro formulario, en el componente **NewPageComponent** creamos este objeto:
+
+
+```typescript
+public  heroForm = new FormGroup({
+    id:               new FormControl<string>(''),
+    superhero:        new FormControl<string>('', {nonNullable: true}),
+    publisher:        new FormControl<Publisher>(Publisher.DCComics),
+    alter_ego:        new FormControl<string>(''),
+    first_appearance: new FormControl<string>(''),
+    characters:       new FormControl<string>(''),
+    alt_img:          new FormControl<string>('')
+  });
+```
+
+**heroForm** es de tipo **FormGroup** el cual acepta un objeto cuyas propiedades son los campos de nuestro formulario, cada propiedad se define con el tipo **FormControl**, al mismo se le puede indicar el tipo de datos y algunas validaciones adicionales.
+
+Ahora vamos a conectar el TemplateHTML con el formulario.
+
+En resumen el Template del **NewPageComponent** tiene estas secciones
+
+
+```html
+<div class="grid">
+  <div class="col-12 sm:col-6 mt-2">
+    <mat-card>
+      <mat-card-content>
+        <div class="grid">
+          <!-- Input Super Hero-->
+          <!-- Input Alter Ego-->
+          <!-- Input First Appearance-->
+          <!-- Input Characters-->
+          <!-- Input Puiblisher-->
+        </div>
+        <!-- Butons Sectios-->
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Second Column with the Image -->
+</div>
+```
+Vamos a cambiar el **<div class="grid">** que agrupa los controles (Input) por un **<form class="grid" [formGroup]="heroForm">**
+
+Esto enlaza nuestro Form del Template con el FormGroup del Componente. Pero debemos hacer lo mismo a nivel de Campos.
+
+Por ejemplo, el campo **Super Hero** 
+
+```html
+<mat-label>Super Hero</mat-label>
+<input type="text" 
+matInput 
+placeholder=""
+required="">
+```
+
+A dicho Input le agregaremos:
+
+```html
+formControlName="superhero"
+```
+
+Esto enlaza el Input **superhero** con el Campo del mismo nombre que definimos en nuestro FormGroup a nivel del componente. Lo mismo aplicamos para los otros Input.
+
+En el caso del Publisher, es un control tipo **mat-select**, tal como si fuese un control más, agregamos el **formControlName**
+
+
+```html
+<mat-select 
+required=""
+formControlName="publisher">
+    <mat-option 
+    *ngFor="let publisher of publishers"
+     [value]="publisher.id">
+        {{ publisher.desc}}
+    </mat-option> 
+</mat-select>
+```
+
+Ahora creamos un método 
+
+```typescript
+onSubmit() {
+    let formValid = this.heroForm.valid;
+    let value = this.heroForm.value;
+    let rawValue = this.heroForm.getRawValue();
+
+    console.log(rawValue);
+  }
+```
+
+Y lo enlazamos en nuestro formulario
+
+```html
+<form class="grid" [formGroup]="heroForm" (ngSubmit)="onSubmit()">
+```
+
+Dado que nuestro botón de guardar lo hemos dejado fuera del formulario, tenemos que agergar tambien el onSubmit
+
+```html
+<button mat-flat-button color="primary" (click)="onSubmit()">
+    <mat-icon>save</mat-icon>
+    Save
+</button>
+```
+
+Si hacemos click en el botón **save** en consola veremos este objeto:
+
+
+```json
+{
+    "id": "",
+    "superhero": "",
+    "publisher": "DC Comics",
+    "alter_ego": "",
+    "first_appearance": "",
+    "characters": "",
+    "alt_img": ""
+}
+```
+
+Además el **this.heroForm.valid** es _false_ dado que no se han agregado los valores para los campos requeridos.
+
+## Geter dentro del Componente
+
+El valor actual del **this.heroForm.value** aunque es muy similar a la interfaz de Heroe, realmente no es del mismo tipo, podemos crear un metodo GET, para retornar el valor del Heroe mostrado en el formulario.
+
+```typescript
+get currentHero(): Heroe {
+  return this.heroForm.value as Heroe;
+}
+```
+
+Luego podemos usar este valor para mostrar la imagen con el **heroImage** pipe
+
+```html
+<img [src]="currentHero | heroImage" alt="Hero Image here!!!" mat-card-image>
+```
+
+Recordemos que el PIPE mencionado usa un default Image
+
+```typescript
+if (!hero.id && !hero.alt_img) {
+  return 'assets/no-image.png';
+}
+```
+
+Por esta razón vemos el placeholder de la imagen:
+
+
+<br/>
+<img src="./imagenes/herosApp09.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 70%; height: auto; border: 1px solid black" />
+
+## Completar el OnSubmit
+
+Apliquemos los siguientes cambios en el OnSubmit
+
+```typescript
+onSubmit() {
+  if (this.currentHero.id) {
+    this.heroService.updateHeroe(this.currentHero)
+    .subscribe(resp => {
+      // mostrar mensaje
+    });
+   return;
+  }
+
+ this.heroService.addHeroe(this.currentHero)
+  .subscribe( resp => {
+    // mostrar mensaje y navegar /heroes/list
+  })
+}  
+```
+
+Con estos cambios, por el momento, podemos agregar un registro, dado que al cargar el formulario, siempre muestra un formulario vacio. De modo que el ID no ha sido asignado al Heroe.
+
+
+
+

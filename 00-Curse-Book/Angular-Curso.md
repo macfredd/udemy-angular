@@ -7456,6 +7456,35 @@ onSubmit() {
 
 Con estos cambios, por el momento, podemos agregar un registro, dado que al cargar el formulario, siempre muestra un formulario vacio. De modo que el ID no ha sido asignado al Heroe.
 
+## Carga un Heroe
+
+Para cargar un Heroe seleccionado desde el Grid, vamos a agregar un cambio en el **NewPageComponent**
+
+Durante la inicialización del componente, vamos a determinar si estamos cargando un heroe para editarlo, si es así, vamos a tomar de los params el ID del heroe y lo buscaremos con nuestro servicio.
+
+Finalmente hacemos un reset del FORM y le asignamos el heroe encontrado, el código es el siguiente
+
+```typescript
+ngOnInit(): void {
+    if (!this.router.url.includes('edit')) return;
+
+    this.activatedRoute.params
+    .pipe(
+      switchMap(({ id }) => this.heroService.getHeroeById( id )),  
+    ).subscribe(heroe => {
+      if (!heroe) return this.router.navigateByUrl('/heroes/list'); 
+
+      this.heroForm.reset(heroe);
+
+      return;
+    });
+  }
+```
+
+Con este cambio, al hacer click sobre el botón **edit** de un heroe, se abre la pantalla en modo de edición.
+
+
+
 
 
 

@@ -11,6 +11,7 @@ import { MaterialModule } from '../material/material.module';
 import { NewPageComponent } from './pages/new-page/new-page.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SearchPageComponent } from './pages/search-page/search-page.component';
+import { SharedModule } from '../shared/shared.module';
 
 
 @NgModule({
@@ -28,6 +29,7 @@ import { SearchPageComponent } from './pages/search-page/search-page.component';
     HerosRoutingModule,
     MaterialModule,
     ReactiveFormsModule,
+    SharedModule,
   ]
 })
 export class HerosModule { }

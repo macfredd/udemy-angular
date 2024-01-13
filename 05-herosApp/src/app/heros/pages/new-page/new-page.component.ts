@@ -3,9 +3,11 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { Heroe, Publisher } from '../../interfaces/heros.interface';
 import { HeroesService } from '../../services/heroes.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { switchMap } from 'rxjs';
+import { filter, of, switchMap } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
+import { ConfirmComponent } from '../../../shared/components/dialogs/confirm/confirm.component';
+import { ConfirmData } from '../../../shared/components/dialogs/interfaces/confirm.interface';
 
 @Component({
   selector: 'app-new-page',
@@ -81,6 +83,46 @@ export class NewPageComponent implements OnInit {
       duration: 2500,
       horizontalPosition: 'center',
       verticalPosition: 'top'
+    });
+  }
+
+  onDeleteHero() {
+    const confirmData: ConfirmData  = {
+      title: 'Delete Hero',
+      message: `Are you sure you want to delete the hero ${this.currentHero.superhero}?`
+    };
+    const dialog = this.dialog.open(ConfirmComponent, {
+      width: '500px',
+      data: confirmData,
+    });
+
+    dialog.afterClosed()
+    .pipe(
+      switchMap(resp => {
+        if (resp) 
+          return this.heroService.deleteHeroe(this.currentHero.id!);
+        return of(false);
+      })
+    ).subscribe(resp => {
+      if (!resp) {
+        return;
+      }
+
+      this.showSnackbar('Record deleted successfully');
+      this.router.navigateByUrl('/heros/list');
+    });
+
+    dialog.afterClosed()
+    .subscribe(resp => {
+      if (resp) {
+        console.log(resp);
+
+        this.heroService.deleteHeroe(this.currentHero.id!)
+        .subscribe(resp => {
+          this.showSnackbar('Record deleted successfully');
+          this.router.navigateByUrl('/heros/list');
+        });
+      }
     });
   }
 }

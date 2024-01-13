@@ -63,7 +63,7 @@
                     </mat-form-field>
                 </form>
                 
-                <button *ngIf="currentHero.id" mat-flat-button color="warn" class="m-2">
+                <button *ngIf="currentHero.id" mat-flat-button color="warn" class="m-2" (click)="onDeleteHero()">
                     <mat-icon>delete</mat-icon>
                     Delete
                 </button>

@@ -25,14 +25,6 @@
       "characters": "Kal-El"
     },
     {
-      "id": "dc-flash",
-      "superhero": "Flash",
-      "publisher": "DC Comics",
-      "alter_ego": "Jay Garrick",
-      "first_appearance": "Flash Comics #1",
-      "characters": "Jay Garrick, Barry Allen, Wally West, Bart Allen"
-    },
-    {
       "id": "dc-green",
       "superhero": "Green Lantern",
       "publisher": "DC Comics",
@@ -167,15 +159,6 @@
       "alter_ego": "Norrin Radd",
       "first_appearance": "The Fantastic Four #48",
       "characters": "Norrin Radd"
-    },
-    {
-      "id": "hNEAlKp",
-      "superhero": "Samurai Ojos Azules",
-      "publisher": "DC Comics",
-      "alter_ego": "Killer",
-      "first_appearance": "Netflix 2023",
-      "characters": "Samurai",
-      "alt_img": "https://i.blogs.es/caabe1/blue-eye-samurai/375_375.jpeg"
     }
   ]
 }

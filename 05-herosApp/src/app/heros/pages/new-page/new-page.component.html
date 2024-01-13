@@ -1,6 +1,5 @@
-<h1>
-    Edit / Add Hero
-    <small>Superman</small>
+<h1 class="mt-2">
+    {{viewTitle}}
 </h1>
 
 <mat-divider mb-2></mat-divider>
@@ -64,7 +63,7 @@
                     </mat-form-field>
                 </form>
                 
-                <button mat-flat-button color="warn" class="m-2">
+                <button *ngIf="currentHero.id" mat-flat-button color="warn" class="m-2">
                     <mat-icon>delete</mat-icon>
                     Delete
                 </button>

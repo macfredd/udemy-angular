@@ -7484,6 +7484,48 @@ ngOnInit(): void {
 Con este cambio, al hacer click sobre el botón **edit** de un heroe, se abre la pantalla en modo de edición.
 
 
+## SnackBars
+
+MatSnackBar es un servicio para mostrar notificaciones. Actualmente al actualizar un registro, no vemos ningún mensaje que confirme que se ha aplicado el cambios. 
+
+Como es un servicio, lo importaremos y lo inyectaremos en el constructor.
+
+```typescript
+constructor(
+    private snackbar: MatSnackBar) { }
+```
+
+Creamos un método, ya que vamos a desplegar diferentes mensajes dependiendo de ciertas acciones en este formulario:
+
+```typescript
+showSnackbar(message: string) {
+    this.snackbar.open(message, 'ok!', {
+      duration: 2500,
+      horizontalPosition: 'center',
+      verticalPosition: 'top'
+    });
+  }
+```
+
+Y luego lo llamamos donde sea necesario. Por ejemplo al editar, si la acción fue realizada con éxito:
+
+```typescript
+this.showSnackbar('Record updated successfully');
+this.router.navigateByUrl('/heros/list');
+```
+
+## Dialog
+
+Para eliminar un Heroe, necesitamos un confirmación, para ellos usaremos el componente de Material: Dialog.
+
+Primero debemos importar el módulo correspondiente:
+
+```typescript
+import {MatDialogModule} from '@angular/material/dialog'; 
+```
+
+
+
 
 
 

@@ -4,6 +4,8 @@ import { Heroe, Publisher } from '../../interfaces/heros.interface';
 import { HeroesService } from '../../services/heroes.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { switchMap } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-new-page',
@@ -11,6 +13,8 @@ import { switchMap } from 'rxjs';
   styleUrl: './new-page.component.css'
 })
 export class NewPageComponent implements OnInit {
+
+  public viewTitle: string = 'New Hero';
 
   public  heroForm = new FormGroup({
     id:               new FormControl<string>(''),
@@ -29,7 +33,9 @@ export class NewPageComponent implements OnInit {
   constructor(
     private heroService: HeroesService,
     private activatedRoute: ActivatedRoute,
-    private router: Router) { }
+    private router: Router,
+    private snackbar: MatSnackBar,
+    private dialog: MatDialog) { }
   
   
   ngOnInit(): void {
@@ -41,6 +47,7 @@ export class NewPageComponent implements OnInit {
     ).subscribe(heroe => {
       if (!heroe) return this.router.navigateByUrl('/heroes/list'); 
 
+      this.viewTitle = `Edit Hero: ${heroe.superhero}`;
       this.heroForm.reset(heroe);
 
       return;
@@ -51,7 +58,8 @@ export class NewPageComponent implements OnInit {
     if (this.currentHero.id) {
       this.heroService.updateHeroe(this.currentHero)
       .subscribe(resp => {
-        // mostrar mensaje
+        this.showSnackbar('Record updated successfully');
+        this.router.navigateByUrl('/heros/list');
       });
 
       return;
@@ -59,11 +67,20 @@ export class NewPageComponent implements OnInit {
 
     this.heroService.addHeroe(this.currentHero)
     .subscribe( resp => {
-      // mostrar mensaje y navegar /heroes/list
+      this.showSnackbar('Record created successfully');
+      this.router.navigateByUrl('/heros/list');
     })
   }
 
   get currentHero(): Heroe {
     return this.heroForm.value as Heroe;
+  }
+
+  showSnackbar(message: string) {
+    this.snackbar.open(message, 'ok!', {
+      duration: 2500,
+      horizontalPosition: 'center',
+      verticalPosition: 'top'
+    });
   }
 }

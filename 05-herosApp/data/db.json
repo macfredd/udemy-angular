@@ -2,8 +2,18 @@
   "users": [
     {
       "id": 1,
-      "usuario": "John Doe",
-      "email": "john.due@gmail.com"
+      "user": "admin",
+      "email": "admin@gmail.com"
+    },
+    {
+      "id": 2,
+      "user": "Freddy Cruz",
+      "email": "fc@gmail.com"
+    },
+    {
+      "id": 3,
+      "user": "Visitor",
+      "email": "visitor@gmail.com"
     }
   ],
   "heroes": [
@@ -13,8 +23,7 @@
       "publisher": "DC Comics",
       "alter_ego": "Bruce Wayne",
       "first_appearance": "Detective Comics #27",
-      "characters": "Bruce Wayne",
-      "alt_img": null
+      "characters": "Bruce Wayne"
     },
     {
       "id": "dc-superman",
@@ -23,6 +32,14 @@
       "alter_ego": "Kal-El",
       "first_appearance": "Action Comics #1",
       "characters": "Kal-El"
+    },
+    {
+      "id": "dc-flash",
+      "superhero": "Flash",
+      "publisher": "DC Comics",
+      "alter_ego": "Jay Garrick",
+      "first_appearance": "Flash Comics #1",
+      "characters": "Jay Garrick, Barry Allen, Wally West, Bart Allen"
     },
     {
       "id": "dc-green",

@@ -2,8 +2,18 @@
   "users": [
     {
       "id": 1,
-      "usuario": "John Doe",
-      "email": "john.due@gmail.com"
+      "user": "admin",
+      "email": "admin@gmail.com"
+    },
+    {
+      "id": 2,
+      "user": "Freddy Cruz",
+      "email": "fc@gmail.com"
+    },
+    {
+      "id": 3,
+      "user": "Visitor",
+      "email": "visitor@gmail.com"
     }
   ],
   "heroes": [

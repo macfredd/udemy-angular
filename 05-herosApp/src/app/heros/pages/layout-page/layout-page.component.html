@@ -24,7 +24,7 @@
         </button>
         <span class="spacer"></span>
         <mat-icon>verified_user</mat-icon> 
-        <span class="pl-1 pr-3">{{currentUser?.user | titlecase}}</span>
+        <span class="pl-1 pr-3">{{currentUser?.email| titlecase}}</span>
         <button mat-button (click)="onLogout()">
             Logout
         </button>

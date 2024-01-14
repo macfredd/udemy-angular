@@ -7877,14 +7877,14 @@ const checkAuthStatus = (): boolean | Observable<boolean> => {
     );
   };
   
-export const canActivateGuard: CanActivateFn = (
+export const canActivateAuthGuard: CanActivateFn = (
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ) => {   
     return checkAuthStatus();
 };
    
-export const canMatchGuard: CanMatchFn = (
+export const canMatchAuthGuard: CanMatchFn = (
     route: Route,
     segments: UrlSegment[]
   ) => {   
@@ -7913,8 +7913,8 @@ const routes: Routes = [
   {
     path: 'heros',
     loadChildren: () => import('./heros/heros.module').then(m => m.HerosModule),
-    canActivate: [canActivateGuard],
-    canMatch: [canMatchGuard], 
+    canActivate: [canActivateAuthGuard],
+    canMatch: [canMatchAuthGuard], 
   },
   //Otras rutas aca
 ];
@@ -7924,5 +7924,58 @@ Ambos Guards entraran en servicio cuando el usuario intente navegar a cualquier 
 
 Con este cambio, si el usuario está logeado puede navegar a los URL's, caso contrario es redireccionado al Login.
 
+## Redirect en el Login
+
+El caso contrario es: Cuando hay una sesión abierta y el usuario intenta abrir la página del login. Esto debe redireccionar el _./_ ya que el usuario, al ver el login View puede interpretar que ha cerrado sesión, y abandonar su dispositivo o estación de trabajo. Si otro usuario abre la APP en usando otro URL, podrá ver el contenido ya que el usuario anterior no cerró sesión.
+
+Para lograr esto creamos una copia del **auth.guards.ts** y vamos a cambiar la condición en el método **checkAuthStatus** En lugar de:
+
+```typescript
+return authService.checkAuth().pipe(
+tap((isAuthenticated) => {
+  if (!isAuthenticated) {
+    router.navigate(['/auth/login']);
+  }
+})
+```
+
+Implementamos esto:
+
+```typescript
+return authService.checkAuth().pipe(
+  tap((isAuthenticated) => {
+    if (isAuthenticated) {
+      router.navigate(['/heros/list']);
+    }
+  }),
+  map((isAuthenticated) => !isAuthenticated),
+);
+```
+
+NOTA: Sin el  `map((isAuthenticated) => !isAuthenticated),` estaba enviado siempre al 404Page, esto porque el TAP hace un navigate, pero el método como tal estaba regresando un TRUE (todo ese return regrea algo, un TRUE). Al regresar un TRUE, intenta cargar el Auth/login y a la vez el Hero/Lis causando un problema interno de redireciconamiento. 
+
+El map retorna lo opuesto al **isAuthenticated** de modo que si está autenticado, retorna un False y la navegación al /Auth/Login se cancela.
 
 
+Otros cambios en el Guard, es que debemos renombramos los métodos **canActivateAuthGuard**  y **canMatchAuthGuard** a **canActivatePublicGuard**  y **canMatchPublicGuard** respectivamente y luego agregamos los nuevos Guards al AppRouting en el path del login:
+
+```typescript
+const routes: Routes = [
+  {
+    path: 'auth',
+    loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule),
+    canActivate: [canActivatePublicGuard],
+    canMatch: [canMatchPublicGuard],
+  },
+  {
+    path: 'heros',
+    loadChildren: () => import('./heros/heros.module').then(m => m.HerosModule),
+    canActivate: [canActivateAuthGuard],
+    canMatch: [canMatchAuthGuard], 
+  }
+  ...
+];
+```
+
+De esta forma, si el usuario está logeado, y trata de cargar el loginView será redireccionado al **/heros/list**, si no está logeado, podrá ver normalmente la página de logeo.
+  

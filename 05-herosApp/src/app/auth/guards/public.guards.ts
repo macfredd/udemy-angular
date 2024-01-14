@@ -7,7 +7,7 @@ import { ActivatedRouteSnapshot,
     RouterStateSnapshot, 
     UrlSegment } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { Observable, tap } from 'rxjs';
+import { Observable, map, of, tap } from 'rxjs';
 
 const checkAuthStatus = (): boolean | Observable<boolean> => {
     const authService: AuthService = inject(AuthService);
@@ -15,21 +15,22 @@ const checkAuthStatus = (): boolean | Observable<boolean> => {
    
     return authService.checkAuth().pipe(
       tap((isAuthenticated) => {
-        if (!isAuthenticated) {
-          router.navigate(['/auth/login']);
-        }
-      })
+        if (isAuthenticated) {
+          router.navigate(['/heros/list']);
+        } 
+      }),
+      map((isAuthenticated) => !isAuthenticated),
     );
   };
   
-export const canActivateAuthGuard: CanActivateFn = (
+export const canActivatePublicGuard: CanActivateFn = (
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ) => {   
     return checkAuthStatus();
 };
    
-export const canMatchAuthGuard: CanMatchFn = (
+export const canMatchPublicGuard: CanMatchFn = (
     route: Route,
     segments: UrlSegment[]
   ) => {   

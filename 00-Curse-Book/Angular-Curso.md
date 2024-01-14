@@ -7518,15 +7518,411 @@ this.router.navigateByUrl('/heros/list');
 
 Para eliminar un Heroe, necesitamos un confirmación, para ellos usaremos el componente de Material: Dialog.
 
-Primero debemos importar el módulo correspondiente:
+Este componente renderiza un dialogo en pantalla, como un pop-up, a su vez dicho componente necesita otro, que es un componente que contiene la información a mostrar.
 
-```typescript
-import {MatDialogModule} from '@angular/material/dialog'; 
+Crearemos un componente en el directorio shared/components/dialogs
+
+```
+ng g c shared/components/dialog/confirm
 ```
 
+Dado qeu necesitamos pasarle datos al componente, como el titulo y el mensaje a mostrar, creamos una interfaz propia del componente:
+
+Directorio: **hared/components/dialog/interfaces**
+
+```typescript
+export interface ConfirmData {
+    title: string;
+    message: string;
+}
+```
+
+Luego creamos el TS del componente:
+
+```typescript
+import { Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ConfirmData } from '../interfaces/confirm.interface';
+
+@Component({
+  selector: 'app-confirm',
+  templateUrl: './confirm.component.html',
+  styleUrl: './confirm.component.css'
+})
+export class ConfirmComponent {
+  constructor(
+    public dialogRef: MatDialogRef<ConfirmComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: ConfirmData,
+  ) {}
+
+  onNoClick(): void {
+    this.dialogRef.close(false);
+  }
+  onConfirm(): void {
+    this.dialogRef.close(true);
+  }
+}
+```
+
+Un par de apuntes, el constructor de ConfirmComponent tiene dos parámetros:
+
+```typescript
+public dialogRef: MatDialogRef<ConfirmComponent>: MatDialogRef
+```
+Es un servicio proporcionado por Angular Material que representa una referencia a un cuadro de diálogo. En este caso, se utiliza para cerrar el cuadro de diálogo cuando sea necesario. **ConfirmComponent** es el tipo de componente asociado al cuadro de diálogo.
+
+```typescript
+@Inject(MAT_DIALOG_DATA) public data: ConfirmData
+```
+
+Se utiliza para inyectar datos en el cuadro de diálogo. **MAT_DIALOG_DATA** es una constante proporcionada por Angular Material que permite inyectar datos en el cuadro de diálogo. **ConfirmData** es el tipo de datos que se espera.(_Interfaz_)
 
 
+Finalmente el Template:
 
+```html
+<h1 mat-dialog-title>{{ data.title }}</h1>
+<div mat-dialog-content>
+  <p>{{ data.message }}</p>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-button (click)="onConfirm()" cdkFocusInitial>Ok</button>
+</div>
+```
+
+Listo, antes de continuar, debemos exportar el **ConfirmComponent** en neustro **SharedModule**
+
+Ahora es momento de usarlo, nos vamos al **NewPageComponent**, primero inyectamos un servicio en el Constructor:
+
+```typescript
+ private dialog: MatDialog
+ ```
+ 
+ Luego agregamos un método para eliminar el Heroe:
+
+```typescript
+onDeleteHero() {
+    const confirmData: ConfirmData  = {
+      title: 'Delete Hero',
+      message: `Are you sure you want to delete the hero ${this.currentHero.superhero}?`
+    };
+    const dialog = this.dialog.open(ConfirmComponent, {
+      width: '500px',
+      data: confirmData,
+    });
+
+    dialog.afterClosed()
+    .pipe(
+      switchMap(resp => {
+        if (resp) 
+          return this.heroService.deleteHeroe(this.currentHero.id!);
+        return of(false);
+      })
+    ).subscribe(resp => {
+      if (!resp) {
+        return;
+      }
+
+      this.showSnackbar('Record deleted successfully');
+      this.router.navigateByUrl('/heros/list');
+    });
+
+    dialog.afterClosed()
+    .subscribe(resp => {
+      if (resp) {
+        console.log(resp);
+
+        this.heroService.deleteHeroe(this.currentHero.id!)
+        .subscribe(resp => {
+          this.showSnackbar('Record deleted successfully');
+          this.router.navigateByUrl('/heros/list');
+        });
+      }
+    });
+  }
+```
+
+Primero, **ConfirmData** es la interfaz que expone el componente **ConfirmDialog**, entonces debemos crear un objeto de este tipo y asignar los datos que se mostrarán en el Dialog:
+
+Luego llamamos el método **open** del dialog y le pasamos la configuración, incluidos los datos.
+
+Finalmente nos suscribimos al **afterClosed** y ejecutamos el **deleteHeroe**
+
+El **afterClosed** retornara un valor True|False, dependiendo del botón presionado (OK, CANCEL), si es true, procedemos con la eliminación del Heroe.
+
+Otra forma de implementar el **afterClose** seria:
+
+```typescript
+dialog.afterClosed()
+  .pipe(
+    filter((result: boolean) => result),
+    switchMap(() => this.heroService.deleteHeroe(this.currentHero.id!)),
+    filter((wasDeleted: boolean) => wasDeleted),
+    )
+    .subscribe(() => {
+      this.showSnackbar('Record deleted successfully');
+      this.router.navigateByUrl('/heros/list');
+    });
+```
+
+El result del AfterClosed puede ser:
+
+True: Si presiona en OK
+False: Si presiona en Cancelar
+undefined: Si presiona fuera del dialog
+
+Por lo tanto el primer filter, filtra unicamene los eventos TRUE. 
+
+Luego el switchMap ejecuta el deleteHeroe, el cual puede retornar: TRUE: Si fue eliminado o  FALSE: si ocurrió un error.
+
+De nuevo se aplica un filtro para mantener en el pipe los eventos TRUE
+
+Finalmente al suscribirse, lo único que puede llegar a escuhar son EVENTOS TRUE, es decir que efectivamente se eliminó el registro, por lo tanto, directamente manda el mensaje a pantalla y redirecciona al list.
+
+NOTA: Para que esto funcione, hay que hacer una correción en el deleteHeroe del servicio, el catchError debe estar al final del pipe. Es decir map -> catchError. Anteriormente el catchError era lo primero que se ejecutaba en el PIPE.
+
+
+```typescript
+  return this.httpClient.delete(`${this.baseUrl}/heroes/${id}`)
+  .pipe(
+      map(resp => true),
+      catchError(err => of(false)));
+```
+
+El resultado final es el siguiente dialog al momento de eliminar un heroe:
+<br/>
+<img src="./imagenes/herosApp10.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 70%; height: auto; border: 1px solid black" />
+
+
+<div style="page-break-after: always;"></div>
+
+# Nueva Sección: Guards (Protección de Rutas):
+
+## ¿Qué veremos en esta sección?
+
+Este es un breve listado de los temas fundamentales:
+
+- Protección de ruta- 
+- Rutas privada- 
+- Rutas pública- 
+- Servicio de autenticació- 
+- Guard- 
+- Can Activat- 
+- Can Matc- 
+- Mantener la sesión del usuario
+
+Esta es una sección muy importante, donde controlaremos de forma básica una autenticación, mucho más adelante en el curso, realizaremos autenticación mediante JWT, pero antes de llegar a eso que son temas de Backend, necesito que comprendamos cómo Angular nos puede servir para proteger nuestras rutas.
+
+
+## Fake Login
+
+Para mostrar la utilidad de los Guards, vamos a simular el login/ logout del usuario, no vamos a autenticarlo por el momento. Usaremos el siguiente servicio dentro del módulo de Autenticación
+
+
+```typescript
+@Injectable({providedIn: 'root'})
+export class AuthService {
+
+    private baseUrl: string = environments.baseUrl;
+
+    private user?: User;
+
+    constructor(private httpClient: HttpClient) { }
+
+    get currentUser() : User | undefined {
+        if (!this.user) return undefined;
+
+        return structuredClone(this.user);
+    }
+
+    login( email: string, password: string): Observable<User> {
+        
+        return this.httpClient.get<User>(`${this.baseUrl}/users/1`)
+        .pipe(
+            tap(user => this.user = user),
+            tap(user => localStorage.setItem('token', user.id.toString()),
+            )
+        );
+    }
+
+    logout(): Observable<boolean> {
+        this.user = undefined;
+        localStorage.clear();
+        return of(true);
+    }
+}
+```
+
+Lo importante aca es que cuando se llame el método **login** se devolverá siempre el user con ID 1, notar que no estamos validando user ni password. Adicionalmente, guardaremos en el localStorage, en el UserID
+
+También agregamos el **logout** que elimina el Token del localStorage y hace undefined el usuario previamente "logeado"
+
+El Login lo usaremos en el **LoginPageComponent**
+
+```typescript
+onLogin() {
+  this.authService.login('admin@gmail.com', '123456')
+  .subscribe(user => {
+    this.router.navigate(['/']);
+  })
+}
+```
+
+Y el Logout lo tenemos que usar en el **LayoutPageComponent** ya que este muestra el botón logout en la Hearde.
+
+```typescript
+constructor(private authService: AuthService,
+    private router: Router) { }
+
+onLogout() {
+  this.authService.logout()
+  .subscribe(() => {
+    this.router.navigate(['/auth/login']);
+  });
+}
+```
+
+Listo, con estos métodos tenemos un fakeLogin que guarda el ID del usuario en el LocalStorage y lo elimina cuando hace Logout, 
+
+El objetivo es validar que el usuario esté logeado para permitirlo navegar en la APP, caso contrario debe ser redireccionado al _auth/login_
+
+## Mostrar el usuario Logeado
+
+Vamos a mostrar en el Header BAR el usuario Logeado, en el template del **LayoutPageComponent** agreamos esto:
+
+
+```html
+<span class="pl-1 pr-3">{{currentUser?.user | titlecase}}</span>
+```
+
+Y definimo el método:
+
+```typescript
+get currentUser(): User | undefined {
+  return this.authService.currentUser;
+}
+```
+Ahora, luego de logearnos, podemos ver el nombre del usuario en la barra
+<br/>
+<img src="./imagenes/herosApp11.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 70%; height: auto; border: 1px solid black" />
+
+Pero si recargamos la página se pierde los datos de sessión y el nombre se borra, aunque, en nuestro localstorage tenemos la información del Token.
+
+Lo que necesitamos es verificar que al recargar las páginas, debemos inspeccionar el localStorage, y si tenemos un Token guardado, debemos cargar la información de nuevo a la sessión.
+
+## Verificar Sessión Activa
+
+
+Vamos a usar un método en nuestro AuthService que valida si hay un Token
+
+```typescript
+checkAuth(): Observable<boolean> {
+    const token = localStorage.getItem('token');
+    if (!token) return of(false);
+    return this.httpClient.get<User>(`${this.baseUrl}/users/1`)
+    .pipe(
+        tap(user => this.user = user),
+        map(user => !!user),
+        catchError(() => of(false))
+    )
+}
+```
+
+Este método hace dos cosas:
+
+- Regresa FALSE si el token no existe
+- Regresa TRUE y a la vez reasigna el this.user si existe el Token
+
+NOTA: `!!user` regresa TRUE si el usuario fue encontrado o False caso contrario, es la negación de la negación. 
+
+Si el usuario está definido:
+`!user`  Regresa False  luego   `!False` regresa True.
+
+Si el usuario NO está definido:
+`!user` Regresa TRUE, luego `!True` regresa False
+
+## Implementando el Guards
+
+En Angular, los guards (o guardianes) son clases que implementan interfaces específicas para controlar la navegación en una aplicación. Estos guards se utilizan para proteger o permitir el acceso a ciertas rutas o componentes en función de ciertas condiciones.
+
+Los Guards son servicios pero en lugar de inyectarlos en los constructores, se colocan en un lugar específico, los Routers.
+
+NOTA: En Angular 17, se han deprecado varias interfaces de los Guards, aca se muestra un ejemplo tomado de la documentación de Angular.
+
+Dentro del directorio _Auth_ creamos el directorio _guards_ y en el archivo auth.guards.ts creamos este código:
+
+```typescript
+import { Injectable, inject } from '@angular/core';
+import { ActivatedRouteSnapshot, 
+    CanActivateFn, 
+    CanMatchFn, 
+    Route,
+    Router, 
+    RouterStateSnapshot, 
+    UrlSegment } from '@angular/router';
+import { AuthService } from '../services/auth.service';
+import { Observable, tap } from 'rxjs';
+
+const checkAuthStatus = (): boolean | Observable<boolean> => {
+    const authService: AuthService = inject(AuthService);
+    const router: Router = inject(Router);
+   
+    return authService.checkAuth().pipe(
+      tap((isAuthenticated) => {
+        if (!isAuthenticated) {
+          router.navigate(['/auth/login']);
+        }
+      })
+    );
+  };
+  
+export const canActivateGuard: CanActivateFn = (
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ) => {   
+    return checkAuthStatus();
+};
+   
+export const canMatchGuard: CanMatchFn = (
+    route: Route,
+    segments: UrlSegment[]
+  ) => {   
+    return checkAuthStatus();
+};
+```
+Varias cosas por analizar:
+
+- No necesitamos una clase para implementar los guards
+- La función local **checkAuthStatus** inyecta el AuthService y el Router con el **inject**
+
+Tanto el **canActivateGuard** como el **canMatchGuard** implementan las interfaces respectivas **CanActivateFn** y **CanMatchFn**, estas regresan un valor True o False dependiendo de lo que retorne el método **checkAuthStatus**
+
+Un Valor True indica que se puede continuar con la navegación, un valor False indica lo conrario. 
+
+Luego debemos usar estos Guards, actualizamos nuestro **app.routing.ts**
+
+
+```typescript
+//localhost:4200
+const routes: Routes = [
+  {
+    path: 'auth',
+    loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule),
+  },
+  {
+    path: 'heros',
+    loadChildren: () => import('./heros/heros.module').then(m => m.HerosModule),
+    canActivate: [canActivateGuard],
+    canMatch: [canMatchGuard], 
+  },
+  //Otras rutas aca
+];
+```
+
+Ambos Guards entraran en servicio cuando el usuario intente navegar a cualquier ruta del módulo **heros**
+
+Con este cambio, si el usuario está logeado puede navegar a los URL's, caso contrario es redireccionado al Login.
 
 
 

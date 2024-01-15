@@ -453,7 +453,6 @@ Si **heroeBorrado.length** es true ejecutará el bloque inicial H2, caso contrar
 ## Modulos
 
 Implementaremos esta pantalla que consta de varios componentes, un listado y un formulario para agregar nuevos elementos al listado.
-
 <br/>
 <img src="./imagenes/basicapp.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 60%; height: auto; border: 1px solid black" />
 
@@ -7978,4 +7977,314 @@ const routes: Routes = [
 ```
 
 De esta forma, si el usuario está logeado, y trata de cargar el loginView será redireccionado al **/heros/list**, si no está logeado, podrá ver normalmente la página de logeo.
-  
+
+<div style="page-break-after: always;"></div>
+
+# Nueva Sección: Formularios Reactivos:
+
+## ¿Qué veremos en esta sección?
+
+Este es un breve listado de los temas fundamentales:
+
+- Formularios Reactivos
+- Lazyload y tareas relacionadas 
+- Validaciones propias de Angular 
+- Validaciones personalizadas
+- Validaciones asíncronas
+- Arreglos y objetos anidados 
+- FormBuilder
+- FormGroup
+- FormArray
+
+## Nueva APP
+
+Creamos una nueva app
+
+```
+ ng new 06-formsApp --standalone --routing
+```
+
+Usaremos bootsrap, pegamos el link en nuestro index
+
+```html
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+```
+
+Editamos el archivo _package.json_ y agreamos el parámetro **-o** al script start
+
+```json
+"start": "ng serve -o",
+```
+
+Creamos tres módulos
+
+```
+ng g m auth --routing
+CREATE src/app/auth/auth-routing.module.ts (247 bytes)
+CREATE src/app/auth/auth.module.ts (272 bytes)
+
+[fcruz@fedora 06-formsApp]$ ng g m reactive --routing
+CREATE src/app/reactive/reactive-routing.module.ts (251 bytes)
+CREATE src/app/reactive/reactive.module.ts (288 bytes)
+
+ng g m shared
+CREATE src/app/shared/shared.module.ts (192 bytes)
+```
+
+El ShareModulo lo agregamos al AppModule porque vamos a requereir usar los componentes del Share en nuestra APP. Ademas es el único módulo sin Routing, porque solo va a proporcionar Componentes como utilidades.
+
+En cambio Auth y Reactive, si van a tener sus enrrutadores, porque haremos una carga Lazy y estos deben de agregar rutas Hijas. Generalmente, los Modulos que exponen rutas, contiene Componentes tipo Páginas, y estas agrupan otros componentes que pueden ser propios del módulo, o que vengan de Shared u otros módulos de terceros como Material.
+
+
+## Creando estructura de Directorios y paginas
+
+- Creamos dos dorectorios **pages** dentro de cada módulo: **Auth** y **Reactive**
+
+- Creamos Los componentes Auth/register, Reactive/basic, Reactive/dinamic y Reactive/switch, los directorios quedarían así:
+
+
+
+
+```
+[fcruz@fedora app]$ tree
+.
+├── app.component.css
+├── app.component.html
+├── app.component.spec.ts
+├── app.component.ts
+├── app.module.ts
+├── app-routing.module.ts
+├── auth
+│   ├── auth.module.ts
+│   ├── auth-routing.module.ts
+│   └── pages
+│       └── register-page
+│           ├── register-page.component.css
+│           ├── register-page.component.html
+│           └── register-page.component.ts
+├── reactive
+│   ├── pages
+│   │   ├── basic-page
+│   │   │   ├── basic-page.component.css
+│   │   │   ├── basic-page.component.html
+│   │   │   └── basic-page.component.ts
+│   │   ├── dinamic-page
+│   │   │   ├── dinamic-page.component.css
+│   │   │   ├── dinamic-page.component.html
+│   │   │   └── dinamic-page.component.ts
+│   │   └── switch-page
+│   │       ├── switch-page.component.css
+│   │       ├── switch-page.component.html
+│   │       └── switch-page.component.ts
+│   ├── reactive.module.ts
+│   └── reactive-routing.module.ts
+└── shared
+    └── shared.module.ts
+```
+
+
+En nuestro AppRoutingModule creamos las rutas Roots:
+
+
+```typescript
+const routes: Routes = [
+  {
+    path: 'reactive',
+    loadChildren: () => import('./reactive/reactive.module').then(m => m.ReactiveModule)
+  },
+  {
+    path: 'auth',
+    loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)
+  },
+  {
+    path:'**',
+    redirectTo: 'reactive'
+  }
+];
+```
+
+Agregamos los ChildRoutes para el módulo de Reactive
+
+```typescript
+const routes: Routes = [
+  {
+    path: '',
+    children:[
+      { path: 'basic', component: BasicPageComponent},
+      { path: 'dinamic', component: DinamicPageComponent},
+      { path: 'switch', component: SwitchPageComponent},
+      { path: '**', redirectTo: 'basic'}
+    ]
+  }
+];
+```
+
+Y Hacemos lo mismo con el módulo de Auth.
+
+```typescript
+const routes: Routes = [
+  { path: 'singup', component: RegisterPageComponent },
+  { path: '**', redirectTo: 'singup' }
+];
+```
+
+NOTA: Cada uno de estos componentes, tiene un template ya diseñado, el cual puede ser descarado del repo del curso.
+
+[Repo del Curso Oficial](https://gist.github.com/Klerith/5729dcfb170595f84d1b564a182ffbc2)
+
+o del repo personal:
+
+[Personal Repo](https://github.com/macfredd/udemy-angular/blob/master/06-formsApp/src/app/auth/pages/register-page/register-page.component.html)
+
+## Barra Lateral
+
+Vamos a crear un componente en el direcotrio shared/components
+
+```
+ng g c shared/components/side-menu --skip-tests
+```
+
+Lo exportamos en el SharedModule, 
+
+```typescript
+@NgModule({
+  declarations: [
+    SideMenuComponent
+  ],
+  imports: [
+    CommonModule
+  ],
+  exports:[
+    SideMenuComponent
+  ]
+})
+export class SharedModule { }
+```
+
+En el **SideMenuComponent** agreamos estos menuItems:
+
+```typescript
+import { Component } from '@angular/core';
+
+interface MenuItem {
+  title: string;
+  route: string;
+}
+
+@Component({
+  selector: 'shared-side-menu',
+  templateUrl: './side-menu.component.html',
+  styleUrl: './side-menu.component.css'
+})
+export class SideMenuComponent {
+
+  public reactiveMenu: MenuItem[] = [
+    { title: 'Basicos', route: './reactive/basic' },
+    { title: 'Dinamicos', route: './reactive/dinamic' },
+    { title: 'Switches', route: './reactive/switch' }
+  ];
+
+  public authMenu: MenuItem[] = [
+    { title: 'Registro', route: './auth/register' }
+  ];
+}
+```
+
+Y el template:
+
+```html
+<h2>Pages</h2>
+
+<hr>
+
+<h3 class="mt-2">Reactive</h3>
+<ul class="list-group">
+    <li 
+    *ngFor="let item of reactiveMenu" 
+    class="list-group-item"
+    [routerLink]="[item.route]"
+    routerLinkActive="active">
+        {{ item.title }}
+    </li>
+</ul>
+<h3 class="mt-2">Validations</h3>
+ 
+<ul class="list-group">
+    <li 
+    *ngFor="let item of authMenu" 
+    class="list-group-item"
+    [routerLink]="[item.route]"
+    routerLinkActive="active">
+        {{ item.title }}
+    </li>
+</ul>
+```
+
+NOTA: para que el **[routerLink]** funcione dentro del _li_ debemos importar el **RouterModule** en el **SharedModule**
+
+Ahora debemos crear nuestro Layout principal, en el app.component.html
+
+```html
+<div class="row mt-5">
+  <div class="col">
+    <router-outlet></router-outlet>
+  </div>
+
+  <div class="col-12 col-sm-4">
+    <shared-side-menu></shared-side-menu>
+  </div>
+</div>
+```
+
+Listo, al cargar la app podemos ver el url **http://localhost:4200/reactive/basic** porqué es esta nuestra página por default? Eso se debe a las rutas. En nuestro Root Router (app.routing.ts) hemos dicho que cualquier path **[\*\*]** sera redireccionado al reactive.
+
+**Path Inicial: http://localhost:4200/**
+
+
+```typescript
+{
+  path:'**',
+  redirectTo: 'reactive'
+}
+```
+
+**Path redireccionado http://localhost:4200/reactive/**
+
+y el path **reactive** carga en modo Lazy el módulo **ReactiveModule**
+
+```typescript
+{
+  path: 'reactive',
+  loadChildren: () => import('./reactive/reactive.module').then(m => m.ReactiveModule)
+}
+```
+
+Y cuando cargamos este módulo, cargamos su reglas de ruteo. Y aca hemos definido que cualquier path que no haga match, será redireccionado al **basic** 
+
+**Path Entrada al módulo: http://localhost:4200/reactive/**
+
+```typescript
+{ path: '**', redirectTo: 'basic'}
+```
+
+Y el path **basic** carga el **BasicPageComponent**
+
+```typescript
+{ path: 'basic', component: BasicPageComponent},
+```
+
+**Path final: http://localhost:4200/reactive/basic**
+
+Resultado final:
+
+<br/>
+<img src="./imagenes/reaciveFormsApp01.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 60%; height: auto; border: 1px solid black" />
+
+
+
+
+
+
+
+
+

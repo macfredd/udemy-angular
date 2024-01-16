@@ -8281,10 +8281,140 @@ Resultado final:
 <img src="./imagenes/reaciveFormsApp01.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 60%; height: auto; border: 1px solid black" />
 
 
+## Primer Form
+
+En el componente BasicPageCompoenent agregaremos un Formulario reactivo, hay dos formas de hacerlo
 
 
+Usando el FormGroup:
+
+Primero importaremos el módulo **ReactiveFormsModule** en **ReactiveModule** y luego en nuestro componente **BasicPageComponent** agregamos el siguiente código:
+
+```typescript
+public productForm: FormGroup = new FormGroup({
+  name: new FormControl(''),
+  price: new FormControl(0),
+  quantity: new FormControl(0)
+});
+```
+
+La otra forma es usando un FormBuilder, para ello necesitamos inyectar un servicio 
 
 
+```typescript
+public productForm: FormGroup = this.formBuilder.group({
+    name:     [ ''],
+    price:    [ 0 ],
+    quantity: [ 0 ]
+  });
+```
+
+Esta forma no requiere que se importe el **ReactiveFormsModule** pero usaremos muchas características de los forumarios reactivos que lo vamos a mantener en el Import.
+
+## Enlazar el HTML con el productForm
+
+Para enlazarlo usaremos la directiva **[formGroup]** que precisamente viene del **ReactiveFormsModule** y le asignaremos el nombre del objeto que definimos en TS.
+
+```html
+<form [formGroup]="productForm" autocomplete="off">
+```
+NOTA: **autocomplete** OFF indica que nosotros haremos las validaciones de nuestro lado.
+
+Creamos un método:
+
+```typescript
+onSubmit() {
+  console.log(this.productForm.value);
+}
+```
+
+Y lo usamos en el click del botón que hace el submit de nuestro formulario
+
+```html
+<button type="submit"
+        (click)="onSubmit()"
+        class="btn btn-primary float-end">
+    Guardar
+</button>
+```
+
+O mejor aún usamos la directiva **ngSubmit**
+
+```html
+<form 
+  [formGroup]="productForm" 
+  (ngSubmit)="onSubmit()"
+  autocomplete="off">
+```
+
+Si aún agregando datos, al presionar **Guardar** veremos un objeto sin valores en sus propiedades.
+
+
+```json
+{
+    "name": "",
+    "price": "",
+    "quantity": ""
+}
+```
+
+
+## Concetar campos de los formularios.
+
+Usaremos la directiva **formControlName** y le asignaremos el nombre de la propiedad, por ejemplo, esta sería **name** para el Nombre del producto.
+
+```html
+<input formControlName="name"
+       type="text"
+       class="form-control"
+       placeholder="Nombre del producto">
+```
+
+Repetimos el mismo proceso para los demas campos del formulario. (Price y quantity) Ahora podemos ver los valores iniciales en cada campo. Además, al agregar datos a los campos y luego presionar **Guardar** vemos en consola:
+
+```json
+{
+    "name": "PS5",
+    "price": 750,
+    "quantity": 1
+}
+```
+
+## FormValidator
+Angular ya incluye validadores, podemos agregar un conjunto de reglas por campo para facilitar las validaciones, por ejemplo, el nombr del producto:
+- Debe ser requerido
+- Debe contener al menos 3 caracteres
+- Y un máximo de 20
+
+Estas validaciones las agregamos al FormGroup, actualmente solo definimos un valor inicial sin validaciones. Las validaciones se agregan en el arreglo, como 2do y 3er parametro. 
+
+
+```typescript
+public productForm: FormGroup = this.formBuilder.group({
+    name:     [ ''],
+    price:    [ 0 ],
+    quantity: [ 0 ]
+  });
+```
+
+En el caso del Name, agregamos:
+
+```typescript
+name:     [ '', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
+```
+
+Aplicamos un par de reglas para los campos price y quantity y probamos el Submit.
+
+Al hacer el submit, simplemente vemos el objeto en el console.log, esto porque no estamos validando el estado del formulario, si agregamos esta condición, los datos no se imprimen
+
+```typescript
+onSubmit() {
+  if (this.productForm.invalid) {
+    return;
+  }
+  console.log(this.productForm.value);
+}
+```
 
 
 

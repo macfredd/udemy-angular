@@ -8410,11 +8410,124 @@ Al hacer el submit, simplemente vemos el objeto en el console.log, esto porque n
 ```typescript
 onSubmit() {
   if (this.productForm.invalid) {
+    this.productForm.markAllAsTouched();
     return;
   }
   console.log(this.productForm.value);
 }
 ```
+
+nota: `this.productForm.markAllAsTouched();` permite mostrar todos los errores en pantalla que tenga el formulario en ese momento. Sin esa instruccion, el formulario es invalido, no ejecuta el Submit, pero tampoco se muestran los errores.
+
+## Mostrar errores en pantalla
+
+El manejo de los errores es importante, debemos proporcionar información exacta al usuario cuando ocurre un error.
+
+Hay varios formas de mostrar un error en el control, cuando no se cumple una condición, por ejemplo, en el caso del nombre del producto tenemos dos reglas
+
+- Requerido
+- Ancho mínimo de 3 caracteres
+
+Podemos implementarlos con el **\*ngIg**
+
+```html
+<input formControlName="name"
+       type="text"
+       class="form-control"
+       placeholder="Nombre del producto">
+<span *ngIf="productForm.controls['name'].getError('required')" class="form-text text-danger">
+    Este campo es requerido.
+</span>
+<span *ngIf="productForm.controls['name'].getError('minlength')" class="form-text text-danger">
+    Este campo requiere al menos 3 caracteres.
+</span>
+```
+
+Como se puede observar accedemos al error especifico usando el método **getError** de control.
+
+Si probamos el cambio, veremos el primer error, cuando el campo esta vecío, al agregar el primer caracter, se oculta el primero error y se muestra el segundo, y hasta que agregamos el 3 caracter, el control no mostrará ningún error.
+
+Un inconveniente de usar esta forma es que el error se muestra de entrada cuando vamos a agregar un nuevo producto, porque el campo está vacío, podriamos agregra una condición más:
+
+```html
+<span *ngIf="productForm.controls['name'].getError('required')
+      && productForm.controls['name'].touched" class="form-text text-danger">
+```
+Esto empieza a ser tedioso, imagina un formulario con 10 campos, y cada campo con almenos 1 o dos validaciones, y uno que otro con más de 4 validaciones. Definitivamente no es para nada eficiente.
+
+## Métodos de ayuda de Errores
+
+Otra forma es crear método que ayuden a detectar errores, por ejemplo
+
+```typescript
+isValidField(field: string): boolean | null {
+  return this.productForm.controls[field].errors 
+  && this.productForm.controls[field].touched;
+}
+```
+
+Luego podemos cambiar nuestro template a algo mas sencillo:
+
+```html
+<span *ngIf="isValidField('name')" class="form-text text-danger">
+    Este campo es requerido.
+</span>
+```
+
+Pero esto no esta del todo bien, porque no estamos evaluando un error específico, por lo tanto no vamos a poder mostrar un mensaje adecuado.
+
+Creemos otro método:
+
+```typescript
+getFieldError(field: string): string | null {
+
+  if (!this.productForm.controls[field]) {
+    return null;
+  }
+  const errors = this.productForm.controls[field].errors || {};
+  for (const key in errors) {
+    if (errors.hasOwnProperty(key)) {
+      switch (key) {
+        case 'required':
+          return 'This field is required';
+        case 'minlength':
+          return `The minimum length is ${errors[key].requiredLength}`;
+        case 'maxlength':
+          return `The maximum length is  ${errors[key].requiredLength}`;
+        default:
+          return null;
+      }
+    }
+  }
+  return null;
+}
+```
+
+Ahora en lugar de dos **span** podemos tener uno solo con el nuevo método.
+
+```html
+<input formControlName="name"
+       type="text"
+       class="form-control"
+       placeholder="Nombre del producto">
+<span *ngIf="isValidField('name')" class="form-text text-danger">
+    {{ getFieldError('name')}}
+</span>
+```
+
+Esto está un poco mejor pero aún necesita trabajo, porque podemos dejar por fuera de las validaciones algun tipo de eror, por ejemplo el valor min que hemos establecido en precio
+
+```typescript
+price:    [ 0, [Validators.required, Validators.min(0)]],
+```
+
+Si agregamos un valor negativo, no vemos el error. Tendríamos que agregar oto CASE
+
+```typescript
+case 'min':
+    return `The minimum value is ${errors[key].min}`;
+```
+
 
 
 

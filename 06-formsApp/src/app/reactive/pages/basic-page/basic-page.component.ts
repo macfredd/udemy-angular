@@ -18,8 +18,41 @@ export class BasicPageComponent {
 
   onSubmit() {
     if (this.productForm.invalid) {
+      this.productForm.markAllAsTouched();
       return;
     }
     console.log(this.productForm.value);
+  }
+
+  isValidField(field: string): boolean | null {
+    return this.productForm.controls[field].errors 
+    && this.productForm.controls[field].touched;
+  }
+
+  getFieldError(field: string): string | null {
+
+    if (!this.productForm.controls[field]) {
+      return null;
+    }
+
+    const errors = this.productForm.controls[field].errors || {};
+
+    for (const key in errors) {
+      if (errors.hasOwnProperty(key)) {
+        switch (key) {
+          case 'required':
+            return 'This field is required';
+          case 'minlength':
+            return `The minimum length is ${errors[key].requiredLength}`;
+          case 'maxlength':
+            return `The maximum length is  ${errors[key].requiredLength}`;
+          case 'min':
+            return `The minimum value is ${errors[key].min}`;
+          default:
+            return null;
+        }
+      }
+    }
+    return null;
   }
 }

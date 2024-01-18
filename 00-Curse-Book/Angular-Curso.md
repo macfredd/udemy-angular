@@ -8528,6 +8528,269 @@ case 'min':
     return `The minimum value is ${errors[key].min}`;
 ```
 
+Esto lo mejoraremos con un servicio de validaciones más adelante.
+
+## Formularios Dinámicos
+
+No sabemos de antemano cuantos elementos tendrá el formulario, podemos agregar controles dinamicamente y cada control debe de tener ciertas validaciones.
+
+Para nuestro formulario dinámico iniciemos creando el código TS.
+
+```typescript
+export class DinamicPageComponent {
+
+  constructor(private formBuilder: FormBuilder) { }
+
+  public form = this.formBuilder.group({
+    name: ['', [Validators.required, Validators.minLength(3)]],
+    favoriteGames: this.formBuilder.array([
+      ['Metal Gear', Validators.required],
+      ['Final Fantasy', Validators.required],
+      ['The Witcher', Validators.required]
+    ])
+  }); 
+
+  get favoriteGames() {
+    return this.form.get('favoriteGames') as FormArray;
+  }
+  
+  onSubmit() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    this.form.reset();
+  }
+}
+```
+
+En el template enlazamos el formulario:
+
+```html
+<form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off">
+```
+
+Y enlazamos los campos iniciales, el Name:
+
+```html
+<input formControlName="name"
+class="form-control"
+placeholder="Nombre de la persona">
+```
+
+Para la parte dinámica, tenemos originalmente este HTML
+
+```html
+<!-- Lista de Juegos Favoritos -->
+<div class="mb-3 row">
+    <label class="col-sm-3 col-form-label">Favoritos</label>
+    <div class="col-sm-9" >
+
+        <!-- Duplicar este bloque por cada elemento dinamico-->
+        <div class="mb-1">
+            <div class="input-group">
+                <input class="form-control">
+                <button class="btn btn-outline-danger"
+                        type="button">
+                  Eliminar
+              </button>
+            </div>
+            <span class="form-text text-danger">
+               Este campo es requerido
+            </span>
+        </div>
+    </div>
+</div>
+```
+
+Primero necesitamos 
+
+Y luego agregar un ngFor para renderizar los elementos de nuestro arreglo de controles, es decir **favoriteGames** de nuestro **form** para ellos usaremos nuestro metodo **get favoriteGames**
+
+```html
+<div class="col-sm-9" formArrayName="favoriteGames">
+    <!-- Duplicar este bloque por cada elemento dinamico-->
+    <div class="mb-1" *ngFor="let favorite of favoriteGames.controls; let i = index">
+        <div class="input-group">
+            <input [formControlName]="i" class="form-control">
+            <button class="btn btn-outline-danger"
+                    type="button">
+              Eliminar
+          </button>
+        </div>
+        <span class="form-text text-danger">
+           Este campo es requerido
+        </span>
+    </div>
+</div>
+```
+
+Notar que usamos un ngFor para renderizar dinamicamente los controles de nuestro array
+
+Luego vemos que para acceder al nombre del control, usamos el index del arreglo
+
+```html
+<input [formControlName]="i"
+```
+
+Con esto ya estaremos renderizando 3 controles, pero aun falta trabajar con las validaciones dinámicas.
+
+## Validaciones Dinámicas
+
+Vamos a copiar (por ahora) las funciones que usamos en el **BasicPageComponent** y agregaremos un método más para validar los controles de un array.
+
+```typescript
+isValidField(field: string): boolean | null {
+    return this.form.controls[field].errors 
+    && this.form.controls[field].touched;
+  }
+
+  isValidFieldArray(formArray: FormArray, index: number): boolean | null {
+    return formArray.controls[index].errors 
+    && formArray.controls[index].touched;
+  }
+
+  getFieldError(field: string): string | null {
+
+    if (!this.form.controls[field]) {
+      return null;
+    }
+
+    const errors = this.form.controls[field].errors || {};
+
+    for (const key in errors) {
+      if (errors.hasOwnProperty(key)) {
+        switch (key) {
+          case 'required':
+            return 'This field is required';
+          case 'minlength':
+            return `The minimum length is ${errors[key].requiredLength}`;
+          case 'maxlength':
+            return `The maximum length is  ${errors[key].requiredLength}`;
+          case 'min':
+            return `The minimum value is ${errors[key].min}`;
+          default:
+            return null;
+        }
+      }
+    }
+    return null;
+  }
+```
+
+Para validar nuestro campo Name, el cual no es un arreglo usamos el método anterior
+
+```html
+<div class="col-sm-9">
+    <input formControlName="name"
+           class="form-control"
+           placeholder="Nombre de la persona">
+    <span *ngIf="isValidField('name')" class="form-text text-danger">
+           {{ getFieldError('name') }}
+    </span>
+</div>
+```
+
+Y en el caso del error que se renderiza en el arreglo, usamos el nuevo método, le pasamos el favoriteGames y el index para indicar que elemento del array queremos validar.
 
 
+```html
+<span *ngIf="isValidFieldArray(favoriteGames, i)" class="form-text text-danger">
+    Este campo es requerido.
+</span>
+```
 
+Por el momento dejaremos el mensaje de error tal como se ve en la plantilla.
+
+## Eliminar Controles dinámicos
+
+Simplemente basta con remover el control del arreglo
+
+TS:
+
+```typescript
+onDelete(index: number) {
+  this.favoriteGames.removeAt(index);
+}
+```
+Y luego lo usamos en el template.
+
+```html
+<button (click)="onDelete(i)" class="btn btn-outline-danger"
+          type="button">
+    Eliminar
+</button>
+```
+
+## Agregar Controles dinámicos
+
+Aca también necesitamos un método para agregar, pero dado que tenemos en el template un input Box para capturar el contenido del control, demos agregar algo al template:
+
+
+El template luce de esta forma:
+
+<br/>
+<img src="./imagenes/reaciveFormsApp02.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 60%; height: auto; border: 1px solid black" />
+
+La idea es que al presionar Agregar Favorito, se agregue un control mas a nuestro arreglo y este sea renderizado.
+
+Dado que necesitamos validar que el usuario por lo menos agregue aldo de información en el Input, podemos hacer un Control Reactivo aislado.
+
+Es decir, en el TS agregamos esto
+
+```typescript
+public newFavorite: FormControl = new FormControl('', [Validators.required, Validators.minLength(3)]);
+```
+
+Adicionalmente creamos un **onAdd** método:
+
+```typescript
+onAdd() {
+  if (this.newFavorite.invalid) {
+    return;
+  }
+  const newGameName = this.newFavorite.value;
+  this.favoriteGames.push(this.formBuilder.control(newGameName, Validators.required));
+  this.newFavorite.reset();
+}
+```
+
+
+Y este control lo enlazamos en nuestro template junto con la acción de Agregar un favorito.
+
+```html
+<div class="input-group">
+    <input [formControl]="newFavorite" class="form-control"
+           placeholder="Agregar favorito">
+    <button (click)="onAdd()" class="btn btn-outline-primary"
+            type="button">
+        Agregar favorito
+    </button>
+</div>
+```
+
+Dado que es un control independiente, necesita su propio validador, podemos crear esta funcion:
+
+```typescript
+isValidNewFavorite(): boolean | null {
+    return this.newFavorite.invalid 
+    && this.newFavorite.touched;
+  }
+```
+
+Y agregamos el span del control:
+
+```html
+<span *ngIf="isValidNewFavorite()" class="form-text text-danger">
+    Valor incorrecto
+</span>
+```
+
+De esta forma ya tenemos un formulario dinámico.
+
+<br/>
+<img src="./imagenes/reaciveFormsApp03.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 60%; height: auto; border: 1px solid black" />
+
+Más información sobre formularios reactivos
+
+[https://angular.io/guide/reactive-forms](https://angular.io/guide/reactive-forms)

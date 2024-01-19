@@ -8794,3 +8794,23 @@ De esta forma ya tenemos un formulario dinámico.
 Más información sobre formularios reactivos
 
 [https://angular.io/guide/reactive-forms](https://angular.io/guide/reactive-forms)
+
+<div style="page-break-after: always;"></div>
+
+# Nueva Sección: Validaciones
+
+## ¿Qué veremos en esta sección?
+
+¿Qué veremos en esta sección?
+
+Este es un breve listado de los temas fundamentales:
+
+- Validaciones manuales
+- Validaciones asíncronas
+- Validar contra expresiones regulares
+- Separar la lógica de validaciones
+- Estado del formulario
+- Mensajes de error personalizados
+
+Más adelante tendremos una sección de directivas, la cual es un excelente complemento para el manejo de errores de formularios reactivos, pero luego llegarán a ella.
+

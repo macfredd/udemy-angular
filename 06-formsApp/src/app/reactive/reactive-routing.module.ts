@@ -11,7 +11,7 @@ const routes: Routes = [
       { path: 'basic', component: BasicPageComponent},
       { path: 'dinamic', component: DinamicPageComponent},
       { path: 'switch', component: SwitchPageComponent},
-      { path: '**', redirectTo: 'switch'}
+      { path: '**', redirectTo: 'basic'}
     ]
   }
 ];

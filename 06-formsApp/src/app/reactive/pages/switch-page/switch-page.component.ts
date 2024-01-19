@@ -22,7 +22,9 @@ export class SwitchPageComponent {
       return;
     }
 
-    console.log(this.form.value);
+    const { termsAndConditions, ... newFormValue } = this.form.value;
+
+    console.log(newFormValue);
   }
 
   isValidField(field: string): boolean | null {

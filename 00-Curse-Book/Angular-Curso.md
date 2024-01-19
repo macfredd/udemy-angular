@@ -8814,3 +8814,85 @@ Este es un breve listado de los temas fundamentales:
 
 Más adelante tendremos una sección de directivas, la cual es un excelente complemento para el manejo de errores de formularios reactivos, pero luego llegarán a ella.
 
+## FormControl en Radio Buttons
+
+Supongamos que tenemos el siguiente formulario
+
+```typescript
+public form: FormGroup =  this.forBuilder.group({
+    gender : ['M', Validators.required],
+    wantsNotifications: [true, Validators.required],
+    termsAndConditions: [false, Validators.requiredTrue]
+  });
+```
+
+El **gender** es un string M|F   (Masculino | Femenino), el formulario HTML es representado como un **RadioButton**
+
+**wantsNotifications** es un true|false, es un checkbox pero se le agrega la clase **form-switch** de bootsrap para convertirlo en un slice button.
+
+Finalmente **termsAndConditions** es un checkbox normal con valores tue|False
+
+<br/>
+<img src="./imagenes/reaciveFormsApp04.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 60%; height: auto; border: 1px solid black" />
+
+Para los **ReadioButtons**, usaremos el mismo FormControlName
+
+```html
+<div class="form-check">
+    <input formControlName="gender"
+           class="form-check-input"
+           type="radio"
+           value="M"
+           id="radioMasculino">
+    <label class="form-check-label" for="radioMasculino">
+      Masculino
+    </label>
+</div>
+<div class="form-check">
+    <input formControlName="gender"
+           class="form-check-input"
+           type="radio"
+           value="F"
+           id="radioFemenino">
+    <label class="form-check-label" for="radioFemenino">
+      Femenino
+    </label>
+</div>
+```
+
+En el caso del **wantsNotifications** y **termsAndConditions** se usan normalmente sus FormControlName respectivos.
+
+Con respecto a las validaciones agregamos las funciones que hemos venido ausando anteriormente, únicamente al campo de las Términos y Condiciones necesita validación.
+
+```html
+<span  *ngIf="isValidField('termsAndConditions')" class="form-text text-danger">
+   {{getFieldError('termsAndConditions')}}
+</span>
+```
+
+Al hacer submit del formulario veremos el siguiente objeto:
+
+```json
+{
+    "gender": "F",
+    "wantsNotifications": true,
+    "termsAndConditions": true
+}
+```
+
+NOTA: Si nuestro backend espera únicamente un objeto con el **gender** y el **wantsNotifications** dejando del lado del frontEnd la responsabilidad de acetpar los términos y condiciones, no debemos enviar este objeto, para ello podemos eliminar ese valor del request
+
+```typescript
+const { termsAndConditions, ... newFormValue } = this.form.value;
+```
+
+En este punto podemos enviar unicamente el **newFormValue**
+
+```json
+{
+    "gender": "F",
+    "wantsNotifications": true
+}
+```
+
+

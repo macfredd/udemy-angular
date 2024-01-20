@@ -8894,5 +8894,158 @@ En este punto podemos enviar unicamente el **newFormValue**
     "wantsNotifications": true
 }
 ```
+## Formulario de Registro
+
+Este es un típico formulario de registro, los errores se muestran en su estado inicial porque no hemos enlazado ningún formControl y no hemos realizados las valiadciones requeridas en cada campo.
+
+<br/>
+<img src="./imagenes/reaciveFormsApp05.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 70%; height: auto; border: 1px solid black" />
+
+Lo primero es inyectar el FormBuilder y luego crear nuestro Form
+
+```typescript
+constructor(private formBuilder: FormBuilder) { }
+
+  public form = this.formBuilder.group({
+    name: ['',[Validators.required, Validators.minLength(6)]],
+    email: ['',[Validators.required]],
+    userName: ['',[Validators.required, Validators.minLength(6)]],
+    password: ['',[Validators.required, Validators.minLength(8)]],
+    password_confirmation: ['',[Validators.required]],
+  });
+```
+
+Estas son las validaciones básicas, vamos a agregar otras validaciones manuales, ademas, usaremos un servicio para proveer las validaciones.
+
+Luego debemos importar el **ReactiveFormsModule**  en el **AuthModule* para poder usar la etiquetas especiales de los ReactiveForms en nuestro Html
+
+Luego enlazamos nuestro forms en el template, tanto a nivel de group como a nivel de controles.
+
+```html
+<form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off">
+```
+
+## Validator Functions
+
+Podemos crear nuestra propias funciones de validaciones y reusarlas en cualquier formulario. Para ello podemos crearlas en nuestro módulo Shared para que estén disponibles. Podemos crearlas como un servicio o bien como simples funciones, este útimo será la forma en como implementaremos la siguiente validación.
+
+Imagina que nos han dado  el siguiente requerimiento, **El userName no puede ser ninguno de estos valores: admin, Administrator, root** 
+
+Podemos pensar en una función que reciva dos cosas
+- Un Valor que no debe de tomar el control
+- El control en sí
+
+El parámetro **valor** podríamos cambiarlo por un arreglo, de esa forma podemos aceptar en una sola llamada a la función varios valores.
+
+Y como estamos usando los Validators de Angular, podemos retornar de una vez un objeto de tipo **ValidationErrors**
 
 
+```typescript
+/**
+ * @description
+ * Defines the map of errors returned from failed validation checks.
+ *
+ * @publicApi
+ */
+export declare type ValidationErrors = {
+    [key: string]: any;
+};
+```
+
+La función luce de la siguiente forma:
+
+```typescript
+import { FormControl, ValidationErrors } from "@angular/forms";
+
+export const cantbeThisValue = (control : FormControl, value: string[]) : ValidationErrors => {
+    if (value.map ( v => v.toLowerCase().tim()).includes(control.value.toLowerCase().trim())) {
+        return {
+            cantbeThisValue: true
+        }
+    }
+  return {};
+}
+```
+
+Dado que recibimos un arreglo de valores que el control no debe aceptar, debemos tratar cada posible valor del arreglo y transformarlo a un valor que pueda ser comparado, es decir aplicamos un **map** para eliminar espacions en blanco y para pasarlo a minúsculas. Lo mismo hacemos con el valor del control
+
+Si el valor del control está incluid en el arreglo, entonces generamos un objeto de tipo **ValidationErrors** que no es más que un key:value.
+
+```json
+return {
+    cantbeThisValue: true
+}
+```
+
+NOTA: Si retornamo un objeto vacío **{}** Angular no lo incluye en la lista de errores.
+
+Luego debemos usar esta función, y lo haremos de esta forma: Al momento de crear nuestro **form** con el **FormBuilder** al especificar el campo **userName** podemos contruirlo de esta forma
+
+
+```typescript
+userName: ['', 
+  [ Validators.required, 
+    Validators.minLength(5),
+    (control: FormControl) => cantbeThisValue(control, ['admin', 'administrator', 'root'])
+  ]
+],
+```
+
+La parte que nos interesa en esta sección es esta línea
+
+```typescript
+(control: FormControl) => cantbeThisValue(control, ['admin', 'administrator', 'root'])
+```
+
+Dado que nuestra función recibe como primer argumento el Control, debemos usar una función anónima para pasar el control.
+
+Normalmente, si la función no recibe parámetro adicionales, podemos hacer una llamada de este tipo
+
+
+```typescript
+email: ['', 
+  [ Validators.required, 
+    isValidEmail()
+  ]
+],
+```
+
+Como se observa, **isValidEmail** no se le pasa ningún parámetro, ya que implicitamente el control se pasa como primer argumento. Dentro de nuestra función isValidEmail, vamos a tener acceso al control y hacer la validación requerida.
+
+Regresando a nuesto ejemplo, dado que debemos explicitamente enviar el **Control** _userName_ y a la vez los valores no permitidos, debemos usar la función anónima para pasar el control en sí.
+
+Con estos cambios, podemos probar las validaciones, si escribimos **admin** en el input UserName, veremos que el formulario es Inválido y el objeto Errors tiene este valor
+
+```json
+{
+  "cantbeThisValue": true
+}
+```
+
+Luego podemos modificar la función **getFieldError** para agregar un nuevo Key **cantbeThisValue**
+
+
+```typescript
+getFieldError(field: string): string | null {
+
+    if (!this.productForm.controls[field]) {
+      return null;
+    }
+
+    const errors = this.productForm.controls[field].errors || {};
+
+    for (const key in errors) {
+      if (errors.hasOwnProperty(key)) {
+        switch (key) {
+          case 'cantbeThisValue':
+            return 'Incorrect value';
+          // Other Keys here!
+          default:
+            return null;
+        }
+      }
+    }
+    return null;
+  }
+}
+```

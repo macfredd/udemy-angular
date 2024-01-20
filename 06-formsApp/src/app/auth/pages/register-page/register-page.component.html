@@ -4,13 +4,14 @@
 <div class="row">
     <div class="col">
 
-        <form autocomplete="off">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off">
 
             <!-- Nombre -->
             <div class="row mb-3">
                 <label class="col-sm-3 col-form-label">Nombre</label>
                 <div class="col-sm-9">
-                    <input type="text"
+                    <input formControlName="name"
+                           type="text"
                            class="form-control"
                            placeholder="Nombre del usuario">
 
@@ -24,7 +25,8 @@
             <div class="row mb-3">
                 <label class="col-sm-3 col-form-label">Email</label>
                 <div class="col-sm-9">
-                    <input type="email"
+                    <input formControlName="email"
+                           type="email"
                            class="form-control"
                            placeholder="Email del usuario">
                     <span class="form-text text-danger">
@@ -37,7 +39,8 @@
             <div class="row mb-3">
                 <label class="col-sm-3 col-form-label">Username</label>
                 <div class="col-sm-9">
-                    <input type="text"
+                    <input formControlName="userName"
+                           type="text"
                            class="form-control"
                            placeholder="Nombre código del usuario">
                     <span class="form-text text-danger">
@@ -50,7 +53,8 @@
             <div class="row mb-3">
                 <label class="col-sm-3 col-form-label">Password</label>
                 <div class="col-sm-9">
-                    <input type="password"
+                    <input formControlName="password"
+                           type="password"
                            class="form-control"
                            placeholder="Password de su cuenta">
 
@@ -64,7 +68,8 @@
             <div class="row mb-3">
                 <label class="col-sm-3 col-form-label">Confirmar</label>
                 <div class="col-sm-9">
-                    <input type="password"
+                    <input formControlName="password_confirmation"
+                           type="password"
                            class="form-control"
                            placeholder="Confirmar la contraseña">
 
@@ -90,11 +95,8 @@
 </div>
 
 
-<h2>Form Valid: </h2>
-<h2>Form Status: </h2>
-<h2>Form Pending: </h2>
-<h2>Form errors</h2>
-<pre>{{ 'formulario' | json }}</pre>
+
+<pre>{{ form.controls['userName'].errors| json }}</pre>
 
 <h5>Nombre</h5>
 <pre>{{ 'formulario' | json }}</pre>

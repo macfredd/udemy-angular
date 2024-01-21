@@ -9363,3 +9363,61 @@ Pero en este caso **fieldsMatch** retorna otra función, la cual captura el Form
 Finalmente debemos agregasr el nuevo KEY-ERROR **notEqual** a nuestro servicio **getFieldError**
 
 
+<div style="page-break-after: always;"></div>
+
+# Nueva Sección: Selectores Anidados, Nueva APP
+
+## ¿Qué veremos en esta sección?
+
+El objetivo de la sección básicamente es aprender a reaccionar cuando información de un formulario cambia, en este caso haremos:
+
+- Selectores anidados
+- Llenar selectores desde peticiones HTTP
+- Encadenamiento de operadores de RXJS
+- Explicar el por qué la gente dice que TypeScript no es del todo "Type Safe"
+
+Creamos una nueva APP
+
+```
+ng new 07-selectorsApp --standalone false --routing
+```
+
+Luego creamos un módulo, **Country**
+
+```
+ng g m country
+```
+
+Creamos la siguiente estructura de directorios, dentro de **src/app/coutnry** 
+
+```
+└── country
+    ├── country.module.ts
+    ├── interfaces
+    ├── pages
+    └── services
+```
+
+Luego creamos nuestro primer componente, dentro de **pages**
+
+```
+ng g c country/pages/selector-page
+CREATE src/app/country/pages/selector-page/selector-page.component.css (0 bytes)
+CREATE src/app/country/pages/selector-page/selector-page.component.html (28 bytes)
+CREATE src/app/country/pages/selector-page/selector-page.component.spec.ts (644 bytes)
+CREATE src/app/country/pages/selector-page/selector-page.component.ts (226 bytes)
+```
+
+Renombremos nuestro selector, a **country-selector-page**
+
+```typescript
+@Component({
+  selector: 'country-selector-page',
+  templateUrl: './selector-page.component.html',
+  styleUrl: './selector-page.component.css'
+})
+export class SelectorPageComponent {
+
+}
+```
+

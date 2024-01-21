@@ -9299,3 +9299,67 @@ Pero debemos agregar el índice **emailTaken** en nuestro Switch del método **g
 
 Con estos cambios ya hemos implementado un Validador Asíncrono y hemos mostrado el error correspondiente en pantalla.
 
+## Validar dos campos diferentes
+
+Esta es una situación particular, anteriormente aplicamos validadores a nivel de cada campo, pero en este caso no podemos aplicarlo a un solo campo, porque solo tenemos acceso al control al que aplicamos el validador.
+
+Lo más transparente es subir un nivel, para poder acceder a todos los campos del formulario al momento de la validación, es decir que en lugar de pasar implícitamente un CAMPO en específico, pasamos todo el formulario, y luego podemos comparar los campos que necesitemos.
+
+LA validación de **passwords** iguales es un ejemplo claro. 
+
+Necesitamos dos cosas
+- Un lugar adecuado que tenga acceso a todos los campos del formulario para usar la función Validadora.
+- Una función validadora que compare dos valores y retorne un ValidationError si son iguales
+
+
+Primero, debemos colocar este validador siempre dentro de la definición del **Form** una vez que definimos los campos y sus validadores, como segundo parámetro podemos pasar un arreglo de funciones validadoras, en este caso se aplicaran a todo el formulario, o dicho de otra forma, estas funciones reciben implícitamente como argumento el formulario.
+
+
+```typescript
+public formName = this.formBuilder.group({
+    fieldName: ['', [Validadores Síncronos], [Validadores Asíncronos]]
+  },{
+    validators: [
+      Validators Síncronos Globales
+    ]
+  });
+```
+
+Si la funcion validadora a nivel de FormGroup recibe el formulario, entonces podemos hacer un validador que acepte dicho formulario, y haga la validación con los campos requeridos, la función en cuestión es la siguiente:
+
+```typescript
+/**
+   * Compare two fields of a form and return an error if they are not equal 
+   * 
+   * @param field1 Field name 1 to compare
+   * @param field2 Field name 2 to compare
+   * 
+   * @returns  A function that compares the values of the fields and 
+   * returns null if they are equal or an error if they are not equal
+   */
+  public fieldsMatch = (field1: string, field2: string) => {
+        return (formGroup: AbstractControl): ValidationErrors | null => {
+            const control1 = formGroup.get(field1);
+            const control2 = formGroup.get(field2);
+            const fieldValue1 = control1?.value;
+            const fieldValue2 = control2?.value;
+
+            if (fieldValue1 === fieldValue2) {
+                control2?.setErrors(null);
+            } else {
+                control2?.setErrors({ notEqual: true });
+            }
+
+            return null;
+        }
+    }
+}
+```
+
+La Función **fieldsMatch** recibirá implícitamente el formulario desde donde se manda a llamar, adicionalmente debe recibir el nombre de los dos controles que deben compararse.
+
+Pero en este caso **fieldsMatch** retorna otra función, la cual captura el FormGroup.Internamente podemos acceder a los nombres de los campos y a la vez extraer sus valores usando el FormGroup.
+
+Finalmente debemos agregasr el nuevo KEY-ERROR **notEqual** a nuestro servicio **getFieldError**
+
+

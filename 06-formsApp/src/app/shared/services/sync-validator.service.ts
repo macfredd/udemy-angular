@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FormArray, FormControl, FormGroup, ValidationErrors } from '@angular/forms';
+import { AbstractControl, FormArray, FormControl, FormGroup, ValidationErrors } from '@angular/forms';
 
 @Injectable({providedIn: 'root'})
 export class SyncValidatorService {
@@ -7,14 +7,7 @@ export class SyncValidatorService {
     public firstNameAndLastnamePattern: string = '([a-zA-Z]+) ([a-zA-Z]+)';
     public emailPattern: string = "^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$";
     
-    public cantbeThisValue = (control : FormControl, value: string[]) : ValidationErrors => {
-        if (value.map ( v => v.toLowerCase().trim()).includes(control.value.toLowerCase().trim())) {
-            return {
-                cantbeThisValue: true,
-            }
-        }
-      return {};
-    }
+    
 
     public isValidField(form: FormGroup, field: string): boolean | null {
         return form.controls[field].errors 
@@ -50,6 +43,8 @@ export class SyncValidatorService {
                             ${errors[key].min}`;
                 case 'emailTaken':
                     return `The email is already taken`;
+                case 'notEqual':
+                    return `The fields are not equal`;
                 default:
                     return null;
                 }
@@ -57,5 +52,40 @@ export class SyncValidatorService {
         }
 
         return null;
+    }
+
+    public cantbeThisValue = (control : FormControl, value: string[]) : ValidationErrors => {
+        if (value.map ( v => v.toLowerCase().trim()).includes(control.value.toLowerCase().trim())) {
+            return {
+                cantbeThisValue: true,
+            }
+        }
+      return {};
+    }
+
+    /**
+     * Compare two fields of a form and return an error if they are not equal 
+     * 
+     * @param field1 Field name 1 to compare
+     * @param field2 Field name 2 to compare
+     * 
+     * @returns  A function that compares the values of the fields and 
+     * returns null if they are equal or an error if they are not equal
+     */
+    public fieldsMatch = (field1: string, field2: string) => {
+        return (formGroup: AbstractControl): ValidationErrors | null => {
+            const control1 = formGroup.get(field1);
+            const control2 = formGroup.get(field2);
+            const fieldValue1 = control1?.value;
+            const fieldValue2 = control2?.value;
+
+            if (fieldValue1 === fieldValue2) {
+                control2?.setErrors(null);
+            } else {
+                control2?.setErrors({ notEqual: true });
+            }
+
+            return null;
+        }
     }
 }

@@ -74,7 +74,7 @@
                            placeholder="Confirmar la contraseña">
 
                     <span *ngIf="isValidField('password_confirmation')" class="form-text text-danger">
-                         Las contraseñas deben de ser iguales
+                         {{ getErrorMessage('password_confirmation') }}
                     </span>
                 </div>
             </div>
@@ -93,4 +93,4 @@
 </div>
 
 
-{{ form.controls['email'].errors| json}}
+{{ form.errors| json}}

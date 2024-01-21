@@ -12,20 +12,25 @@ export class RegisterPageComponent {
 
   constructor(
     private formBuilder: FormBuilder,
-    private validatorSercice: SyncValidatorService) { }
+    private validatorService: SyncValidatorService) { }
 
   public form = this.formBuilder.group({
-    name: ['', [Validators.required, Validators.minLength(6), Validators.pattern(this.validatorSercice.firstNameAndLastnamePattern)]],
-    email: ['', [Validators.required, Validators.pattern(this.validatorSercice.emailPattern)], [new AsyncEmailValidator()]],
+    name: ['', [Validators.required, Validators.minLength(6), Validators.pattern(this.validatorService.firstNameAndLastnamePattern)]],
+    email: ['', [Validators.required, Validators.pattern(this.validatorService.emailPattern)], [new AsyncEmailValidator()]],
     userName: ['', 
       [ Validators.required, 
         Validators.minLength(5),
-        (control: FormControl) => this.validatorSercice.cantbeThisValue(control, ['admin', 'administrator', 'root'])
+        (control: FormControl) => this.validatorService.cantbeThisValue(control, ['admin', 'administrator', 'root'])
       ]
     ],
-    password: ['', [Validators.required, Validators.minLength(8)]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
     password_confirmation: ['', [Validators.required]],
-  });
+  }, {
+      validators:[
+        this.validatorService.fieldsMatch('password', 'password_confirmation')
+        ]
+      }
+  );
 
   onSubmit() {
     if(this.form.invalid) {
@@ -37,10 +42,10 @@ export class RegisterPageComponent {
   }
 
   isValidField(field: string) {
-    return this.validatorSercice.isValidField(this.form, field );
+    return this.validatorService.isValidField(this.form, field );
   }
 
   getErrorMessage(field: string) {
-    return this.validatorSercice.getFieldError(this.form, field );
+    return this.validatorService.getFieldError(this.form, field );
   }
 }

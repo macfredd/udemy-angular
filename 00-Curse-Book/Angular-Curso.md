@@ -9049,3 +9049,149 @@ getFieldError(field: string): string | null {
   }
 }
 ```
+
+## Validación del Email
+
+Podemos usar expresiones regulares para validar ciertos patrones, por ejemplo, creamos la siguiente constante en nuestro archivo validators.ts
+
+
+```typescript
+export const emailPattern: string = "^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$";
+```
+
+Luego agregamos la validación al campo Email:
+
+```typescript
+email: ['', [Validators.required, Validators.pattern(CustomValidators.emailPattern)]],
+```
+
+En el caso de no cumplir con el Pattern indicado, vamos a obtener el siguiente error:
+
+```json
+{
+  "pattern": {
+    "requiredPattern": "^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$",
+    "actualValue": "email"
+  }
+}
+```
+
+También podríamos crear nuestra propia función y retornar un objeto con mejor información.
+
+NOTA: he realizado un cambio en el import para permitir acceder a las funciones de nuestro validators.ts, con **CustomValidators.emailPattern** o **CustomValidators.cantbeThisValue**
+
+
+```typescript
+import * as CustomValidators from '../../../shared/validators/validators';
+```
+
+## Servicio de Validaciones
+
+Vamos a crear una carpeta **services** en el directorio **shared** y dentro de este nuevo directorio creamos el archivo: **validator.service.ts** creamos un nuevo servicio manualmente,
+
+```typescript
+@Injectable({providedIn: 'root'})
+export class ValidatorService {
+    
+}
+```
+
+Y dentro de este servicio vamos a pegar todas las funciones validadoras que hemos estado usando en las secciones anteriores. 
+
+- El email pattern
+- El método cantbeThisValue
+```typescript
+public cantbeThisValue = (control : FormControl, value: string[]) : ValidationErrors => {}
+```
+- Las funcines isValidField
+```typescript
+public isValidField(form: FormGroup, field: string): boolean | null {}
+```
+- El isValidField, en este caso tenemos que pasar el FormGroup
+```typescript
+public isValidField(form: FormGroup, field: string): boolean | null {}
+```
+- El isValidArray
+```typescript
+public isValidFieldArray(formArray: FormArray, index: number): boolean | null {}
+```
+- Y el GetFieldError
+```typescript
+public getFieldError(form: FormGroup, field: string): string | null {}
+```
+
+Luego debemos de hacer un par de cambios en el componente, en lugar de usar una función validadora local o importada de nuestro validator.ts ahora debemos inyectar el servicio
+
+```typescript
+constructor(
+    private formBuilder: FormBuilder,
+    private validatorSercice: ValidatorService) { }
+```
+
+Removemos el Import anterior
+
+```typescript
+import * as CustomValidators from '../../../shared/validators/validators';
+```
+
+Y donde nos marque error, usamos el servicio. Es decir en lugar de **CustomValidators.[METHOD]** lo reemplazamos por **this.validatorSercice.[METHOD]**
+
+
+Debemos de mantener algunos de los metodos anteriores en nuestro compoentes, porque estos siguen siendo usados por el template, por ejemplo el **isValidField** pero estos métodos ahora llaman el servicio en lugar de hacer la validación localmente:
+
+```typescript
+isValidField(field: string) {
+  return this.form.get(field)?.invalid && this.form.get(field)?.touched;
+}
+```
+
+
+Revisemos nuevamente el proceso de validación completo, todo inicial en el componente, quien define un **FormGroup** por ejemplo para el **UserName**
+
+```typescript
+public form = this.formBuilder.group({
+  // Otros campos se definen aca  
+  userName: ['', 
+    [
+      // Otras validaciones se definen aca
+       (control: FormControl) => this.validatorSercice.cantbeThisValue(control, ['admin', 'administrator', 'root'])
+    ]
+  ],
+});
+```
+
+Luego el Template hace el Enlace (primeramente a nivel del FormGroup) y luego con el campo:
+
+```html
+<input formControlName="userName">
+    <!-- otras propedades del input -->
+</input>
+<span *ngIf="isValidField('userName')" class="form-text text-danger">
+     Nombre de usuario no permitido.
+</span>
+```
+
+Cuando el usuario escribe **admin** en el userName, al perder el focus se aplica las validaciones en este caso manda a llamar el **cantbeThisValue** este valor no cumple con la regla, por lo tanto el campo UserName tiene un error.
+
+Dado que el campo tiene un error, la llamada desde el template al metodo **isValidField('userName')** hace que el **span** con el texto _Nombre de usuario no permitido._ sea visible al usuario.
+
+
+Una vez aplicadas todos los cambios en el template veremos un formulario sin mensajes de errores y listo para aceptar datos
+
+
+<br/>
+<img src="./imagenes/reaciveFormsApp06.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 60%; height: auto; border: 1px solid black" />
+
+Dado que con estos datos el formulario es válido, al hace el submit, enviaríamos los siguientes datos al server:
+
+```json
+{
+    "name": "Leonel Messi",
+    "email": "messi@argentina.com",
+    "userName": "TheGoat",
+    "password": "12345678",
+    "password_confirmation": "12345678"
+}
+```
+
+NOTA: Aún hace falta implementar los validadores para los passwords.

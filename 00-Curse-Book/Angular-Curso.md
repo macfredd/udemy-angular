@@ -9137,14 +9137,17 @@ import * as CustomValidators from '../../../shared/validators/validators';
 Y donde nos marque error, usamos el servicio. Es decir en lugar de **CustomValidators.[METHOD]** lo reemplazamos por **this.validatorSercice.[METHOD]**
 
 
-Debemos de mantener algunos de los metodos anteriores en nuestro compoentes, porque estos siguen siendo usados por el template, por ejemplo el **isValidField** pero estos métodos ahora llaman el servicio en lugar de hacer la validación localmente:
+Debemos de mantener algunos de los metodos anteriores en nuestro componentes, porque estos siguen siendo usados por el template, por ejemplo el **isValidField** y el **getErrorMessage** pero estos métodos ahora llaman el servicio en lugar de hacer la validación localmente:
 
 ```typescript
-isValidField(field: string) {
-  return this.form.get(field)?.invalid && this.form.get(field)?.touched;
-}
-```
+  isValidField(field: string) {
+    return this.validatorSercice.isValidField(this.form, field );
+  }
 
+  getErrorMessage(field: string) {
+    return this.validatorSercice.getFieldError(this.form, field );
+  }
+```
 
 Revisemos nuevamente el proceso de validación completo, todo inicial en el componente, quien define un **FormGroup** por ejemplo para el **UserName**
 
@@ -9195,3 +9198,104 @@ Dado que con estos datos el formulario es válido, al hace el submit, enviaríam
 ```
 
 NOTA: Aún hace falta implementar los validadores para los passwords.
+
+## Validadores Asíncronos
+
+Hasta el momento, todos los validadores que hemos agregado son Síncronos, al llamarlos, esperamos una respuesta y el flujo continuará cuando regresan una respuesta, usualmente un objeto. Estos validadores síncronos los hemos colocado coom segundo argumento, este segundo argument puede ser un arreglo de validadores o un único validador.
+
+Pero este formato acepta un tercer agrumentos, también un único validador o un arreglo de validadores, con la diferencia que estos son **Asíncronos**, es decir regresaran una promesa o un observable. 
+
+
+```typescript
+public formName = this.formBuilder.group({
+    fieldName: ['', [Validadores Síncronos], [Validadores Asíncronos]]
+  });
+```
+
+Para crear un Validador Asíncrono debemos implementar la interfaz **AsyncValidator**  y debemos definir el método **Validate**, el método **registerOnValidatorChange** es opcional.
+
+
+```typescript
+validate(control: AbstractControl<any, any>): Promise<ValidationErrors | null> | Observable<ValidationErrors | null> {
+    throw new Error('Method not implemented.');
+}
+```
+
+Este método acepta un control, y retorna ya sea un Promise o un Observable. Vamos a retornar observables en nuestro caso.
+
+Las validaciones asyncronas, colocan el formulario en un estado de **pending** es decir, que existen, en este caso, validaciones que se están ejecutando. Para ver ese estado tendriamos que retrazar la ejecución del validador a propósito (delay) para poder observar este efecto. 
+
+Otro ejemplo sería implementar una validacion que reuqire hacer alguna verificación en el backend, mientras no se complete dicha operación, el formulario estaría en estado **Pending**
+
+Implementemos un Validador de Email, que consulte si el email ya ha sido registrado por otro usuario. Dado que no tenemos un backend vamos a crear un Fake httpCall.
+
+
+```typescript
+import { Injectable } from '@angular/core';
+import { AbstractControl, AsyncValidator, ValidationErrors } from '@angular/forms';
+import { Observable, of } from 'rxjs';
+
+@Injectable({providedIn: 'root'})
+export class AsyncEmailValidator implements AsyncValidator {
+    
+    constructor() { }
+
+    validate(control: AbstractControl): Observable<ValidationErrors | null> {
+        const email = control.value;
+
+        const httpCallObservable = new Observable<ValidationErrors | null>( (suscriber) => {
+            if (email === 'example@domain.com') {
+                suscriber.next({ emailTaken: true });
+                suscriber.complete();
+                return;
+            }
+
+            suscriber.next(null);
+            suscriber.complete();
+        })
+
+        return httpCallObservable;
+    }
+}
+```
+
+En este código, por medio de un **new Observable** creamos un fake HTTP que simula una validación en el backend. Si el email **example@domain.com** es proporcionado por el Usuario, el Observable emite un **{ emailTaken: true }** de lo contrario emite un **null**
+
+Ahora es momento de usar nuestro validador, dado que lo hemos inyectado con root ```@Injectable({providedIn: 'root'})``` lo cual lo hace accesible desde cualquier parte de nuestra app, podemos instanciarlos como ```new AsyncEmailValidator()``` y inyectarlos en el constructor. 
+
+Usemos el NEW
+
+```typescript
+email: ['', 
+  [Validators.required, Validators.pattern(this.validatorSercice.emailPattern)], 
+  [new AsyncEmailValidator()]],
+```
+
+Insertamos un segundo arreglo con el **new AsyncEmailValidator()**, dado que ya hemos agregado un primero arreglo de validadoes síncronos, demos agregar los **Async** como Arreglo.
+
+**Si todos los validadoes del primer grupo se cumplen, se hace las valiadciones de los Async.**
+
+Si agregamos el email **example@domain.co** se dispara una primera vez el Async validator, porque ese email es válido segund el Pattern, que permite entre 2 y 4 caracteres luego del punto separador del dominio  **[a-z]{2,4}$**  Cuando se hace esta primer llamada ASYNC a nuestro nuevo validador, este retorna un null, pero tan pronto completamos el email **example@domain.com** se llama nuevamente el validador ASYNC y esta vez retorna:
+
+```json
+{ "emailTaken": true }
+```
+
+Para mostrar el mensaje en pantalla, debemos llamar el **getErrorMessage** 
+
+
+```html
+<span *ngIf="isValidField('email') "class="form-text text-danger">
+    {{ getErrorMessage('email') }}
+</span>
+```
+
+Pero debemos agregar el índice **emailTaken** en nuestro Switch del método **getErrorMessage** del servicio: **SyncValidatorService**
+
+```typescript
+    case 'emailTaken':
+    return `The email is already taken`;
+```
+
+Con estos cambios ya hemos implementado un Validador Asíncrono y hemos mostrado el error correspondiente en pantalla.
+

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
-import { cantbeThisValue } from '../../../shared/validators/validators';
+import { ValidatorService } from '../../../shared/services/validator.service';
 
 @Component({
   selector: 'app-register-page',
@@ -9,15 +9,17 @@ import { cantbeThisValue } from '../../../shared/validators/validators';
 })
 export class RegisterPageComponent {
 
-  constructor(private formBuilder: FormBuilder) { }
+  constructor(
+    private formBuilder: FormBuilder,
+    private validatorSercice: ValidatorService) { }
 
   public form = this.formBuilder.group({
-    name: ['', [Validators.required, Validators.minLength(6)]],
-    email: ['', [Validators.required]],
+    name: ['', [Validators.required, Validators.minLength(6), Validators.pattern(this.validatorSercice.firstNameAndLastnamePattern)]],
+    email: ['', [Validators.required, Validators.pattern(this.validatorSercice.emailPattern)]],
     userName: ['', 
       [ Validators.required, 
         Validators.minLength(5),
-        (control: FormControl) => cantbeThisValue(control, ['admin', 'administrator', 'root'])
+        (control: FormControl) => this.validatorSercice.cantbeThisValue(control, ['admin', 'administrator', 'root'])
       ]
     ],
     password: ['', [Validators.required, Validators.minLength(8)]],
@@ -31,5 +33,9 @@ export class RegisterPageComponent {
     }
     
     console.log(this.form.value);
+  }
+
+  isValidField(field: string) {
+    return this.form.get(field)?.invalid && this.form.get(field)?.touched;
   }
 }

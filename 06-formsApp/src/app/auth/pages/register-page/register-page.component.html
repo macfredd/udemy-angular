@@ -15,7 +15,7 @@
                            class="form-control"
                            placeholder="Nombre del usuario">
 
-                    <span class="form-text text-danger">
+                    <span *ngIf="isValidField('name')" class="form-text text-danger">
                         Debe de ser en formato de nombre y apellido
                     </span>
                 </div>
@@ -29,7 +29,7 @@
                            type="email"
                            class="form-control"
                            placeholder="Email del usuario">
-                    <span class="form-text text-danger">
+                    <span *ngIf="isValidField('email') "class="form-text text-danger">
                         mensaje de error del email
                     </span>
                 </div>
@@ -43,8 +43,8 @@
                            type="text"
                            class="form-control"
                            placeholder="Nombre código del usuario">
-                    <span class="form-text text-danger">
-                         El username no puede ser Strider
+                    <span *ngIf="isValidField('userName')" class="form-text text-danger">
+                         Nombre de usuario no permitido.
                     </span>
                 </div>
             </div>
@@ -58,7 +58,7 @@
                            class="form-control"
                            placeholder="Password de su cuenta">
 
-                    <span class="form-text text-danger">
+                    <span *ngIf="isValidField('password') "class="form-text text-danger">
                          La contraseña debe de ser mayor de 6 caracteres.
                     </span>
                 </div>
@@ -73,7 +73,7 @@
                            class="form-control"
                            placeholder="Confirmar la contraseña">
 
-                    <span class="form-text text-danger">
+                    <span *ngIf="isValidField('password_confirmation')" class="form-text text-danger">
                          Las contraseñas deben de ser iguales
                     </span>
                 </div>
@@ -93,23 +93,3 @@
         </form>
     </div>
 </div>
-
-
-
-<pre>{{ form.controls['userName'].errors| json }}</pre>
-
-<h5>Nombre</h5>
-<pre>{{ 'formulario' | json }}</pre>
-
-<h5>Email</h5>
-<pre>{{ 'formulario' | json }}</pre>
-
-<h5>Username</h5>
-<pre>{{ 'formulario' | json }}</pre>
-
-
-<h5>Password</h5>
-<pre>{{ 'formulario' | json }}</pre>
-
-<h5>Confirmar</h5>
-<pre>{{ 'formulario' | json }}</pre>

@@ -30,7 +30,7 @@
                            class="form-control"
                            placeholder="Email del usuario">
                     <span *ngIf="isValidField('email') "class="form-text text-danger">
-                        mensaje de error del email
+                        {{ getErrorMessage('email') }}
                     </span>
                 </div>
             </div>
@@ -88,8 +88,9 @@
                     </button>
                 </div>
             </div>
-
-
         </form>
     </div>
 </div>
+
+
+{{ form.controls['email'].errors| json}}

@@ -9421,3 +9421,257 @@ export class SelectorPageComponent {
 }
 ```
 
+Editemos el **app-routing.module.ts** y carguemos en forma LazyLoading el **CountryModule**
+
+
+```typescript
+const routes: Routes = [
+  {
+    path: 'selector',
+  loadChildren: () => import('./country/country.module').then(m => m.CountryModule)
+  },
+  {
+    path: '**',
+    redirectTo: 'selector'
+  }
+];
+```
+
+Ahora debeos crear nuestro **country-routing.module.ts**, este pudo haber sido creado con el parametro **--routing** cuando creamos el módulo.
+
+```typescript
+const routes: Routes = [
+    {
+        path: '',
+        component: SelectorPageComponent
+    }
+];
+
+@NgModule({
+    imports: [RouterModule.forChild(routes)],
+    exports: [RouterModule]
+})
+export class CountryRoutingModule { }
+```
+
+Otra forma, quizás mejor, es usar childrens, porque es probable que necesitemos agregar mas paginas en nuestro componente Country,
+
+```typescript
+const routes: Routes = [
+    {
+        path: '',
+        children: [
+            {
+                path: 'countries',
+                component: SelectorPageComponent
+            },
+            {
+                path: '**',
+                redirectTo: 'countries'
+            }
+        ]
+    }
+];
+```
+
+Finalmente lo conectamos con nuestro módulo principal **CountryModule** en el imports:
+
+```typescript
+@NgModule({
+  declarations: [
+    SelectorPageComponent
+  ],
+  imports: [
+    CommonModule,
+    CountryRoutingModule
+  ]
+})
+export class CountryModule { }
+```
+
+Listo, ya estamso cargando el SelectorPage cuando iniciamos la APP en la ruta: `http://localhost:4200/selector` o bien `http://localhost:4200/selector/countries` si aplicamos la segunda solución de mostrar las rutas con **children**
+
+## Selector-Page Component
+
+Creamos un formulario con formBuilder, tal como se indica a continuación:
+
+
+```typescript
+constructor(private formBuilder: FormBuilder) { }
+  
+  public form: FormGroup = this.formBuilder.group({
+    region: ['', Validators.required]
+  });
+```
+
+Enlazamos el **form** en nuestro template y hacemos lo mismo a nivel de campos, enlazado a tres selectores.
+
+```html
+<h3 class="mt-3">Selectores Anidados</h3>
+<hr>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="row mb-3">
+        <div class="col">
+            <div class="mb-3">
+                <label for="form-label">Region</label>
+                <select formControlName="region"
+                    class="form-select form-select-lg">
+                    <option selected>Seleccione Uno</option>
+                    <!-- Llenar desde  Rest Api-->
+                </select>
+            </div>
+            
+        </div>
+    </div>
+</form>
+```
+
+Vamos a usar el `https://restcountries.com/` obetenemos un ejemplo del JSON y usando **Past as JSON code** creamos una interfaz en `/country/intergaces/coutrny.interface.ts` y agremos un enum para las regiones, en el mismo archivo de interfaces
+
+```typescript
+export enum Region {
+    Africa      = "Africa",
+    Americas    = "Americas",
+    Asia        = "Asia",
+    Europe      = "Europe",
+    Oceania     = "Oceania",
+}
+```
+
+Creamos un srevicio:
+
+```
+$ ng g s country/services/countries --skip-tests
+CREATE src/app/country/services/countries.service.ts (138 bytes)
+```
+
+Y agremos el siguiente código:
+
+```typescript
+private _regions: Region[] = [ 
+    Region.Africa, 
+    Region.Americas, 
+    Region.Asia, 
+    Region.Europe, 
+    Region.Oceania
+  ];
+
+  get regions(): Region[] {
+    return [...this._regions];
+  }
+```
+
+NOTA: no debemos regresar el `this._regions` porque esto pasaria la referencia del objeto, y se podría modificar por el que lo consume, por lo tanto lo que retornamos es un nuevo arreglo, el cual se construye a partir de los elementos en `...this._regions`
+
+Ahora inyectamos el servicio en nuestro componente, y como es privado, (el servicio) no podemos accederlo desde el template, por lo tanto hacemos un getter en el componente
+
+```typescript
+get Regions() {
+  return this.countriesServices.regions;
+}
+```
+
+Y en el template, llenamos el select:
+
+```html
+<select formControlName="region"
+    class="form-select form-select-lg">
+    <option selected>Seleccione Uno</option>
+    <option *ngFor="let region of Regions" [value]="region">
+        {{ region }}
+    </option>
+</select>
+```
+
+## Segundo selector Aninado
+
+Usaremos una petición http para obtener los paises de la región seleccionada, por lo tanto debemos importar el **HttpClientModule** en el AppModule.
+
+Ademas usaremos una versión más reducida de la interfaz **Country**, 
+
+```typescript
+export interface CountriesResponse {
+    name:         string;
+    cca3:         string;
+    borders:      string[];
+}
+```
+
+Además necesitamos agregar este nuevo método en nuestro servicio:
+
+```typescript
+getCountriesByRegion(region: Region): Observable<CountriesResponse[]> {
+
+    if (!region) {
+      return of([]);
+    }
+
+    const url = `${this.baseUrl}/region/${region}?fields=name,cca3,borders`;
+
+    return this.httpClient.get<Country[]>(url)
+    .pipe(
+      map( countries => countries.map(country => (
+        {
+          name: country.name.common,
+          cca3: country.cca3,
+          borders: country.borders ?? []
+        }
+      ))),
+    );
+  }
+```
+
+Este método retorna un `Observable<CountriesResponse[]>` esta interfaz reducida solo define el coutrny name (como string), el cca3 y las fronteras o borders.
+
+Hacemos la petición y luego pasamos esa respuesta por un **pipe**, la función **map** toma cada valor (country) de la respuesta, y lo transforma a la versión reducida.
+
+Ahora necesitamos consumir este servicio en el Componente, donde definimos previamente el primer selector. 
+
+Creamos un método **onRegionChange** el cual crea un **Listener** con el **valueChanges** sonre el primer selector, en otras palabras, cuando el selector cambie el valor seleccionado se va a disparar este Evento.
+
+```typescript
+onRegionChange(): void {
+    this.form.get('region')?.valueChanges
+    .pipe(
+      switchMap(region => this.countriesServices.getCountriesByRegion(region))
+    ).subscribe(countries => {
+      this.countries = countries;
+    });
+  }
+```
+
+Ahora hace falta llamar este método, y lo haremos en el onInit
+
+```typescript
+ngOnInit(): void {
+    this.onRegionChange();
+  }
+```
+
+Cuando se inicializa el componente, el OnInit va a llamar el **onRegionChange** quien va a crear el Listener sobre el selector de Regiones.
+
+Agregamos el Template el segundo selector
+
+```html
+<div *ngIf="countries.length > 0"  class="row mb-3">
+    <div class="col-6">
+        <div class="mb-3">
+            <label for="form-label">Countries</label>
+            <select formControlName="country"
+                class="form-control">
+                <option selected>Seleccione el País</option>
+                <option *ngFor="let country of countries" [value]="country.cca3">
+                    {{ country.name }}
+                </option>
+            </select>
+        </div>
+    </div>
+</div>
+```
+
+Listo con este cambio podemos ver la lista de paises una vez seleccionamos una región.
+
+
+
+

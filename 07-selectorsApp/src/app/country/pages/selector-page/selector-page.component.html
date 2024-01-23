@@ -3,16 +3,32 @@
 
 <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="row mb-3">
-        <div class="col">
+        <div class="col-6">
             <div class="mb-3">
                 <label for="form-label">Region</label>
                 <select formControlName="region"
-                    class="form-select form-select-lg">
-                    <option selected>Seleccione Uno</option>
-                    <!-- Llenar desde  Rest Api-->
+                    class="form-control">
+                    <option selected>Seleccione la Región</option>
+                    <option *ngFor="let region of Regions" [value]="region">
+                        {{ region }}
+                    </option>
                 </select>
             </div>
-            
+        </div>
+    </div>
+
+    <div *ngIf="countries.length > 0"  class="row mb-3">
+        <div class="col-6">
+            <div class="mb-3">
+                <label for="form-label">Countries</label>
+                <select formControlName="country"
+                    class="form-control">
+                    <option selected>Seleccione el País</option>
+                    <option *ngFor="let country of countries" [value]="country.cca3">
+                        {{ country.name }}
+                    </option>
+                </select>
+            </div>
         </div>
     </div>
 </form>

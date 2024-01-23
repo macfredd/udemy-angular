@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Form, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CountriesService } from '../../services/countries.service';
-import { switchMap } from 'rxjs';
+import { filter, switchMap, tap } from 'rxjs';
 import { CountriesResponse } from '../../interfaces/country.interface';
 
 @Component({
@@ -13,17 +13,20 @@ export class SelectorPageComponent implements OnInit{
 
   public countries: CountriesResponse[] = [];
 
+  public borders: CountriesResponse[] = [];
+
   constructor(private formBuilder: FormBuilder,
     private countriesServices: CountriesService) { }
   
   ngOnInit(): void {
     this.onRegionChange();
+    this.onCountryChange();
   }
     
   public form: FormGroup = this.formBuilder.group({
     region: ['', Validators.required],
     country: ['', Validators.required],
-    borders: ['', Validators.required]
+    border: ['', Validators.required]
   });
 
   get Regions() {
@@ -33,9 +36,25 @@ export class SelectorPageComponent implements OnInit{
   onRegionChange(): void {
     this.form.get('region')?.valueChanges
     .pipe(
+      tap(() => this.form.get('country')?.reset('')),
+      tap(() => this.countries = []),
+      filter(region => region !== ''),
       switchMap(region => this.countriesServices.getCountriesByRegion(region))
     ).subscribe(countries => {
       this.countries = countries;
+    });
+  }
+
+  onCountryChange(): void {
+    this.form.get('country')?.valueChanges
+    .pipe(
+      tap(() => this.form.get('border')?.reset('')),
+      tap(() => this.borders = []),
+      filter(code => code !== ''),
+      switchMap(code => this.countriesServices.getCountryByCode(code)),
+      switchMap(country => this.countriesServices.getCountryBordersByCode(country?.borders || []))
+    ).subscribe(countryResponse => {
+      this.borders = countryResponse || [];
     });
   }
 

@@ -9672,6 +9672,102 @@ Agregamos el Template el segundo selector
 
 Listo con este cambio podemos ver la lista de paises una vez seleccionamos una región.
 
+## Tercer Selector Anidado
+
+Mostraremos los países fronterizos con el país seleccionado en el segundo selector. Dado que la información de las fronteras viene en un arreglo de string, el cual contiene códigos de países, y lo que deseamos mostrar se el nombre del país fronterizo vamos hacer una llamada adicional.
+
+En el Servicio agregamos dos nuevos métodos:
+
+```typescript
+getCountryByCode(cca3: string): Observable<CountriesResponse> {
+    
+  const url = `${this.baseUrl}/alpha/${cca3}?fields=name,cca3,borders`;
+  return this.httpClient.get<Country>(url).pipe(
+    map( country => (
+      {
+        name: country.name.common,
+        cca3: country.cca3,
+        borders: country.borders ?? []
+      })
+  ));
+}
 
 
+getCountryBordersByCode(borders: string[]): Observable<CountriesResponse[]> {
+  if (!borders || borders.length === 0) {
+    return of([]);
+  }
+  const requests: Observable<CountriesResponse>[] = [];
+  borders.forEach(cca3 => {
+    requests.push(this.getCountryByCode(cca3));
+  });
+  return combineLatest(requests);
+}
+```
+
+**getCountryByCode**  obtiene el nombre de país, el código y sus fronteras. Este método lo usaremos cuando cambiemos un País del segundo selector. 
+
+**getCountryBordersByCode** Va a recibir un arreglo de strings[] los cuales son los códigos de países de las fronteras. Este arreglo lo vamos a tomar de la respuesta de **getCountryByCode** (country.borders)  Notar que estamos usando un método diferente, dado que el API (probablemente si) no nos permite hacer consultas mandando un arreglo de códigos, tenemos que enviar tantas peticiones como códigos de fronteras vengan en el arreglo. 
+
+Explicación adicional:
+
+Esta línea `requests.push(this.getCountryByCode(cca3));` no hace la llamada al API, simplemente agregar el request a nuestro arreglo de requests. 
+
+El que se encarga de hacer todas las peticiones es `combineLatest(requests);` esto se hace de una sola vez, todas al mismo tiempo. El método se encargara de gestionarlas y enviar una respuesta final.
+
+Con estos métodos combinados, vamos a obtener la lista de fronteras, pero en forma de Paises, de modo que podremos mostrar el nombre del país fronterizo en lugar del Código.
+
+Una vez implementados estos métodos, agregamos un nuevo Listener en nuestro Componente:
+
+```typescript
+
+public borders: CountriesResponse[] = [];
+
+
+onCountryChange(): void {
+    this.form.get('country')?.valueChanges
+    .pipe(
+      tap(() => this.form.get('border')?.reset('')),
+      tap(() => this.borders = []),
+      filter(code => code !== ''),
+      switchMap(code => this.countriesServices.getCountryByCode(code)),
+      switchMap(country => this.countriesServices.getCountryBordersByCode(country?.borders || []))
+    ).subscribe(countryResponse => {
+      this.borders = countryResponse || [];
+    });
+  }
+```
+
+Primero definidmos un arreglo **borders** el cual contendrá la lista de paises fronterizos.
+
+Segundo agregamos el Listener sobre el campo **country** con el _valueChanges_
+
+Cuando se seleccione un país occuren las siguientes tareas
+
+- Limpamos el selector de las fronteras, por si se había mostrado algo anteriormente
+- Limpiamos internamente el arreglo de Borders.
+- Si el Código seleccionado es vacío o no definido, filtramos ese evento, es decir no continúa en el PIPE
+- Con SwitchMap hacemos un llamado al **getCountryByCode** para obtener la información del Pais seleccionado, recordemos que aca vamos a tener, el nombre del país, su código y lo mas importante los códigos de los países fronterizos en forma de arreglo de String[]
+- Con el Segundo Switch, mandamos el arreglo de paises fronterizos al método **getCountryBordersByCode** y este retornara un arreglo de Paises
+- Luego asignamos este arreglo de países a nuestra variable pública **this.borders**
+
+
+Finalmente el template va a mostrar la lista de Fronteras con Nombres de Países
+
+```html
+<div *ngIf="borders.length > 0"  class="row mb-3">
+    <div class="col-6">
+        <div class="mb-3">
+            <label for="form-label">Borders</label>
+            <select formControlName="border"
+                class="form-control">
+                <option selected>Seleccione la Frontera </option>
+                <option *ngFor="let border of borders" [value]="border.cca3">
+                    {{ border.name }}
+                </option>
+            </select>
+        </div>
+    </div>
+</div>
+```
 

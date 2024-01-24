@@ -9911,3 +9911,109 @@ ngDoCheck
 ngAfterContentChecked
 ngAfterViewChecked
 ```
+
+## OnChange con @Input
+
+Agreguemos esto al PriceComponent
+
+```typescript
+export class PriceComponent  implements OnInit, OnChanges, OnDestroy {
+  
+  @Input() price: number = 0;
+
+  ngOnInit(): void {
+    console.log('    PriceComponent - ngOnInit');
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    console.log('    PriceComponent - ngOnChanges');
+    console.log('    ' + JSON.stringify(changes));
+  }
+
+  ngOnDestroy(): void {
+    console.log('    PriceComponent - ngOnDestroy');
+  }
+}
+```
+
+Usemos este componente en nuestro ProductoComponent
+
+```html
+<p>product works!</p>
+
+<app-price 
+    *ngIf="isProductVisible"
+    [price]="currentPrice">
+</app-price>
+
+<button (click)="isProductVisible = !isProductVisible">
+    Toggle product
+</button>
+
+<button (click)="increasePrice()">
+    Increase Price
+</button>
+```
+
+**increasePrice()** aumenta en +1 el precio del producto, por medio de una propiedad public `currentPrice`
+
+```typescript
+public currentPrice: number = 0;
+```
+
+Si ejecutamos la APP, vemos el Log, observamos 
+
+
+<img src="./imagenes/lifeCycleApp01.png" alt="ngClass ejemplo" style="margin-right: 10px; max-width: 55%; height: auto; border: 1px solid black" />
+
+El objecto **change** también tiene una propiedad **previousValue** la cual es undefined, por eso no se muestra en el JSON.
+
+Agreguemos un `console.log(JSON.stringify(changes));` al  **ngOnChanges** del ProductComonent, Si presionamos el botón que incrementa el precio en +1 veremos esto:
+
+
+<img src="./imagenes/lifeCycleApp02.png" alt="ngClass ejemplo" style="margin-right: 10px; max-width: 55%; height: auto; border: 1px solid black" />
+
+Primero, el cambio de la propiedad interna **currentPrice** de ProductComponent, no dispara el **ngOnChanges** del ProductoComponent, pero si el del componente hijo **PriceComponent** Y podemos ver el valor anterior y el nuevo valor, además de que **firstChange** es **false**
+
+EL **firstChange** es TRUE solo al momento de que el componente Padre le pasa el valor de **0** y el componente precio lo acepta por el **@Input**
+
+Tocar repetidamente el botón de incrementar el precio generará estos cambios en el objeto **changes** :
+
+```json
+[
+  {"price":{"currentValue":0,"firstChange":true}},
+  {"price":{"previousValue":0,"currentValue":1,"firstChange":false}},
+  {"price":{"previousValue":1,"currentValue":2,"firstChange":false}},
+  {"price":{"previousValue":2,"currentValue":3,"firstChange":false}}
+]
+```
+El registro anterior incluye la primera carga del componente, y luego click  en el botón incrementar precio por 3 veces.
+
+## OnDesroy del Hijo
+
+Tenemos este botón:
+
+```html
+<button (click)="isProductVisible = !isProductVisible">
+    Toggle product
+</button>
+```
+
+El cual cambia el valor de la proiedad **isProductVisible** y a la vez oculta el componente Hijo
+
+```html
+<app-price 
+    *ngIf="isProductVisible"
+    [price]="currentPrice">
+</app-price>
+```
+
+Si presionamos ese botón, el componente Precio debe de destruirse. 
+
+<img src="./imagenes/lifeCycleApp03.png" alt="ngClass ejemplo" style="margin-right: 10px; max-width: 55%; height: auto; border: 1px solid black" />
+
+Si nuevamente presionamos el mismo botón, el ciclo de vida de dicho componente se activa nuevamente y mostrará su estado inicial
+
+```json
+{"price":{"currentValue":0,"firstChange":true}}
+```

@@ -9713,7 +9713,7 @@ Explicación adicional:
 
 Esta línea `requests.push(this.getCountryByCode(cca3));` no hace la llamada al API, simplemente agregar el request a nuestro arreglo de requests. 
 
-El que se encarga de hacer todas las peticiones es `combineLatest(requests);` esto se hace de una sola vez, todas al mismo tiempo. El método se encargara de gestionarlas y enviar una respuesta final.
+El que se encarga de hacer todas las peticiones es `combineLatest(requests);` esto se hace de una sola vez, todas al mismo tiempo. El método se encargara de gestionarlas y enviar una respuesta final. 
 
 Con estos métodos combinados, vamos a obtener la lista de fronteras, pero en forma de Paises, de modo que podremos mostrar el nombre del país fronterizo en lugar del Código.
 
@@ -9771,3 +9771,143 @@ Finalmente el template va a mostrar la lista de Fronteras con Nombres de Países
 </div>
 ```
 
+<div style="page-break-after: always;"></div>
+
+# Nueva Sección: El ciclo de un componente
+
+## ¿Qué veremos en esta sección?
+
+Se explicarán todos los pasos del ciclo de vida de un componente (también se aplican a las directivas que veremos después).
+
+Creamos una nueva APP
+
+```
+ng new 08-lifeCycle --standalone false --routing
+```
+
+Creamos un modulo
+
+```
+ng g m products  --routing
+CREATE src/app/products/products-routing.module.ts (251 bytes)
+CREATE src/app/products/products.module.ts (288 bytes)
+```
+
+Agregamos el ProductsModule al Import del AppModule, no vamos hacer carga lazy en esta app.
+
+Creamos dos directorios **pages** y **comonents** dentro de **Products**
+
+Creamos los componentes
+
+```
+ng g c products/pages/product
+ng g c products/components/price
+```
+
+
+```
+products
+    ├── components
+    ├── pages
+    │   └── product
+    │       ├── product.component.css
+    │       ├── product.component.html
+    │       ├── product.component.spec.ts
+    │       └── product.component.ts
+    ├── products.module.ts
+    └── products-routing.module.ts
+```
+
+Luego agregamos las rutas necesarias y actualizamos los módulos, el objetivo es centrarnos en el ciclo de vida del componente.
+
+En **ProductComponent** vamos a implementar todos los eventos del ciclo de vida, en el siguiente código se encuentran en el orden de ejecución.
+
+<div style="page-break-after: always;"></div>
+
+```typescript
+export class ProductComponent implements OnChanges, OnInit, DoCheck, AfterContentInit, AfterContentChecked, AfterViewInit, AfterViewChecked, OnDestroy{
+  
+  // Ocurre cuando Angular inicializa el componente
+  constructor() { }
+  
+  // Responde cuando Angular establece o restablece propiedades 
+  // de entrada vinculadas a datos. El método recibe un objeto 
+  // SimpleChanges de los valores de propiedad actuales y anteriores.
+  ngOnChanges(changes: SimpleChanges): void {}
+  
+  // Inicialice la directiva o el componente después de que 
+  // Angular muestre por primera vez las propiedades vinculadas 
+  // a datos y establezca las propiedades de entrada de la 
+  // directiva o el componente.
+  ngOnInit(): void {}
+
+  // Detecta y actúa sobre cambios que Angular no puede o no 
+  // quiere detectar por sí solo.
+  ngDoCheck(): void {}
+
+  // Responde después de que Angular proyecta contenido externo 
+  // en la vista del componente o en la vista en la que se 
+  // encuentra una directiva.
+  ngAfterContentInit(): void {}
+
+  // Responde después de que Angular verifica el contenido 
+  // proyectado en la directiva o componente.
+  ngAfterContentChecked(): void {}
+  
+  // Responde después de que Angular inicializa las vistas 
+  // y las vistas secundarias del componente, o la vista 
+  // que contiene la directiva.
+  ngAfterViewInit(): void {}
+
+  // Responde después de que Angular verifica las vistas 
+  // y las vistas secundarias del componente, o la vista 
+  // que contiene la directiva.
+  ngAfterViewChecked(): void {}
+
+  // Limpiezas justo antes de que Angular destruya la directiva o componente. 
+  // Cancele la suscripción de Observables y separe los controladores 
+  // de eventos para evitar pérdidas de memoria.
+  ngOnDestroy(): void {}
+}
+```
+<div style="page-break-after: always;"></div>
+
+
+Si agregamos un console.log con el nombre del método, veremos este orden de ejecución.
+
+```
+ngOnInit
+ngDoCheck
+ngAfterContentInit
+ngAfterContentChecked
+ngAfterViewInit
+ngAfterViewChecked
+ngDoCheck
+ngAfterContentChecked
+ngAfterViewChecked
+```
+
+El **ngOnChanges** no se muestra porque el componente no tiene ningún elemento que pueda cambiar.
+
+
+Si agregamos un propiedad pública
+
+```typescript
+public isProductVisible: boolean = true;
+```
+
+Y lo enlazamos en el Template:
+
+```html
+<button (click)="isProductVisible = !isProductVisible">
+    Testing
+</button>
+```
+
+Al presinar el botón vemos estos eventos:
+
+```
+ngDoCheck
+ngAfterContentChecked
+ngAfterViewChecked
+```

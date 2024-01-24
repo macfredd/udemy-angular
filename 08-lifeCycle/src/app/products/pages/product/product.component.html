@@ -1,7 +1,17 @@
-<p>product works!</p>
+<p>Precio Actual {{ currentPrice }}</p>
 
-<app-price></app-price>
+<app-price 
+    *ngIf="isProductVisible"
+    [price]="currentPrice">
+</app-price>
+
 
 <button (click)="isProductVisible = !isProductVisible">
-    Testing
+    Toggle product
 </button>
+
+<button (click)="increasePrice()">
+    Increase Price
+</button>
+
+

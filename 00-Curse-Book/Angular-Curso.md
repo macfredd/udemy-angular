@@ -10017,3 +10017,41 @@ Si nuevamente presionamos el mismo botón, el ciclo de vida de dicho componente 
 ```json
 {"price":{"currentValue":0,"firstChange":true}}
 ```
+
+## OnDestroy
+
+Cualquier observable que emita constantemente valores debe ser cancelada su suscripción al momento de destruir el elemento, caso contrario, seguirá emitiendo valores y puede causar problemas de rendimiento.
+
+Si creamos el siguiente Interval
+
+```typescript
+ngOnInit(): void {
+  console.log('    PriceComponent - ngOnInit');
+  interval(1000).subscribe(value => {
+    console.log('    PriceComponent - interval: ' + value);
+  });
+}
+```
+
+Al salir del Componente Price (ocultarlo) veremos en consola que seguirá imprimieno valores.
+
+
+Podemos usar el OnDestroy para cancelar la suscripción. Para ello asignaremos la suscripción a una variable pública
+
+```typescript
+public interval$?: Subscription;
+
+ngOnInit(): void {
+  this.interval$ = interval(1000).subscribe(value => {
+    console.log('    PriceComponent - interval: ' + value);
+  });
+}
+
+ngOnDestroy(): void {
+  this.interval$?.unsubscribe();
+}
+
+```
+
+Con este cambio, al ocultar el componente, se llama el ngOnDestroy y el intervalo se cancela. Generalmente cualquier objeto que genere o escuche eventos, debe ser destruido junto con el componente.
+

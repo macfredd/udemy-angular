@@ -10055,3 +10055,150 @@ ngOnDestroy(): void {
 
 Con este cambio, al ocultar el componente, se llama el ngOnDestroy y el intervalo se cancela. Generalmente cualquier objeto que genere o escuche eventos, debe ser destruido junto con el componente.
 
+<div style="page-break-after: always;"></div>
+
+# Nueva Sección: Nueva Aplicación de Mapas:
+
+## ¿Qué veremos en esta sección?
+
+¿Qué veremos en esta sección?
+
+Este es un breve listado de los temas fundamentales:
+
+-Manejo de librerías escritas en JavaScript en TypeScript
+-Uso de Mapas basados en Mapbox (el API es similar a la de Google Maps)
+-Marcadores
+-Eventos
+-FlyTo
+-Coordenadas geográficas
+-Componentes para re-utilización de mapas
+-Mantener objetos de forma persistente
+-@types
+-Zoom
+-Range
+
+## Crear nueva APP y preparar proyecto
+
+Hacemos lo de siempre, creamos nueva app, modificamos el scrit del start para agregar el parámetro **-o**, limpiamos el APPComponent.html
+
+```
+ng new 09-mapApp --standalone false --routing
+```
+
+Creamos un módulo:
+
+```
+$ ng g m maps --routing
+CREATE src/app/maps/maps-routing.module.ts (247 bytes)
+CREATE src/app/maps/maps.module.ts (272 bytes)
+```
+
+Componentes
+
+```
+ng g c maps/components/mini-map
+ng g c maps/components/site-menu
+
+ng g c maps/layout/maps-layout --skip-selector
+ng g c maps/pages/full-screen-page --skip-selector
+ng g c maps/pages/markers-page --skip-selector
+ng g c maps/pages/properties-page --skip-selector
+ng g c maps/pages/zoom-page --skip-selector
+```
+
+
+--skip-selector omite agregar un selector al componente, este es un componente especial que no necesita ser incluido como un TAG, eso lo veremos adelante. El componente se crea de la siguiente forma:
+
+```typescript
+@Component({
+  templateUrl: './maps-layout.component.html',
+  styleUrl: './maps-layout.component.css'
+})
+export class MapsLayoutComponent {
+
+}
+```
+
+Esta es la estructura actual:
+
+```
+[fcruz@fedora src]$ tree app
+app
+├── app.component.css
+├── app.component.html
+├── app.component.ts
+├── app.module.ts
+├── app-routing.module.ts
+└── maps
+    ├── components
+    │   ├── mini-map
+    │   │   ├── mini-map.component.css
+    │   │   ├── mini-map.component.html
+    │   │   └── mini-map.component.ts
+    │   └── site-menu
+    │       ├── site-menu.component.css
+    │       ├── site-menu.component.html
+    │       └── site-menu.component.ts
+    ├── layout
+    │   └── maps-layout
+    │       ├── maps-layout.component.css
+    │       ├── maps-layout.component.html
+    │       └── maps-layout.component.ts
+    ├── maps.module.ts
+    ├── maps-routing.module.ts
+    └── pages
+        ├── full-screen-page
+        │   ├── full-screen-page.component.css
+        │   ├── full-screen-page.component.html
+        │   └── full-screen-page.component.ts
+        ├── markers-page
+        │   ├── markers-page.component.css
+        │   ├── markers-page.component.html
+        │   └── markers-page.component.ts
+        ├── properties-page
+        │   ├── properties-page.component.css
+        │   ├── properties-page.component.html
+        │   └── properties-page.component.ts
+        └── zoom-page
+            ├── zoom-page.component.css
+            ├── zoom-page.component.html
+            └── zoom-page.component.ts
+```
+
+
+En el archivo **src/app/maps/layout/maps-layout/maps-layout.component.html** agregamos un ```<router-outlet></router-outlet>```
+
+En el **AppRoutingModule** agregamos una ruta, con carga Lazy
+
+```typescript
+const routes: Routes = [
+  {
+    path: 'maps',
+    loadChildren: () => import('./maps/maps.module').then(m => m.MapsModule)
+  },
+  {
+    path: '**',
+    redirectTo: 'maps',
+  }
+];
+```
+
+En cambio, en el **MapsRoutingModule** agregaremos estas rutas:
+
+```typescript
+const routes: Routes = [
+  {
+    path: '',
+    component : MapsLayoutComponent,
+    children: [
+      { path: 'fullscreen', component: FullScreenPageComponent},
+      { path: 'zoom-range', component: ZoomPageComponent},
+      { path: 'markers', component: MarkersPageComponent},
+      { path: 'proerties', component: PropertiesPageComponent},
+      { path: '**', redirectTo: 'fullscreen'}
+    ]
+  }
+];
+```
+
+

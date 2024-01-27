@@ -1,1 +1,10 @@
-<p>site-menu works!</p>
+<ul class="list-group">
+    <li 
+    *ngFor="let item of menuItems" 
+    class="list-group-item"
+    [routerLink]="[item.router]"
+    routerLinkActive="active"
+    >
+        <i class="menu-icon {{item.icon}}"></i>{{ item.name}}
+    </li>
+</ul>

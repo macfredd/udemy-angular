@@ -10085,6 +10085,13 @@ Hacemos lo de siempre, creamos nueva app, modificamos el scrit del start para ag
 ng new 09-mapApp --standalone false --routing
 ```
 
+Agregamos en el index.html la referencias a bootstrap y fontawesome
+
+```html
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <script src="https://kit.fontawesome.com/8de2637909.js" crossorigin="anonymous"></script>
+```
+
 Creamos un módulo:
 
 ```
@@ -10201,4 +10208,66 @@ const routes: Routes = [
 ];
 ```
 
+## Maps Menu lateral (sideMenu)
 
+Nuestro **MapsLayoutComponent** va a funcionar como un contenedor general de neustros componentes dentro del modulo de mapas. **MapsLayoutComponent** es un componente que pone a disposición un espacio ara que los demas componentes puedas renderizarse. 
+
+Vamos a crear el sideMenu y lo primero que haremos es agregar al template del **MapsLayoutComponent**
+
+```html
+<maps-site-menu></maps-site-menu>
+<router-outlet></router-outlet>
+```
+
+POdemos agrear CSS a los componentes desde el padre, podríamos agregar esto en nuestro Layout CSS Component:
+
+```css
+maps-site-menu {
+    left: 20px;
+    position: fixed;
+    top: 20px;
+    width: 180px;
+    z-index: 999;
+}
+```
+
+Para agregar las opciones al menú, haremos lo mismo, creamos un menuItem[] y agregamos rutas y nombre de los items. Esto lo hacemos en el **siteMenuComponent**
+
+```typescript
+interface MenuItems {
+  router: string,
+  name: string,
+  icon: string
+}
+
+@Component({
+  selector: 'maps-site-menu',
+  templateUrl: './site-menu.component.html',
+  styleUrl: './site-menu.component.css'
+})
+export class SiteMenuComponent {
+  public menuItems: MenuItems[] = [
+    { router: '/maps/fullscreen', name: 'Fullscreen', icon: 'fa-solid fa-desktop' },
+    { router: '/maps/zoom-range', name: 'Zoom Range', icon: 'fa-solid fa-magnifying-glass' },
+    { router: '/maps/markers', name: 'Marker', icon: 'fa-solid fa-location-dot'},
+    { router: '/maps/properties', name: 'Properties', icon: 'fa-solid fa-house-chimney-window'},
+  ]
+}
+```
+
+Y luego renderizamos con un NgFor.
+
+```html
+<ul class="list-group">
+    <li 
+    *ngFor="let item of menuItems" 
+    class="list-group-item"
+    [routerLink]="[item.router]"
+    routerLinkActive="active">
+        <i class="menu-icon {{item.icon}}"></i>{{ item.name}}
+    </li>
+</ul>
+```
+
+
+## VAriables de Entorno

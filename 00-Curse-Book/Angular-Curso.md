@@ -10270,4 +10270,70 @@ Y luego renderizamos con un NgFor.
 ```
 
 
-## VAriables de Entorno
+## MapBox 
+
+Usaremos este servicio, de modo que se crear una cuenta y un token de accesso el cual usaremos en nuestro ENV files.
+
+## Archivos de Environment
+
+Crearemos los siguientes archivos
+
+|Nombre|Ubicación|Descripción|
+|-|-|-|
+| .env            | ./                | Contiene las variables de entorno, no se sube al repositorio  |
+| .env.template   | ./                | Es un template que indica que variables se deben de configurar. Este archivo si debe ser enviado al repositorio|
+| .environment    | ./src/environments| Se genera mediante un script, Angular usará este archivo para inicializar nuestras variables. Al igual que .env, es un archivo que no debe enviarse al respositorio, ya que contentrá información sensible.|
+
+## Construir Archivo .environment
+
+Usaremos **dotenv**: Dotenv es un módulo de dependencia cero que carga variables de entorno desde un archivo .env en **Process.env**. 
+
+instalamos el paquete en Desarrollo:
+
+```
+$ npm install dotenv --save-dev
+```
+
+Necesitamos transformar el contenido en nuestro archivo privado .env en una versión para que el entorno de Angular pueda usar dichas variables, para ello usaremos node y un script en JS
+
+```javascript
+const { writeFileSync, mkdirSync } = require('fs');
+
+require('dotenv').config();
+
+const targetPath = './src/environments/environment.ts';
+
+const envFileContent = `
+export const environment = {
+    mapbox_key: "${process.env.MAPBOX_KEY}",
+};
+`;
+
+mkdirSync('./src/environments', { recursive: true });
+
+writeFileSync(targetPath, envFileContent);
+```
+
+Este script **set-envs.js** lo guardamos en el path **./scripts/set-envs.js**
+
+Luego agregamos una nueva tarea en el package.json
+
+```json
+"scripts": {
+  "envs": "node ./scripts/set-envs.js",
+  "start": "npm run evns && ng serve -o",
+  "watch": "npm run evns && ng build --watch --configuration development",
+}
+```
+
+Probamos la tarea 
+
+```
+$ npm run envs
+
+> 09-map-app@0.0.0 envs
+> node ./scripts/set-envs.js
+```
+
+Como resultado podremos ver nuestro nuevo archivo de configuración **./src/environments/environment.ts**
+

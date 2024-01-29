@@ -10337,6 +10337,19 @@ $ npm run envs
 
 Como resultado podremos ver nuestro nuevo archivo de configuración **./src/environments/environment.ts**
 
+Para acceder a las propiedades debemos importar este archivo
+
+
+```typescript
+import { environment } from '../../../../environments/environment';
+```
+
+y luego acceder a la propiedad requerida
+
+```typescript
+accessToken: environment.mapbox_key
+```
+
 ## Instalar MapBox
 
 ```
@@ -10359,7 +10372,8 @@ Implementaremos el mapa en el **fullScreenComponent**
 
 ```typescript
 import { AfterViewInit, Component } from '@angular/core';
-import * as  mapboxgl  from 'mapbox-gl';
+import { Map } from 'mapbox-gl';
+import { environment } from '../../../../environments/environment';
 
 
 @Component({
@@ -10368,10 +10382,12 @@ import * as  mapboxgl  from 'mapbox-gl';
 })
 export class FullScreenPageComponent implements AfterViewInit{
 
+  @ViewChild('map') divMap!: ElementRef;
+
   ngAfterViewInit(): void {
-    const map = new mapboxgl.Map({
-      accessToken: "pk.eyJ1IjoiZnJlZGR5Y3J1emUiLCJhIjoiY2xyd21tejAxMHFmbzJpbzUzeGxmMmU0cSJ9.EJw5qNZ84LCvmRUKXz1fPQ",
-      container: 'map', // container ID
+    const map = new Map({
+      accessToken: environment.mapbox_key,
+      container: this.divMap.nativeElement,, // container ID
       style: 'mapbox://styles/mapbox/streets-v12', // style URL
       center: [-74.5, 40], // starting position [lng, lat]
       zoom: 9, // starting zoom
@@ -10380,10 +10396,10 @@ export class FullScreenPageComponent implements AfterViewInit{
 }
 ```
 
-Agregamos un contenedor, por el momento usaremos un ID
+Agregamos un contenedor, usaremos una referencia local **#map** visible en el componente mediante el **ViewChild**
 
 ```html
-<div id="map">
+<div #map id="map">
     
 </div>
 ```
@@ -10396,4 +10412,126 @@ Y algo de estilo:
     height: 100vh;
 }
 ```
+
+
+<br/>
+<img src="./imagenes/mapApp01.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 90%; height: auto; border: 1px solid black" />
+
+## Zoom in/out
+
+Esta funcionalidad la implementaremos en el **ZoomPageComponent**
+
+Implementamos este componente:
+
+```typescript
+@Component({
+  templateUrl: './zoom-page.component.html',
+  styleUrl: './zoom-page.component.css'
+})
+export class ZoomPageComponent implements AfterViewInit{
+
+  @ViewChild('map') divMap?: ElementRef;
+
+  public zoom: number = 10;
+
+  public map!: Map;
+
+  ngAfterViewInit(): void {
+
+    if(!this.divMap) {
+      return;
+    }
+
+    this.map = new Map({
+      accessToken: environment.mapbox_key,
+      container: this.divMap.nativeElement, // container ID
+      style: 'mapbox://styles/mapbox/streets-v12', // style URL
+      center: [-74.5, 40], // starting position [lng, lat]
+      zoom: this.zoom, // starting zoom
+    });
+
+    this.mapListener();
+  }
+
+  mapListener() {
+    this.map.on('zoom', (ev) => {
+      this.zoom = this.map.getZoom();
+    });
+  }
+
+  OnRangeChange(event: any) {
+    this.map.setZoom(event.target.value);
+  }
+
+  zoomIn() {
+    this.map.zoomIn();
+  }
+
+  zoomOut() {
+    this.map.zoomOut();
+  }
+  
+}
+```
+
+Y el Template:
+
+```html
+<div #map id="map"></div>
+
+<div class="floatting-range p-2">
+    <div class="floatting-content">
+        <button type="button" class="btn btn-primary" (click)="zoomOut()">-</button>
+        <input 
+            type="range"
+            class="form-range p-2"
+            min="-2"
+            max="18"
+            [value]="zoom"
+            (change)="OnRangeChange($event)"
+        >
+        <button type="button" class="btn btn-primary" (click)="zoomIn()">+</button>
+    </div>
+
+    <span class="form-label">
+        Zoom: {{zoom | number: '1.1-1'}}
+        <br>
+        Ln, Lt: {{"0,0"}}
+        
+    </span>
+</div>
+```
+
+
+Un poco de estilo 
+
+```css
+#map {
+    width: 100vw;
+    height: 100vh;
+}
+
+.floatting-range {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 999;
+    width: 500px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.floatting-content {
+    display: flex;
+    align-items: center;
+}
+```
+
+Con esto hemos implementado un Zoom in/out en el mapa y hemos conectado los controles en ambas dirrecciones, al hacer zoom en el mapa se actualizan los controles, al mover los controles se cambia el zoom en el mapa.
+
+
+<br/>
+<img src="./imagenes/mapApp02.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 50%; height: auto; border: 1px solid black" />
+
 

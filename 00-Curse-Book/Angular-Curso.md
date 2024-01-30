@@ -10535,3 +10535,78 @@ Con esto hemos implementado un Zoom in/out en el mapa y hemos conectado los cont
 <img src="./imagenes/mapApp02.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 50%; height: auto; border: 1px solid black" />
 
 
+## Latitud y Longitud
+
+Creemos una propiedad **lngLat** y la inicializamos
+
+```typescript
+public currentLatLng: LngLat = new LngLat(-85.579765542208, 11.577481296026505);
+```
+
+Mostramos en el Template
+
+```html
+<span class="form-label">
+      Zoom: {{zoom | number: '1.1-1'}} - ({{currentLatLng.lat | number: '1.4-4'}}, {{currentLatLng.lng | number: '1.4-4'}})   
+</span>
+```
+
+La enlazamos al Mapa con un Listener
+
+
+```typescript
+mapListener() {
+
+    // Otros listeners
+
+    this.map.on('move', (ev) => {
+      this.currentLatLng = this.map.getCenter();;
+    });
+  }
+```
+
+Y listo, con esto podemos ver la Latitud y Longitud del centro del mapa cada vez que nos desplazamos.
+
+## Destruir Listeners 
+
+Una tarea importante es limpiar los listeners creados en nuestro componente:
+
+```typescript
+ngOnDestroy(): void {
+    this.map.remove();
+  }
+```
+
+## Marcadores
+
+El siguiente método, crea un marcador, en la latitud y longitud definida con las opciones enviadas como parámetro
+
+```typescript
+addMarker(lngLat: LngLat, options: MarkerOptions) {
+    const marker = new Marker({
+      ...options
+    })
+      .setLngLat(lngLat)
+      .addTo(this.map);
+
+    if (options.draggable) {
+      marker.on('drag', (ev) => {
+        this.currentLatLng = marker.getLngLat();
+      });
+    }
+  }
+```
+
+Podemos llamar este método con las siguientes opciones:
+
+```typescript
+const makerOptions = {
+      color: '#FF0000',
+      draggable: true,
+    }
+    this.addMarker(this.currentLatLng, makerOptions);
+```
+
+Esto genera:
+<br/>
+<img src="./imagenes/mapApp03.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 60%; height: auto; border: 1px solid black" />

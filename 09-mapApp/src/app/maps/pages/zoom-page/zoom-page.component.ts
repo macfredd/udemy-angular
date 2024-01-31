@@ -1,12 +1,18 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { LngLat, Map, Marker, MarkerOptions } from 'mapbox-gl';
 import { environment } from '../../../../environments/environment';
+
+export interface MarkerInfo {
+  marker: Marker;
+  color: string;
+  visible: boolean;
+}
 
 @Component({
   templateUrl: './zoom-page.component.html',
   styleUrl: './zoom-page.component.css'
 })
-export class ZoomPageComponent implements AfterViewInit, OnDestroy{
+export class ZoomPageComponent implements OnInit, AfterViewInit, OnDestroy{
 
   @ViewChild('map') divMap?: ElementRef;
 
@@ -16,6 +22,12 @@ export class ZoomPageComponent implements AfterViewInit, OnDestroy{
 
   public currentLatLng: LngLat = new LngLat(-85.579765542208, 11.577481296026505);
 
+  private markersList: MarkerInfo[] = [];
+
+  ngOnInit(): void {
+    
+  }
+  
   ngAfterViewInit(): void {
 
     if(!this.divMap) {
@@ -31,12 +43,6 @@ export class ZoomPageComponent implements AfterViewInit, OnDestroy{
     });
 
     this.mapListener();
-
-    const makerOptions = {
-      color: '#FF0000',
-      draggable: true,
-    }
-    this.addMarker(this.currentLatLng, makerOptions);
   }
 
   ngOnDestroy(): void {
@@ -54,8 +60,13 @@ export class ZoomPageComponent implements AfterViewInit, OnDestroy{
   }
 
   addMarker(lngLat: LngLat, options: MarkerOptions) {
-    const marker = new Marker({
-      ...options
+
+    const color = options.color || 
+      '#' + Math.floor(Math.random() * 16777215).toString(16);
+    
+      const marker = new Marker({
+      ...options,
+      color
     })
       .setLngLat(lngLat)
       .addTo(this.map);
@@ -65,6 +76,25 @@ export class ZoomPageComponent implements AfterViewInit, OnDestroy{
         this.currentLatLng = marker.getLngLat();
       });
     }
+
+    this.markersList.push({marker, color, visible: true});
+  }
+
+  removerMarker(index: number) {
+    const marker = this.markersList[index];
+    marker.marker.remove();
+    this.markersList.splice(index, 1);
+  }
+
+  flyToMarker(index: number) {
+    const marker = this.markersList[index];
+    this.map.flyTo({
+      center: marker.marker.getLngLat()
+    });
+  }
+
+  toggleMarker(index: number) {
+    this.markersList[index].visible = !this.markersList[index].visible;
   }
 
   OnRangeChange(event: any) {
@@ -79,4 +109,14 @@ export class ZoomPageComponent implements AfterViewInit, OnDestroy{
     this.map.zoomOut();
   }
   
+  onAddNewMarker() {
+    const makerOptions = {
+      draggable: true,
+    }
+    this.addMarker(this.map.getCenter(), makerOptions);
+  }
+
+  get markers(): MarkerInfo[]{
+    return [...this.markersList]
+  }
 }

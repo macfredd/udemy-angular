@@ -3,18 +3,35 @@
     height: 100vh;
 }
 
-.floatting-range {
+.floatting-style {
     position: fixed;
-    bottom: 20px;
-    left: 20px;
     z-index: 999;
-    width: 500px;
     background-color: white;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
+.floatting-range {
+    bottom: 20px;
+    left: 20px;
+    width: 500px;
+}
+
 .floatting-content {
     display: flex;
     align-items: center;
+}
+
+.floatting-markers-list {
+    top: 20px;
+    right: 20px;
+    width: 300px;
+}
+
+.list-group {
+    cursor: pointer;
+}
+
+.list-group :hover {
+    background-color: #f39090;
 }

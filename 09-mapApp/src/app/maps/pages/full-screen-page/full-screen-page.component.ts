@@ -5,7 +5,12 @@ import { environment } from '../../../../environments/environment';
 export interface MarkerInfo {
   marker: Marker;
   color: string;
-  visible: boolean;
+}
+
+export interface PlainMarker {
+  lng: number;
+  lat: number;
+  color: string;
 }
 
 @Component({
@@ -43,6 +48,8 @@ export class FullScreenPageComponent implements OnInit, AfterViewInit, OnDestroy
     });
 
     this.mapListener();
+
+    this.loadFromLocalStorage();
   }
 
   ngOnDestroy(): void {
@@ -70,20 +77,22 @@ export class FullScreenPageComponent implements OnInit, AfterViewInit, OnDestroy
     })
       .setLngLat(lngLat)
       .addTo(this.map);
-
+    
     if (options.draggable) {
       marker.on('drag', (ev) => {
         this.currentLatLng = marker.getLngLat();
       });
     }
 
-    this.markersList.push({marker, color, visible: true});
+    this.markersList.push({marker, color});
+    this.saveToLocalStorage();
   }
 
   removerMarker(index: number) {
     const marker = this.markersList[index];
     marker.marker.remove();
     this.markersList.splice(index, 1);
+    this.saveToLocalStorage();
   }
 
   flyToMarker(index: number) {
@@ -91,10 +100,6 @@ export class FullScreenPageComponent implements OnInit, AfterViewInit, OnDestroy
     this.map.flyTo({
       center: marker.marker.getLngLat()
     });
-  }
-
-  toggleMarker(index: number) {
-    this.markersList[index].visible = !this.markersList[index].visible;
   }
 
   OnRangeChange(event: any) {
@@ -118,6 +123,35 @@ export class FullScreenPageComponent implements OnInit, AfterViewInit, OnDestroy
 
   get markers(): MarkerInfo[]{
     return [...this.markersList]
+  }
+
+  saveToLocalStorage() {
+    const plainMarkers: PlainMarker[] = this.markersList.map((marker) => {
+      return {
+        lng: marker.marker.getLngLat().lng,
+        lat: marker.marker.getLngLat().lat,
+        color: marker.color
+      }
+    });
+
+    localStorage.setItem('plainmarkers', JSON.stringify(plainMarkers));
+  }
+
+  loadFromLocalStorage() {
+    const plainMarkers = localStorage.getItem('plainmarkers');
+    if (!plainMarkers) {
+      return;
+    }
+
+    const markers: PlainMarker[] = JSON.parse(plainMarkers);
+    markers.forEach((marker) => {
+      const lngLat = new LngLat(marker.lng, marker.lat);
+      const markerOptions = {
+        color: marker.color,
+        draggable: true
+      }
+      this.addMarker(lngLat, markerOptions);
+    });
   }
 }
 

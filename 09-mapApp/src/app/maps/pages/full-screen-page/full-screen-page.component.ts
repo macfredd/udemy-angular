@@ -79,8 +79,8 @@ export class FullScreenPageComponent implements OnInit, AfterViewInit, OnDestroy
       .addTo(this.map);
     
     if (options.draggable) {
-      marker.on('drag', (ev) => {
-        this.currentLatLng = marker.getLngLat();
+      marker.on('dragend', (ev) => {
+        this.saveToLocalStorage();
       });
     }
 

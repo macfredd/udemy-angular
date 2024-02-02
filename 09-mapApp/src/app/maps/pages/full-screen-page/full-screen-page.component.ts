@@ -154,4 +154,3 @@ export class FullScreenPageComponent implements OnInit, AfterViewInit, OnDestroy
     });
   }
 }
-

@@ -10108,9 +10108,7 @@ ng g c maps/components/site-menu
 
 ng g c maps/layout/maps-layout --skip-selector
 ng g c maps/pages/full-screen-page --skip-selector
-ng g c maps/pages/markers-page --skip-selector
 ng g c maps/pages/properties-page --skip-selector
-ng g c maps/pages/zoom-page --skip-selector
 ```
 
 
@@ -10158,18 +10156,11 @@ app
         │   ├── full-screen-page.component.css
         │   ├── full-screen-page.component.html
         │   └── full-screen-page.component.ts
-        ├── markers-page
-        │   ├── markers-page.component.css
-        │   ├── markers-page.component.html
-        │   └── markers-page.component.ts
-        ├── properties-page
-        │   ├── properties-page.component.css
-        │   ├── properties-page.component.html
-        │   └── properties-page.component.ts
-        └── zoom-page
-            ├── zoom-page.component.css
-            ├── zoom-page.component.html
-            └── zoom-page.component.ts
+        └─── properties-page
+            ├── properties-page.component.css
+            ├── properties-page.component.html
+            └── properties-page.component.ts
+
 ```
 
 
@@ -10199,8 +10190,6 @@ const routes: Routes = [
     component : MapsLayoutComponent,
     children: [
       { path: 'fullscreen', component: FullScreenPageComponent},
-      { path: 'zoom-range', component: ZoomPageComponent},
-      { path: 'markers', component: MarkersPageComponent},
       { path: 'proerties', component: PropertiesPageComponent},
       { path: '**', redirectTo: 'fullscreen'}
     ]
@@ -10248,8 +10237,6 @@ interface MenuItems {
 export class SiteMenuComponent {
   public menuItems: MenuItems[] = [
     { router: '/maps/fullscreen', name: 'Fullscreen', icon: 'fa-solid fa-desktop' },
-    { router: '/maps/zoom-range', name: 'Zoom Range', icon: 'fa-solid fa-magnifying-glass' },
-    { router: '/maps/markers', name: 'Marker', icon: 'fa-solid fa-location-dot'},
     { router: '/maps/properties', name: 'Properties', icon: 'fa-solid fa-house-chimney-window'},
   ]
 }
@@ -10419,39 +10406,12 @@ Y algo de estilo:
 
 ## Zoom in/out
 
-Esta funcionalidad la implementaremos en el **ZoomPageComponent**
+Implementamos estos métodos:
 
-Implementamos este componente:
 
 ```typescript
-@Component({
-  templateUrl: './zoom-page.component.html',
-  styleUrl: './zoom-page.component.css'
-})
-export class ZoomPageComponent implements AfterViewInit{
-
-  @ViewChild('map') divMap?: ElementRef;
 
   public zoom: number = 10;
-
-  public map!: Map;
-
-  ngAfterViewInit(): void {
-
-    if(!this.divMap) {
-      return;
-    }
-
-    this.map = new Map({
-      accessToken: environment.mapbox_key,
-      container: this.divMap.nativeElement, // container ID
-      style: 'mapbox://styles/mapbox/streets-v12', // style URL
-      center: [-74.5, 40], // starting position [lng, lat]
-      zoom: this.zoom, // starting zoom
-    });
-
-    this.mapListener();
-  }
 
   mapListener() {
     this.map.on('zoom', (ev) => {
@@ -10471,8 +10431,12 @@ export class ZoomPageComponent implements AfterViewInit{
     this.map.zoomOut();
   }
   
-}
 ```
+ 
+ El método **this.mapListener();** lo llamaremos dentro del **ngAfterViewInit** luego de inicializar el mapa.
+
+
+
 
 Y el Template:
 
@@ -10610,3 +10574,347 @@ const makerOptions = {
 Esto genera:
 <br/>
 <img src="./imagenes/mapApp03.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 60%; height: auto; border: 1px solid black" />
+
+
+## Guardar en el Local Storage
+
+Los marcadores que agregamos pueden ser guardados en el local storage, necesitamos dos métodos para guardar y recuperar la información. Nota, no vamos a guardar el objeto Marker, ya que contiene muchos datos, en su lugar guardaremos la latitud y longitud.
+
+
+## Código completo del Componente
+
+
+```typescript
+export interface MarkerInfo {
+  marker: Marker;
+  color: string;
+}
+
+export interface PlainMarker {
+  lng: number;
+  lat: number;
+  color: string;
+}
+
+@Component({
+  templateUrl: './full-screen-page.component.html',
+  styleUrl: './full-screen-page.component.css'
+})
+export class FullScreenPageComponent implements OnInit, AfterViewInit, OnDestroy{
+
+  @ViewChild('map') divMap?: ElementRef;
+
+  public zoom: number = 10;
+
+  public map!: Map;
+
+  public currentLatLng: LngLat = new LngLat(-85.579765542208, 11.577481296026505);
+
+  private markersList: MarkerInfo[] = [];
+
+  ngOnInit(): void {
+    
+  }
+  
+  ngAfterViewInit(): void {
+
+    if(!this.divMap) {
+      return;
+    }
+
+    this.map = new Map({
+      accessToken: environment.mapbox_key,
+      container: this.divMap.nativeElement, // container ID
+      style: 'mapbox://styles/mapbox/streets-v12', // style URL
+      center: this.currentLatLng, // starting position [lng, lat]
+      zoom: this.zoom, // starting zoom
+    });
+
+    this.mapListener();
+
+    this.loadFromLocalStorage();
+  }
+
+  ngOnDestroy(): void {
+    this.map.remove();
+  }
+
+  mapListener() {
+    this.map.on('zoom', (ev) => {
+      this.zoom = this.map.getZoom();
+    });
+
+    this.map.on('move', (ev) => {
+      this.currentLatLng = this.map.getCenter();;
+    });
+  }
+
+  addMarker(lngLat: LngLat, options: MarkerOptions) {
+
+    const color = options.color || 
+      '#' + Math.floor(Math.random() * 16777215).toString(16);
+    
+      const marker = new Marker({
+      ...options,
+      color
+    })
+      .setLngLat(lngLat)
+      .addTo(this.map);
+    
+    if (options.draggable) {
+      marker.on('dragend', (ev) => {
+        this.saveToLocalStorage();
+      });
+    }
+
+    this.markersList.push({marker, color});
+    this.saveToLocalStorage();
+  }
+
+  removerMarker(index: number) {
+    const marker = this.markersList[index];
+    marker.marker.remove();
+    this.markersList.splice(index, 1);
+    this.saveToLocalStorage();
+  }
+
+  flyToMarker(index: number) {
+    const marker = this.markersList[index];
+    this.map.flyTo({
+      center: marker.marker.getLngLat()
+    });
+  }
+
+  OnRangeChange(event: any) {
+    this.map.setZoom(event.target.value);
+  }
+
+  zoomIn() {
+    this.map.zoomIn();
+  }
+
+  zoomOut() {
+    this.map.zoomOut();
+  }
+  
+  onAddNewMarker() {
+    const makerOptions = {
+      draggable: true,
+    }
+    this.addMarker(this.map.getCenter(), makerOptions);
+  }
+
+  get markers(): MarkerInfo[]{
+    return [...this.markersList]
+  }
+
+  saveToLocalStorage() {
+    const plainMarkers: PlainMarker[] = this.markersList.map((marker) => {
+      return {
+        lng: marker.marker.getLngLat().lng,
+        lat: marker.marker.getLngLat().lat,
+        color: marker.color
+      }
+    });
+
+    localStorage.setItem('plainmarkers', JSON.stringify(plainMarkers));
+  }
+
+  loadFromLocalStorage() {
+    const plainMarkers = localStorage.getItem('plainmarkers');
+    if (!plainMarkers) {
+      return;
+    }
+
+    const markers: PlainMarker[] = JSON.parse(plainMarkers);
+    markers.forEach((marker) => {
+      const lngLat = new LngLat(marker.lng, marker.lat);
+      const markerOptions = {
+        color: marker.color,
+        draggable: true
+      }
+      this.addMarker(lngLat, markerOptions);
+    });
+  }
+}
+```
+
+Y el Template completo
+
+```html
+<div #map id="map"></div>
+
+<div class="floatting-style floatting-range p-2">
+    <div class="floatting-content">
+        <button type="button" class="btn btn-primary" (click)="zoomOut()">-</button>
+        <input 
+            type="range"
+            class="form-range p-2"
+            min="-2"
+            max="18"
+            [value]="zoom"
+            (change)="OnRangeChange($event)"
+        >
+        <button type="button" class="btn btn-primary" (click)="zoomIn()">+</button>
+        <button type="button" class="btn btn-primary m-2" (click)="onAddNewMarker()">
+            +Marker
+        </button>
+    </div>
+
+    <span class="form-label">
+        Zoom: {{zoom | number: '1.1-1'}} - ({{currentLatLng.lat | number: '1.4-4'}}, {{currentLatLng.lng | number: '1.4-4'}})   
+    </span>
+</div>
+
+<div class="floatting-style floatting-markers-list p-2">
+    <div class="floatting">
+        <h5>Markers</h5>
+        <hr>
+        <ul class="list-group">
+            <li *ngFor="let marker of markers; let i = index" 
+                class="list-group-item"
+                (dblclick)="removerMarker(i)"
+                (click)="flyToMarker(i)">
+                M {{ i + 1 }} [{{marker.marker.getLngLat().lat| number: '1.4-4'}}, {{marker.marker.getLngLat().lng | number: '1.4-4'}}]
+            </li>
+        </ul>
+</div>
+
+```
+Resultado final del Full Map View:
+
+<br/>
+<img src="./imagenes/mapApp04.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 100%; height: auto; border: 1px solid black" />
+
+
+## Lista de Propiedades, uso de miniMaps
+
+El objetivo es mostrar una grilla, simulando una lista de propiedades, con un mapa mostrando la ubicación, el mapa lo implementaremos con el componente miniMap.
+
+Este componente recibe una latitud, longitud y se muestra en modo **interactive: false** lo que bloque las funciones de zoom, drag, etc. Es una imagen estática.
+
+
+
+El código del Minimap:
+
+```typescript
+@Component({
+  selector: 'app-mini-map',
+  templateUrl: './mini-map.component.html',
+  styleUrl: './mini-map.component.css'
+})
+export class MiniMapComponent {
+
+  @Input() public lngLat: [number, number] = [0, 0];
+  @ViewChild('map') divMap?: ElementRef;
+  
+  public map!: Map;
+
+  ngAfterViewInit(): void {
+
+    if(!this.divMap || !this.lngLat) {
+      return;
+    }
+
+    this.map = new Map({
+      accessToken: environment.mapbox_key,
+      container: this.divMap.nativeElement, 
+      style: 'mapbox://styles/mapbox/streets-v12', 
+      center: this.lngLat, 
+      zoom: 12,
+      interactive: false
+    });
+
+    new Marker().setLngLat(this.lngLat).addTo(this.map);
+  }
+
+}
+```
+
+Y el Template:
+
+```html
+<div #map></div>
+```
+
+Un poco de estilos
+
+```css
+div {
+    width: 100%;
+    height: 150px;
+    margin: 0px;
+}
+```
+
+Y listo, ahora trabajaremos en el PropertiesComponent, usará un arreglo de propiedades, y usara el miniMap para mostrarla
+
+
+El código del componente:
+
+```typescript
+mport { Component } from '@angular/core';
+
+interface House {
+  title: string;
+  description: string;
+  lngLat: [number, number];
+  price: number;
+}
+
+@Component({
+  templateUrl: './properties-page.component.html',
+  styleUrl: './properties-page.component.css'
+})
+export class PropertiesPageComponent {
+
+  public houses: House[] = [
+    {
+      title: 'Casa residencial, Canadá',
+      description: 'Bella propiedad en Katana, Canadá',
+      lngLat: [ -75.92722289474008, 45.280015511264466],
+      price: 1000000
+    },
+    // Se agregan mas elementos en este arreglo
+  ]
+}
+
+```
+
+Y el Template:
+
+```html
+<div class="row mt-3">
+    <div class="col-2"></div>
+    <div class="col">
+        <h3>Listado de Propiedades</h3>
+        <hr>
+    </div>
+</div>
+
+<div class="row mt-2">
+    <div class="col-2"></div>
+    <div class="col">
+        <div class="row">
+            <div *ngFor="let house of houses"  class="col-4 mb-2">
+                <div class="card">
+                    <img src="" class="card-img-top">
+                    <app-mini-map class="card-img-top" [lngLat]="house.lngLat"></app-mini-map>
+                    <div class="card-body">
+                        <h5 class="card-title">{{house.title}}</h5>
+                        <p class="card-text">{{house.description}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+```
+
+Como resultado obtenemos: 
+
+<br/>
+<img src="./imagenes/mapApp05.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 100%; height: auto; border: 1px solid black" />
+
+Con esto se da por conluida esta sección, hemos aprendido como icorporar otro mapa, hay muchas cosas que se pueden hacer, pero esto representa una buena base a partir de la cual se pueden implementar muchas aplicaciones con Mapas.
+

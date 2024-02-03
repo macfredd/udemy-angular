@@ -10918,3 +10918,132 @@ Como resultado obtenemos:
 
 Con esto se da por conluida esta sección, hemos aprendido como icorporar otro mapa, hay muchas cosas que se pueden hacer, pero esto representa una buena base a partir de la cual se pueden implementar muchas aplicaciones con Mapas.
 
+# Nueva Sección: Standalone Component
+
+## ¿Qué veremos en esta sección?
+
+Esta sección tiene por objetivo explicar y usar esta nueva característica de Angular, puntualmente veremos:
+
+- ¿Qué son?
+- ¿Para qué sirven?
+- ¿Cómo usarlos?
+- ¿Cómo cargarlos de forma perezosa?
+- ¿Cómo conectarlos entre sí?
+- ¿Cómo integrarlos en módulos y componentes tradicionales?
+
+## Standalone Como Página
+
+Un "standalone component" en Angular es un componente independiente que puede ser utilizado de manera autónoma sin depender de otros componentes en la misma aplicación. Para crearlo con el CLI usaremos `--standalone true`
+
+El siguiente comando crear un **standalone component** en la ruta `app/alone/pages/`
+
+```
+ng g c alone/pages/alone-page --standalone true
+```
+
+Exáminemos la estructura de este componente:
+
+
+```typescript
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-alone-page',
+  standalone: true,
+  imports: [],
+  templateUrl: './alone-page.component.html',
+  styleUrl: './alone-page.component.css'
+})
+export class AlonePageComponent {
+
+}
+```
+
+El componente es a su vez un módulo que puede ser importado por otro componente.
+
+A continuación cargaremos el componente en modo Lazy, en lugar de loadChilder, usaremos el loadComponent, y cargaremos el AlonePageComponent tal como si fuese un módulo.
+
+
+```typescript
+{
+  path: 'alone',
+  loadComponent: () => import('./alone/pages/alone-page/alone-page.component').then(m => m.AlonePageComponent)
+}
+```
+
+Si navegamos al path `http://localhost:4200/alone` veremos nuestro compomente, y no lo hemos importado en ninún lugar, solamente lo hemos cargado como si fuese un módulo más.
+
+
+## Standalone Como Componente reutilizable
+
+Creemos un nuevo componente
+
+```
+ng g c alone/components/counter-alone --standalone
+```
+
+Agregamos un simple contador
+
+```typescript
+export class CounterAloneComponent {
+
+  public counter: number = 0;
+  
+  decrement() {
+    this.counter--;
+  }
+
+  increment() {
+    this.counter++;
+  }
+}
+```
+
+Un template:
+
+```html
+<h1>Counter   {{ counter }}</h1>
+<button (click)="decrement()">-</button>
+<button (click)="increment()">+</button>
+```
+
+Si queremos usar este Standalone componente dentro de otro standalone component, debemos importar el componente, en este caso el Counter dentro del componente padre,
+
+```typescript
+@Component({
+  selector: 'app-alone-page',
+  standalone: true,
+  imports: [CounterAloneComponent],
+  templateUrl: './alone-page.component.html',
+  styleUrl: './alone-page.component.css'
+})
+export class AlonePageComponent {
+
+}
+```
+
+Y luego ya podemos usarlo en el template:
+
+```html
+<div class="row">
+    <counter-alone></counter-alone>
+</div>
+```
+
+## Standalone en Módulos Tradicionales
+
+Si un componente Standalone debe ser utilizando dentro de un compomente tradicional, debemos importar el Standalone Component dentro del módulo que contiene el componente padre. Por ejemplo, en el siguiente código, importamos el CounterAloneComponent dentro del **MapsModule** a partir de ese momento, cualquier componente definido dentro de **MapsModule** podrá usar dicho componente.
+
+```typescript
+@NgModule({
+  declarations: [
+    // Other declarations
+  ],
+  imports: [
+    CommonModule,
+    CounterAloneComponent,
+    MapsRoutingModule,
+  ]
+})
+export class MapsModule { }
+```

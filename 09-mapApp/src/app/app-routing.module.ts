@@ -12,7 +12,7 @@ const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'alone',
+    redirectTo: 'maps',
   }
 ];
 

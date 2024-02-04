@@ -45,4 +45,8 @@ export class PropertiesPageComponent {
       price: 1500000
     }
   ]
+
+  liked(index: number) {
+    console.log(this.houses[index].title + ' liked');
+  }
 }

@@ -11041,9 +11041,75 @@ Si un componente Standalone debe ser utilizando dentro de un compomente tradicio
   ],
   imports: [
     CommonModule,
-    CounterAloneComponent,
     MapsRoutingModule,
   ]
 })
 export class MapsModule { }
 ```
+
+## Ejercicio práctico
+
+Agregaremos un Like Button, en cada propiedad a la venta en nuestro PropertiesComponent, usando standalone component. Este boton acepta la cantidad de likes inciales y emite un evento cuado el visitante da click en el botón
+
+Primero creamos el componente:
+
+```
+ng g c standalone/components/like-btn --standalone
+```
+
+El código del componente sería:
+
+```typescript
+@Component({
+  selector: 'like-btn',
+  standalone: true,
+  imports: [],
+  templateUrl: './like-btn.component.html',
+  styleUrl: './like-btn.component.css'
+})
+export class LikeBtnComponent {
+
+  @Input() likes: number = 0;
+
+  @Output() onLike : EventEmitter<number> = new EventEmitter<number>();
+
+  liked() {
+    this.likes++;
+    this.onLike.emit(1);
+  }
+
+}
+```
+
+El template:
+
+```html
+<button
+    type="button"
+    class="btn btn-primary"
+    (click)="liked()">
+    <i class="fa-regular fa-thumbs-up"></i>
+    <span class="badge badge-light">{{ likes }}</span>
+</button>
+```
+
+Lo importamos en el **MapsModule** y lo usamos en nuestro template 
+
+```html
+<div class="card-footer">
+    <like-btn [likes]="0" (onLike)="liked(i)"></like-btn>
+</div>
+```
+
+Finalmente debemos definir el método del lado del **PropertiesPageComponent** que va a procesar el evento final, puede ser una llamada AJAX para aumentar los likes de dicha propiedad.
+
+```typescript
+liked(index: number) {
+  console.log(this.houses[index].title + ' liked');
+}
+```
+
+Resultado:
+
+<br/>
+<img src="./imagenes/mapApp06.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 40%; height: auto; border: 1px solid black" />

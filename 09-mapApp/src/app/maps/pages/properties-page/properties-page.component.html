@@ -10,7 +10,7 @@
     <div class="col-2"></div>
     <div class="col">
         <div class="row">
-            <div *ngFor="let house of houses"  class="col-4 mb-2">
+            <div *ngFor="let house of houses; let i = index"  class="col-4 mb-2">
                 <div class="card">
                     <img src="" class="card-img-top">
                     <app-mini-map class="card-img-top" [lngLat]="house.lngLat"></app-mini-map>
@@ -18,12 +18,12 @@
                         <h5 class="card-title">{{house.title}}</h5>
                         <p class="card-text">{{house.description}}</p>
                     </div>
+                    <div class="card-footer">
+                        <like-btn [likes]="0" (onLike)="liked(i)"></like-btn>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<div class="row mt-2">
-    <counter-alone></counter-alone>
 </div>
 

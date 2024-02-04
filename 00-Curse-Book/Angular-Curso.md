@@ -1,3 +1,9 @@
+
+<head>
+  <link rel="stylesheet" href="md.css">
+</head>
+
+
 # Curso de Angular
 
 ## C O N T E N I D O
@@ -11113,3 +11119,95 @@ Resultado:
 
 <br/>
 <img src="./imagenes/mapApp06.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 40%; height: auto; border: 1px solid black" />
+
+## Transformar el SideMenu en Standalone 
+
+Debemos mover todo el directorio del componente, que se encuentra dentro del módulo de maps, al directorio donde tenemos los standalone component.
+
+ACtualizamos las referencias y agregamos al SideMenu:
+
+```typescript
+@Component({
+  standalone: true,
+  imports: [CommonModule, RouterModule]
+})
+```
+
+CommonModule lo importamos porque usamos el NGFor para iterar sobre las opcones del menú, y el RouterModule porque agregamos links en cada opción.
+
+```html
+<ul class="list-group">
+    <li 
+    *ngFor="let item of menuItems" 
+    class="list-group-item"
+    [routerLink]="[item.router]"
+    routerLinkActive="active"
+    >
+        <i class="menu-icon {{item.icon}}"></i>{{ item.name}}
+    </li>
+</ul>
+```
+
+Con esto ya tenemos el componente en modo standalone, ahora debemos hacer los cambios donde sea que debamos utilizarlo, primero en el **MapsModule**, porque el menú lo usamos en el **MapsLayoutComponent** que está dentro de dicho módulo, y segundo lo agregaremos en nuestro **AlonePageComponent** dado que este también es un standalone component, entonces lo importamos directamente en dicho componente:
+
+```typescript
+@Component({
+  selector: 'app-alone-page',
+  standalone: true,
+  imports: [CounterAloneComponent, SiteMenuComponent],
+  templateUrl: './alone-page.component.html',
+  styleUrl: './alone-page.component.css'
+})
+export class AlonePageComponent {
+
+}
+```
+
+Y luego lo ubicamos en el template, y finalmente movemos algunos estilos CSS que habámos creado a nivel del Menu, como compomente del MAPA, para que ahora sean parte del Standalone Components, de esta forma nuestro menú contiene todo lo necesario para renderizarse correctamente donde se necesite
+
+```css
+ul {
+    left: 20px;
+    position: fixed;
+    top: 20px;
+    z-index: 999;
+}
+```
+
+Antes, debemos agregar una opción más al MenuItems para poder navegar al Alone Page
+
+```typescript
+public menuItems: MenuItems[] = [
+    { router: '/maps/fullscreen', name: 'Fullscreen', icon: 'fa-solid fa-desktop' },
+    { router: '/maps/properties', name: 'Properties', icon: 'fa-solid fa-house-chimney-window'},
+    { router: '/alone', name: 'Alone', icon: 'fa-solid fa-user'}
+  ]
+```
+
+El resultado:
+
+<br/>
+<img src="./imagenes/mapApp07.png" alt="Diseño Básico" style="margin-right: 10px; max-width: 70%; height: auto; border: 1px solid black" />
+
+
+<div style="page-break-after: always;"></div>
+
+## Nueva Seccion - Directivas personalizadas y Signals
+
+## ¿Qué veremos en esta sección?
+
+En esta sección vamos a crear directivas personalizadas en Angular. La idea será crear una directiva robusta que nos sirva para resumir la forma cómo los errores en los formularios son mostrados, y así no tener que colocar infinidad de condiciones dentro del HTML.
+
+Esta directiva que crearemos, es de uso real y dará una buena idea de qué podemos hacer con ellas.
+
+Además iniciaremos el estudio de los Signals:
+
+<aside class="nota-informativa">
+  <p>Una señal es un wrapper alrededor de un valor que puede notificar a los consumidores interesados cuando ese valor cambia. Las señales pueden contener cualquier valor, desde primitivas simples hasta estructuras de datos complejas.</p>
+</aside>
+
+<aside class="nota-importante">
+  <p>Disponibles a partir de la versión 16 de Angular.</p>
+</aside>
+
+

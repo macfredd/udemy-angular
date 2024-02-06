@@ -11150,7 +11150,7 @@ CommonModule lo importamos porque usamos el NGFor para iterar sobre las opcones 
 
 Con esto ya tenemos el componente en modo standalone, ahora debemos hacer los cambios donde sea que debamos utilizarlo, primero en el **MapsModule**, porque el menú lo usamos en el **MapsLayoutComponent** que está dentro de dicho módulo, y segundo lo agregaremos en nuestro **AlonePageComponent** dado que este también es un standalone component, entonces lo importamos directamente en dicho componente:
 
-```typescript
+```typescript {.code-block}
 @Component({
   selector: 'app-alone-page',
   standalone: true,
@@ -11209,5 +11209,113 @@ Además iniciaremos el estudio de los Signals:
 <aside class="nota-importante">
   <p>Disponibles a partir de la versión 16 de Angular.</p>
 </aside>
+
+
+## Nueva APP
+
+```
+ng new 10-DirectivesApp --standalone false --routing
+
+ng g m products --routing
+ng g c products/pages/product-page --skip-selector
+
+```
+
+La estructura de la applicación se describe a continuación
+
+```
+src/app/
+├── app.component.css
+├── app.component.html
+├── app.component.spec.ts
+├── app.component.ts
+├── app.module.ts
+├── app-routing.module.ts
+└── products
+    ├── pages
+    │   └── product-page
+    │       ├── product-page.component.css
+    │       ├── product-page.component.html
+    │       └── product-page.component.ts
+    ├── products.module.ts
+    └── products-routing.module.ts
+```
+
+Agregamos las rutas
+
+
+**AppRoutingModule**
+
+```typescript
+const routes: Routes = [
+  {
+    path: '',
+    loadChildren: () => import('./products/products.module').then(m => m.ProductsModule)
+  },
+  {
+    path: '**',
+    redirectTo: '/products'
+  }
+];
+```
+
+**ProductsRoutingModule**
+
+```typescript
+const routes: Routes = [
+  {
+    path: '',
+    children: [
+      { path: 'product', component: ProductPageComponent},
+      { path: '**', redirectTo: 'product'}
+    ]
+  }
+]; 
+```
+
+## Formulario Reactivo
+
+Para crear el formulario inyectaremos el formBuilder, anteriormente lo hemos realizado de esta forma
+
+```typescript
+constructor(private formBuilder: FormBuilder ) { }
+```
+
+También podemos inyectarlo de esta forma
+
+```typescript
+private formBuilder =  Inject( FormBuilder );
+```
+
+Agregamos un par de métodos:
+
+```typescript
+@Component({
+  templateUrl: './product-page.component.html',
+  styleUrl: './product-page.component.css'
+})
+export class ProductPageComponent {
+
+  private formBuilder =  inject( FormBuilder );
+  
+  public color: string = 'green';
+
+  public productForm: FormGroup = this.formBuilder.group({
+    name: ['', [ Validators.required, Validators.minLength(6), Validators.email]],
+  });
+
+  public changeColor(): void {
+    this.color = this.generateRandomColor();
+  }
+
+  public generateRandomColor(): string {
+    return '#' + Math.floor(Math.random()*16777215).toString(16);
+  }
+}
+```
+
+Lo enlazamos en el HTML.
+
+
 
 

@@ -13,3 +13,9 @@
     padding: 5px;
     text-align: justify;
 } 
+
+
+/* Estilos personalizados para bloques de código */
+.code-block {
+    font-size: 7px;
+}

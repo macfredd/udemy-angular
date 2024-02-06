@@ -1,0 +1,21 @@
+.nota-informativa {
+    background-color: rgba(175, 250, 252, 0.5);
+    border-left: 7px solid #2319fa;
+    margin: 5px 0;
+    padding: 5px;
+    text-align: justify;
+}
+  
+.nota-importante {
+    background-color: rgba(255, 128, 128, 0.5);
+    border-left: 7px solid #ff0000;
+    margin: 5px 0;
+    padding: 5px;
+    text-align: justify;
+} 
+
+
+/* Estilos personalizados para bloques de código */
+.code-block {
+    font-size: 7px;
+}

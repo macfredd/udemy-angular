@@ -11218,8 +11218,13 @@ ng new 10-DirectivesApp --standalone false --routing
 
 ng g m products --routing
 ng g c products/pages/product-page --skip-selector
-
+ng g m shared
+* ng g d shared/directives/customLabel
 ```
+
+<aside class="nota-informativa">
+<p> * El comando se ejecuta posteriormente </p>
+</aside>
 
 La estructura de la applicación se describe a continuación
 
@@ -11231,14 +11236,19 @@ src/app/
 ├── app.component.ts
 ├── app.module.ts
 ├── app-routing.module.ts
-└── products
-    ├── pages
-    │   └── product-page
-    │       ├── product-page.component.css
-    │       ├── product-page.component.html
-    │       └── product-page.component.ts
-    ├── products.module.ts
-    └── products-routing.module.ts
+├── products
+│   ├── pages
+│   │   └── product-page
+│   │       ├── product-page.component.css
+│   │       ├── product-page.component.html
+│   │       └── product-page.component.ts
+│   ├── products.module.ts
+│   └── products-routing.module.ts
+└── shared
+    ├── directives
+    │   ├── custom-label.directive.spec.ts
+    │   └── custom-label.directive.ts
+    └── shared.module.ts
 ```
 
 Agregamos las rutas
@@ -11316,6 +11326,133 @@ export class ProductPageComponent {
 
 Lo enlazamos en el HTML.
 
+## Crear Directiva
+
+En el módulo de Shared vamos a crear nuestra primer directiva:
+
+```
+ng g d shared/directives/customLabel
+CREATE src/app/shared/directives/custom-label.directive.spec.ts (245 bytes)
+CREATE src/app/shared/directives/custom-label.directive.ts (151 bytes)
+UPDATE src/app/shared/shared.module.ts (296 bytes)
+```
+
+El código generado para nuestra primer directiva se muestra a continuación:
+
+```typescript
+import { Directive } from '@angular/core';
+
+@Directive({
+  selector: '[appCustomLabel]'
+})
+export class CustomLabelDirective {
+
+  constructor() { }
+
+}
+```
+
+Notar que el selector se coloca entre llaves cuadradas  **[]** y se nombra usando el formato loweCammelCase. A diferencia del selector del componente que iba entre comillas simples y separado por guiones (kebab-case)
 
 
+Además de la anotación **@Directive** esta se trata como un compomente en nuestro módulo, es decir debemos declararla e importarla en el módulo **SharedModule**
 
+```typescript
+@NgModule({
+  declarations: [
+    CustomLabelDirective
+  ],
+  imports: [
+    CommonModule
+  ],
+  exports: [
+    CustomLabelDirective
+  ]
+})
+export class SharedModule { }
+```
+
+Luego importamos dicho módulo en el **ProductsModule** para usar la nueva directiva en el formulario.
+
+
+## Uso de nuestra directiva
+
+
+Tenemos nuestro formulario, con un campo **name** y un **span** que deberá mostrar el error asociado al campo
+
+```html
+<div class="col-auto">
+    <label>Nombre:</label>
+</div>
+<div class="col-auto">
+    <input formControlName="name" type="text" class="form-control">
+</div>
+<div class="col-auto">
+    <span customLabel></span>
+</div>
+```
+
+Agregamos nuestra directiva **customLabel** al span que debe de mostrar el error. Por el momento nuestra directiva no hace nada, por tanto no vemos ningún cambio.
+
+## Implementar la Directiva
+
+Vamos a nuestro código de la directiva y aplicamos estmos cambios:
+
+```typescript
+@Directive({
+  selector: '[customLabel]'
+})
+export class CustomLabelDirective {
+
+  private _errors: ValidationErrors | null | undefined  = null;
+  @Input() set errors(value: ValidationErrors | null | undefined) {
+    this._errors = value;
+    this.setErrorMessages()
+  }
+
+  private htmlElement?: ElementRef<HTMLElement>;
+
+  constructor( private el: ElementRef<HTMLElement>) { 
+    this.htmlElement = el;
+  }
+
+  setErrorMessages(): void {
+    if (!this.el) return;
+
+    if (!this._errors ) {
+      this.el.nativeElement.textContent = '';
+      return;
+    }
+
+    const errors = Object.keys(this._errors || {}); 
+
+    if (errors.includes('required')) {
+      this.el.nativeElement.textContent = 'This field is required';
+      return;
+    }
+
+    if (errors.includes('minlength')) {
+      const reqLen = this._errors['minlength'].requiredLength;
+      this.el.nativeElement.textContent = 
+        `This field must be at least ${reqLen} characters long`;
+      return;
+    }
+
+    if (errors.includes('email')) {
+      this.el.nativeElement.textContent = 
+        'This field must be a valid email';
+      return;
+    }
+  }
+}
+```
+
+Hemos definido un `@Input() set errors ...` por lo tanto debemos de pasar una lista de Errores. Nuestro template debe de cambiar:
+
+```html
+<span customLabel
+    [errors]="productForm.get('name')?.errors">
+</span>
+```
+
+Listo, de esta forma podremos ver el mensaje de error asociado al campo, pero esta vez usando una Directiva personalizada

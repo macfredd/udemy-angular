@@ -11456,3 +11456,131 @@ Hemos definido un `@Input() set errors ...` por lo tanto debemos de pasar una li
 ```
 
 Listo, de esta forma podremos ver el mensaje de error asociado al campo, pero esta vez usando una Directiva personalizada
+
+<div style="page-break-after: always;"></div>
+
+# Nueva Sección: Signals:
+
+## ¿Qué veremos en esta sección?
+
+En esta sección empezaremos a utilizar las señales en Angular
+
+(Requerimiento mínimo Angular 16+)
+
+Puntualmente veremos:
+
+- Utilización
+- Modificación
+- Mutación
+- Actualización
+
+**Definición: Signals:**
+
+<aside class="nota-informativa">
+    <p>Una señal es un Wrapper alrededor de un valor que puede notificar a los consumidores interesados cuando ese valor cambia. Las señales pueden contener cualquier valor, desde primitivas simples hasta estructuras de datos complejas.</p>
+</aside>
+
+Entonces, cual es la diferencia de los Signals con los Observables o EventEmitters?
+
+
+Los Observables son potentes pero pueden ser complicados y propensos a errores si no se usan correctamente. Los **Signals**, en cambio, están diseñados para ser más simples y accesibles, facilitando el manejo de valores reactivos en situaciones más directas, especialmente en el contexto de la interfaz de usuario. 
+
+Los **Observables** de RxJS son una abstracción más general para manejar flujos de datos asíncronos, **EventEmitter** es específico de Angular y se utiliza para la comunicación entre componentes o servicios dentro de la misma aplicación Angular. Observables pueden ser utilizados en un contexto más amplio y son parte de **RxJS**, mientras que **EventEmitter** está diseñado específicamente para Angular y se utiliza para la comunicación entre componentes.
+
+La elección entre **Observables** y **Signals** dependerá de la complejidad de los flujos de datos y de las necesidades específicas del desarrollo en Angular.
+
+## Nuevo Módulo
+
+Creamos un módulo
+
+```
+ng g m signals --routing
+```
+
+Y Creamos la siguiente estructura:
+
+```
+src/app/signals/
+├── components
+├── interfaces
+├── layout
+│   └── layout
+│       ├── layout.component.css
+│       ├── layout.component.html
+│       └── layout.component.ts
+├── pages
+│   ├── counter-page
+│   │   ├── counter-page.component.css
+│   │   ├── counter-page.component.html
+│   │   └── counter-page.component.ts
+│   ├── properties-page
+│   │   ├── properties-page.component.css
+│   │   ├── properties-page.component.html
+│   │   └── properties-page.component.ts
+│   └── user-info-page
+│       ├── user-info-page.component.css
+│       ├── user-info-page.component.html
+│       └── user-info-page.component.ts
+├── services
+├── signals.module.ts
+└── signals-routing.module.ts
+```
+
+Nuestro Sistema de Rutas:
+
+**SignalsRoutingModule**
+
+```typescript
+const routes: Routes = [
+  {
+    path: '',
+    component: LayoutComponent,
+    children: [
+      {path: 'counter', component: CounterPageComponent},
+      {path: 'user-info', component: UserInfoPageComponent},
+      {path: 'properties', component: PropertiesPageComponent},
+      {path: '**', redirectTo: 'counter'}
+    ]
+  }
+];
+```
+
+**AppRoutingModule**
+
+```typescript
+const routes: Routes = [
+  {
+    path: 'products',
+    loadChildren: () => import('./products/products.module').then(m => m.ProductsModule)
+  },
+  {
+    path: 'signals',
+    loadChildren: () => import('./signals/signals.module').then(m => m.SignalsModule)
+  },
+  {
+    path: '**',
+    redirectTo: '/signals'
+  }
+];
+```
+
+
+Agregamos un menú lateral:
+
+
+```typescript
+@Component({
+  selector: 'app-side-menu',
+  templateUrl: './side-menu.component.html',
+  styleUrl: './side-menu.component.css'
+})
+export class SideMenuComponent {
+
+  public menuItems: MenuItem[] = [
+    { title: 'Contador', route: 'counter' },
+    { title: 'Usuario', route: 'user-info' },
+    { title: 'Mutaciones', route: 'properties' }
+  ]
+}
+```
+

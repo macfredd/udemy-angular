@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 
 @Component({
   selector: 'app-counter-page',
@@ -7,4 +7,18 @@ import { Component } from '@angular/core';
 })
 export class CounterPageComponent {
 
+  public counter = signal(0);
+  public squeareComputed = computed(() => this.counter() ** 2);
+
+  public increment(): void {
+    this.counter.update((value) => value + 1);
+  }
+
+  public decrement(): void {
+    this.counter.update((value) => value - 1);
+  }
+
+  public reset(): void {
+    this.counter.set(0);
+  }
 }

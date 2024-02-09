@@ -11584,3 +11584,97 @@ export class SideMenuComponent {
 }
 ```
 
+Y lo Implementamos en el Template:
+
+```html
+<ul class="list-group">
+    <li 
+        *ngFor="let item of menuItems" 
+        class="list-group-item"
+        [routerLink]="[ item.route ]"
+        routerLinkActive="active">
+        {{item.title}}
+    </li>
+</ul>
+```
+
+
+## Crear una primer Señal
+
+Vamos a transformar el menuItems en un **signal** es decir, vamos a envolverlo en un wrapper para que este emita valores cuando algo cambien detro del menú:
+
+```typescript
+public menuItems = signal<MenuItem[]>([
+  { title: 'Contador', route: 'counter' },
+  { title: 'Usuario', route: 'user-info' },
+  { title: 'Mutaciones', route: 'properties' }
+]);
+```
+
+**menuItemsSignal** directamente no es un arreglo de **MenuITem** ahora es una señal.
+
+Si imprimimos esto en el template:  `{{menuItemsSignal}} observaremos
+
+```typescript
+() => { producerAccessed(node); return node.value; }
+```
+
+Si lo imprimimos como una función, obtenemos una lista de objetos, que son los elementos del arreglo
+
+```
+[object Object],[object Object],[object Object]
+```
+
+Así que para tener nuevamente nuestro menú, debemos cambiar el NgFor de esto:
+
+```typescript
+*ngFor="let item of menuItems" 
+```
+
+a esto
+
+```typescript
+*ngFor="let item of menuItems()" 
+```
+
+## Counter Signal
+
+Definamos un Singla Counter
+
+```typescript
+public counter = signal(0);
+```
+
+Podemos incrementar en 1 el valor del Counter de esta forma:
+
+```typescript
+this.counter.set(this.counter() + 1);
+```
+
+O mejor aún con el update
+
+```typescript
+this.counter.update((value) => value + 1);
+```
+
+Ahora, si queremos imprimir el cuadrado del valor, podriamos pensar en multiplicar el valor actual por el mismo valor
+
+```html
+<h2>Squeare Counter {{ counter() * counter() }}</h2>
+```
+
+Una solución mejor es usar una función Computada:
+
+```typescript
+public squeareComputed = computed(() => this.counter() ** 2);
+```
+
+Y cambiamos el template
+
+```html
+<h2>Squeare Counter {{ squeareComputed() }}</h2>
+```
+
+<Aside class="nota-informativa">
+<p> <strong>squeareComputed</strong> es una función computada que se va a ejecutar cuando el valor de nuestro signal <strong>counter</strong> cambie.</p>
+</Aside>

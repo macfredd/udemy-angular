@@ -1,1 +1,10 @@
-<p>counter-page works!</p>
+<h1>Counter: {{ counter() }}</h1>
+<hr>
+<h2>Squeare Counter {{ squeareComputed() }}</h2>
+<hr>
+
+<button class="btn btn-primary" (click)="increment()"> +1 </button>
+&nbsp;
+<button class="btn btn-primary" (click)="decrement()"> -1 </button>
+&nbsp;
+<button class="btn btn-primary" (click)="reset()"> reset </button>

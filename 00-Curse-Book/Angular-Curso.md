@@ -11678,3 +11678,85 @@ Y cambiamos el template
 <Aside class="nota-informativa">
 <p> <strong>squeareComputed</strong> es una función computada que se va a ejecutar cuando el valor de nuestro signal <strong>counter</strong> cambie.</p>
 </Aside>
+
+
+## Nuevo Servicio
+
+Agregamos un servicio
+
+```
+ng g s signals/services/user-service
+```
+
+Importamos el **HttpClientModule** en el AppModule.
+
+
+Usaremos un FakeAPI  `https://reqres.in/api/users/1`
+
+```json
+{
+   "data":{
+      "id":2,
+      "email":"janet.weaver@reqres.in",
+      "first_name":"Janet",
+      "last_name":"Weaver",
+      "avatar":"https://reqres.in/img/faces/2-image.jpg"
+   },
+   "support":{
+      "url":"https://reqres.in/#support-heading",
+      "text":"To keep ReqRes free, contributions towards server costs are appreciated!"
+   }
+}
+```
+
+Y generamos las interfaces 
+
+```typescript
+export interface SingleUserResponse {
+    data:    User;
+    support: Support;
+}
+
+export interface User {
+    id:         number;
+    email:      string;
+    first_name: string;
+    last_name:  string;
+    avatar:     string;
+}
+
+export interface Support {
+    url:  string;
+    text: string;
+}
+```
+
+
+Y agregamos este código al servicio:
+
+```typescript
+@Injectable({
+  providedIn: 'root'
+})
+export class UserServiceService {
+
+  private httpClient = inject(HttpClient);
+  private baseUrl = 'https://reqres.in/api/users';
+
+  getUserById(id: number): Observable<User> {
+    return this.httpClient.get<SingleUserResponse>(`${this.baseUrl}/${id}`)
+    .pipe(
+      map(response => response.data)  
+    );
+
+  }
+}
+```
+
+Vamos a crear una pantalla, con dos botones, los cuales al presionar cualquiera de ellos se generara un ID (anterior o siguiente), y cuando ese valor cambia, llamaremos nuestro srevicio para obtener la data del usuario con ese ID, posteriormente mostramos los datos del usuario en pantalla:
+
+El Template:
+
+
+
+

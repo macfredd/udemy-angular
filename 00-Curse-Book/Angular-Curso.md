@@ -11758,5 +11758,136 @@ Vamos a crear una pantalla, con dos botones, los cuales al presionar cualquiera 
 El Template:
 
 
+```html
 
+<h1>Información del Usuario</h1>
+<hr>
+
+<div class="row">
+    <div class="col-4">
+        <h3>Usuario Actual: {{userId()}}</h3>
+        <button 
+            (click)="loadUser( userId() - 1 )" 
+            class="btn btn-primary">
+            Anterior
+        </button>
+        &nbsp;
+        <button 
+            (click)="loadUser( userId() + 1 )"
+            class="btn btn-primary">
+                Siguiente
+        </button>
+    </div>
+    <div class="col-8" *ngIf="currentUser()">
+        <h3>Usuario</h3>
+        <hr>
+        <p>Nombre: {{ fullName() }}</p>
+        <p>Correo:{{ currentUser()?.email}}</p>
+        
+        <img src="{{ currentUser()?.avatar }}" alt="Avatar">
+    </div>
+    <div *ngIf="!userWasFound()"  class="col-8">
+        <h3>Usuario no encontrado</h3>
+    </div>
+</div>
+```
+
+Y el código completo del componente:
+
+```typescript
+import { HttpClient } from '@angular/common/http';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { SingleUserResponse, User } from '../../interfaces/user-request.interface';
+import { Observable, catchError, map, of } from 'rxjs';
+import { UserServiceService } from '../../services/user-service.service';
+
+@Component({
+  selector: 'app-user-info-page',
+  templateUrl: './user-info-page.component.html',
+  styleUrl: './user-info-page.component.css'
+})
+export class UserInfoPageComponent implements OnInit{
+  
+
+  private userService = inject(UserServiceService);
+
+  public userId = signal<number>(1);
+  
+  public currentUser = signal<User | undefined>(undefined);
+
+  public userWasFound = signal<boolean>(true);
+  
+  public fullName = computed<string>(() => { 
+    return this.currentUser()?.first_name + 
+      ' '
+      + this.currentUser()?.last_name});
+
+  ngOnInit(): void {
+    this.loadUser(this.userId());
+  }
+
+  loadUser(id: number) {
+    if (id < 1) {
+      this.userWasFound.update(() => false);
+      return;
+    }
+
+    this.userId.set(id);
+    this.currentUser.update(() => undefined);
+
+    this.userService.getUserById(id).subscribe({
+      next: (user) => {
+        this.currentUser.update(() => user);
+        this.userWasFound.update(() => true);
+      },
+      error: (err) => {
+        this.userWasFound.update(() => false);
+        this.currentUser.update(() => undefined);
+      }
+    })
+  }
+}
+```
+Analicemos este código, primero hacemos una inyección de dependencias, esta vez no usamos el constructor.
+
+```typescript
+private userService = inject(UserServiceService);
+```
+
+Luego tenemos varios **signals**
+
+```typescript
+public userId = signal<number>(1);
+public currentUser = signal<User | undefined>(undefined);
+public userWasFound = signal<boolean>(true);
+```
+
+**UserId** simplemente es de tipo numerico, cada vez que cambiamos su valor, se hará una búsqueda por medio del servicio, esto se debe a la acción de los botones en el template:
+
+
+```html
+<button 
+    (click)="loadUser( userId() + 1 )"
+    class="btn btn-primary">
+        Siguiente
+</button>
+```
+
+EL **currentUser** almacena el usuario actual y el **userWasFound** simplemente es un flag true/false. Recordemos que estas son variables, pero que estan envueltas dentro de la estructura de un **signal**
+
+El método **loadUser** hace lo siguiente
+
+- Verifica el ID
+- Establece el nuevo valor de **userId** 
+- Borra cualquier dato almacenado en **currentUser**
+- Usa el Servicio para obtener el Usuario según el ID
+
+Anteriormente, usabamos **Pipes** para capturar los errores, en este caso lo hacemos de una manera mas limpia, dentro del mismo **subscribe** usamos:
+
+- Next: Para obtener el siguiente valor emitido, este va a contener el usuario retornado por el servicios
+- Error: En caso de ocurrir un error lo capturamos con esta etiqueta.
+
+El Resultado es la siguiente pantalla:
+
+<img src="./imagenes/DirectivesApp01.png" alt="" style="margin-right: 10px; max-width: 70%; height: auto; border: 1px solid black" />
 

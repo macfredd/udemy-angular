@@ -17,10 +17,10 @@
                 Siguiente
         </button>
     </div>
-    <div class="col-8">
+    <div class="col-8" *ngIf="currentUser()">
         <h3>Usuario</h3>
         <hr>
-        <p>Nombre: {{ currentUser()?.first_name}} {{ currentUser()?.last_name}}</p>
+        <p>Nombre: {{ fullName() }}</p>
         <p>Correo:{{ currentUser()?.email}}</p>
         
         <img src="{{ currentUser()?.avatar }}" alt="Avatar">

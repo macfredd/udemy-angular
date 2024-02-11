@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, effect, signal } from '@angular/core';
 import { User } from '../../interfaces/user-request.interface';
 
 @Component({
@@ -20,6 +20,10 @@ export class PropertiesPageComponent {
     return this.user()?.first_name + 
       ' '
       + this.user()?.last_name});
+
+  public userChangeEffect = effect(() => {
+    console.log(this.user().first_name + ' ' + this.user().last_name + ' has been updated');
+  });
 
   onFieldUpdated(field: keyof User, value:string){
     //this.user.set({...this.user(), [field]: value});

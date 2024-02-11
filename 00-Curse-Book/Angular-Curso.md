@@ -11891,3 +11891,161 @@ El Resultado es la siguiente pantalla:
 
 <img src="./imagenes/DirectivesApp01.png" alt="" style="margin-right: 10px; max-width: 70%; height: auto; border: 1px solid black" />
 
+
+## Mutaciones
+
+
+Creamos el siguiente template
+
+```html
+<h1>Mutaciones</h1>
+<hr>
+
+<div class="row">
+    <div class="col-6">
+
+        <input 
+            type="text" 
+            class="form-control mb-2" 
+            #txtEmail
+            placeholder="Email" 
+            (input)="onFieldUpdated('email', txtEmail.value)"
+            [value]="user().email">
+
+        <input 
+            type="text" 
+            class="form-control mb-2" 
+            #txtFirstName
+            placeholder="First Name"
+            (input)="onFieldUpdated('first_name', txtFirstName.value)"
+            [value]="user().first_name">
+
+        <input 
+            type="text" 
+            class="form-control mb-2" 
+            #txtLastName
+            placeholder="Last Name"
+            (input)="onFieldUpdated('last_name', txtLastName.value)"
+            [value]="user().last_name">       
+    </div>
+    <div class="col-6">
+        <pre>
+        {{ user() | json }}
+        </pre>
+
+        <pre>
+        {{ fullName() }}
+        </pre>
+    </div>
+</div>
+```
+
+Y escribamos este componente:
+
+```typescript
+export class PropertiesPageComponent {
+
+  public user = signal<User>({
+      id:2,
+      email:'janet.weaver@reqres.in',
+      first_name:'Janet',
+      last_name:'Weaver',
+      avatar:'https://reqres.in/img/faces/2-image.jpg'
+  });
+
+  public fullName = computed<string>(() => { 
+    return this.user()?.first_name + 
+      ' '
+      + this.user()?.last_name});
+
+  onFieldUpdated(field:string, value:string){
+    this.user.set({...this.user(), [field]: value});
+  }
+}
+```
+
+Aca tenemos un **user** que es un signal y se inicializa con un objeto tipo **User** con sus respectivos datos.
+
+Además tenemos una variable **fullName** que es computada y une el first y last Name
+
+Y cada uno de los Input del formulario estan enlazados a cada una de las propiedades del objeto, (email, first_name y last_name) además cada vez que cambiamos el valor del Input llamamos el método **onFieldUpdated**
+
+<aside class="nota-importante">
+<p> Esta forma de actualizar nuestro objeto es potencialmente peligrosa, ya que se puede inyectar propiedades adicionales</p>
+</aside>
+
+Podemos aplicar una validación, que consiste en que el parámetro **field** sea únicamente de un tipo string pero que solo pueda tomar los campos de la interfaz User, es decir, **id, email, first_name ... ***
+
+```typescript
+onFieldUpdated(field: keyof User, value:string){}
+```
+
+Otra forma similar de implementar el método **onFieldUpdated** es con el Update, 
+
+```typescript
+this.user.update((current) => ({...current, [field]: value}));
+```
+
+Este código funciona igual, pero es la misma implementación.
+
+Otra forma, quizás mas extensa y tediosa pero más segura es crear algo similar a esto
+
+```typescript
+onFieldUpdated(field: keyof User, value:string){
+  this.user.update((current) => {
+    switch(field){
+      case 'email':
+        current.email = value;
+        break;
+      case 'first_name':
+        current.first_name = value;
+        break;
+      case 'last_name':
+        current.last_name = value;
+        break;
+    }
+    return current;
+  }
+)}
+```
+
+Esto es mas seguro, porque explicitamente indicamos que campos vamos a actualizar, pero podemos lograr esto haciendo una validación del **field** y seguir usando el operador spread.
+
+
+El resultado de esto es que cada vez que escribimos en la caja de texto, el valor se actualiza en la propiedad correspondiente y a la vez la variable computada FullName es ejecutada:
+
+<img src="./imagenes/DirectivesApp02.png" alt="" style="margin-right: 10px; max-width: 100%; height: auto; border: 1px solid black" />
+
+
+NOTA: Solo una aclaración, en el método onFieldUpdated usando el Switch final, no recalcula el FullName, porque estamos modificando directamente el current Value, mobx-state-tree (MST) no detecta el cambio cuando actualizamos directamente las propiedades del objeto observable.
+
+
+Lo que deberíamos hacer es retornar un nuevo objeto con los valores modificados.
+
+
+Por ejemplo:
+   
+
+    onFieldUpdated(field: keyof User, value:string){
+        //this.user.set({...this.user(), [field]: value});
+        //this.user.update((current) => ({...current, [field]: value}));
+     
+        this.user.update((current) => {
+     
+           var newUser = {...current};
+           switch(field){
+             case 'email':
+              newUser.email = value;
+               break;
+             case 'first_name':
+              newUser.first_name = value;
+               break;
+             case 'last_name':
+              newUser.last_name = value;
+               break;
+           }
+           return newUser;
+         }
+        )}
+
+

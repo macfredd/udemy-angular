@@ -17,14 +17,14 @@ export class UserInfoPageComponent implements OnInit{
   public userId = signal<number>(1);
   
   public currentUser = signal<User | undefined>(undefined);
+
+  public userWasFound = signal<boolean>(true);
   
   public fullName = computed<string>(() => { 
     return this.currentUser()?.first_name + 
       ' '
       + this.currentUser()?.last_name});
   
-      public userWasFound = signal<boolean>(true);
-
   ngOnInit(): void {
     this.loadUser(this.userId());
   }

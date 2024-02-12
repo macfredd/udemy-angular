@@ -12049,3 +12049,347 @@ Por ejemplo:
         )}
 
 
+## Efectos con Señales
+
+Un efecto es una función que se ejecuta automáticamente en respuesta a algún cambio en el estado observado. En el siguiente caso, el efecto se dispara cuando hay cambios en el signal llamado user.
+
+```typescript
+public userChangeEffect = effect(() => {
+    console.log(this.user().first_name + ' has been updated');
+  });
+```
+
+La dependencia entre el efecto y el cambio en user se establece automáticamente debido a cómo **mobx-state-tree** rastrea las dependencias. Cuando defines un efecto con `effect(() => { ... })`, el código dentro de la función se ejecuta de manera reactiva cada vez que alguna propiedad observada dentro del bloque de efecto cambia.
+
+En tu caso, `this.user()`  es una referencia a un signal, y cuando llamas a this.user().first_name dentro de la función del efecto, **mobx-state-tree** registra automáticamente una dependencia entre el efecto y user.
+
+Entonces, cada vez que se actualizan cualquier propiedad del User, el efecto se dispara automáticamente porque está observando esas propiedades. La reactividad de **mobx-state-tree** se encarga de mantener esta relación de dependencia de manera eficiente.
+
+<aside class="nota-informativa">
+    <p>Los effect tienen una limpieza automática, cada vez que se destruye el componente, se limpian los effectos.</p>
+</aside>
+
+
+<div style="page-break-after: always;"></div>
+
+# Nueva Seccion - Creando un Backend con NestJS
+
+¿Qué veremos en esta sección?
+
+- Crearemos un API REST con NestJS, dado las similitudes entre Angular y NestJS, esta será el inicio de dos secciones en la que construiremos un APP, que consuma un REST API. 
+
+
+## Inicio del Backend
+
+Iniciamos configuran las herramientas necesarias para crear nuestro API Rest, instalamos el CLI de nestjs:
+
+```
+npm i -g @nestjs/cli
+```
+
+Luego creamos nuestra APP
+
+```
+nest new nestBackend
+```
+
+Seleccionamos NPM.
+
+```
+npm run start:dev
+```
+
+## Configurar Docker en Fedora
+
+```
+sudo dnf -y install dnf-plugins-core
+sudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+
+sudo dnf install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+sudo systemctl start docker
+```
+
+
+
+### Docker Desketop
+
+```
+sudo dnf install /home/fcruz/Downloads/docker-desktop-4.27.2-x86_64.rpm
+```
+
+Configuramos el File Sharing
+
+```
+grep "$USER" /etc/subuid >> /dev/null 2&>1 || (echo "$USER:100000:65536" | sudo tee -a /etc/subuid)
+grep "$USER" /etc/subgid >> /dev/null 2&>1 || (echo "$USER:100000:65536" | sudo tee -a /etc/subgid)
+```
+
+<aside>
+<p> En fedora, si al abrir la APP Desktop no funciona, intenta reiniciar docker, o bien en la misma APP desktop, abre las configuraciones y resetea los valores de fabrica, y reinicia nuevamente la APP</p>
+</aside>
+
+
+```
+gpg --generate-key
+Add Real name
+Add Email address
+
+pub   ed##### 2024-02-11 [SC] [expires: 2026-02-10]
+pass init ed#####
+
+Sigin in Desktop and follow instructions
+```
+
+# Mongo Compass
+
+Descargar el RPM (https://www.mongodb.com/try/download/compass)[https://www.mongodb.com/try/download/compass]
+
+```
+npm install mongodb-compass-1.42.0.x86_64.rpm
+```
+
+# Docker Compose
+
+Vamos a ir a nuestro proyecto de nestjs y crearemos un archivo en la raíz del mismo
+
+**docker-compose.yml**
+
+```yml
+version: '3'
+
+services:
+  db:
+    container_name: mongo-db
+    image: mongo:7.0.5
+    volumes:
+      - ./mongo:/data/db
+    ports:
+      - "27017:27017"
+    restart: always
+```
+
+Ejecutamos el comando siguiente en la terminal:
+
+```
+docker compose up -d
+```
+
+-d : Detached, permite cerrar la terminal y dejar 
+
+<aside class="nota-importante">
+  <p> El comando anterior debí correrlo como root en fedora, y antes fue necesario hacer un:</p>
+  <pre>$ docker login</pre>
+</aside>
+
+
+```
+docker compose up -d
+[+] Running 9/9
+ ✔ db 8 layers [⣿⣿⣿⣿⣿⣿⣿⣿]      0B/0B      Pulled                                                                                                                                                                                       27.8s 
+   ✔ 57c139bbda7e Pull complete                                                                                         3.5s 
+   ✔ 2a7c884ecb1c Pull complete                                                                                         0.7s 
+   ✔ ddcbc3e219f6 Pull complete                                                                                         1.1s 
+   ✔ 347abad2978b Pull complete                                                                                         2.0s 
+   ✔ 33ad7d6a71b8 Pull complete                                                                                         1.9s 
+   ✔ 46b764746687 Pull complete                                                                                         2.5s 
+   ✔ 0d22e1cb5ef2 Pull complete                                                                                        22.2s 
+   ✔ fef1dc21c099 Pull complete                                                                                         3.3s 
+[+] Running 1/2
+ ⠏ Network nest-backend_default  Created                                                                                                                                                                                                0.9s 
+ ✔ Container mongo-db            Started        
+ ```
+
+ NOTA para Fedora: Si no llegamos a ver el contenedor en Docker-Desktop es posible que debamos abrir sesión y para ellos debemos seguir esta guía:
+
+(https://docs.docker.com/desktop/get-started/#credentials-management-for-linux-users)[ https://docs.docker.com/desktop/get-started/#credentials-management-for-linux-users]
+
+
+```
+ rm -rf ~/.password-store/docker-credential-helpers 
+ pass init ed#####
+ docker login
+ docker compose up -d
+ docker ps
+```
+
+Tambien puede ser necesario agregar nuestro usuario al grupo de Docker:
+
+Como Root:
+
+```
+ sudo usermod -aG docker $USER
+ sudo chown -R $USER:$USER ~/.docker/
+ rm -rf ~/.docker/config.json
+ sudo systemctl restart docker
+```
+
+Al final debemos de observar nuestro contenedor:
+
+
+<img src="./imagenes/11-NestJS-Angular01.png" alt="" style="margin-right: 10px; max-width: 100%; height: auto; border: 1px solid black" />
+
+# Crear CRUD con Nestjs
+
+Borramos el Controller y el Service y vamos a crear un **resource**  Un recurso en NestJS permite agregar de una sola vez, todas las operaciones necesarias para una entidad de datos. Por ejemplo, si necesitamos aplicar un CRUD para nuestro proceso de Autenticación, haremos lo siguiente
+
+
+```
+[fcruz@fedora nest-backend]$ nest g resource auth
+? What transport layer do you use? (Use arrow keys)
+❯ REST API 
+  GraphQL (code first) 
+  GraphQL (schema first) 
+  Microservice (non-HTTP) 
+  WebSockets 
+ Would you like to generate CRUD entry points? Yes
+CREATE src/auth/auth.controller.spec.ts (556 bytes)
+CREATE src/auth/auth.controller.ts (883 bytes)
+CREATE src/auth/auth.module.ts (241 bytes)
+CREATE src/auth/auth.service.spec.ts (446 bytes)
+CREATE src/auth/auth.service.ts (607 bytes)
+CREATE src/auth/dto/create-auth.dto.ts (30 bytes)
+CREATE src/auth/dto/update-auth.dto.ts (169 bytes)
+CREATE src/auth/entities/auth.entity.ts (21 bytes)
+UPDATE package.json (1984 bytes)
+UPDATE src/app.module.ts (191 bytes)
+✔ Packages installed successfully.
+[fcruz@fedora nest-backend]$ 
+```
+
+Notar como el CLI de Nestjs nos ha generado el controlador, los modulos, el servicio etc etc..
+
+La estructura del proyecto actual sería:
+
+```
+src/
+├── app.module.ts
+├── auth
+│   ├── auth.controller.ts
+│   ├── auth.module.ts
+│   ├── auth.service.ts
+│   ├── dto
+│   │   ├── create-auth.dto.ts
+│   │   └── update-auth.dto.ts
+│   └── entities
+│       └── auth.entity.ts
+└── main.ts
+```
+
+# Conectar Nestjs con Mongo
+
+La Documentación de nestjs provee suficiente información para implementar nuestra conección con el manejador de base de datos, en este caso con MongoDB 
+
+[https://docs.nestjs.com/techniques/mongodb](https://docs.nestjs.com/techniques/mongodb)
+
+
+Instalamos el ORM De Mongo
+
+```
+npm i @nestjs/mongoose mongoose
+```
+
+Actualizamos nuestro AppModule
+
+```typescript
+import { Module } from '@nestjs/common';
+import { AuthModule } from './auth/auth.module';
+import { MongooseModule } from '@nestjs/mongoose';
+
+@Module({
+  imports: [AuthModule,
+  MongooseModule.forRoot('mongodb://localhost:27017')],
+  controllers: [],
+  providers: [],
+})
+export class AppModule {}
+```
+
+<aside class="nota-informativa">
+  <p> Se pueden usar variables de entorno para especificar el URL de conección</p>
+</aside>
+
+## Usar Variables de Entorno
+
+Creamos un archivo .env y .env.template y agregamos las configuraciones necesariias, por el momento:
+
+```
+MONGO_URI=mongodb://localhost:27017
+```
+
+**.env** debe ser agregado al .gitignore
+
+
+Instalamos la siguiente dependencia
+
+```
+npm install @nestjs/config
+```
+
+Luego, en nuestro app.module.ts, en la sección de los imports
+
+```typescript
+@Module({
+  imports: [
+    ConfigModule.forRoot(),
+    MongooseModule.forRoot(process.env.MONGO_URI),
+    AuthModule],
+  controllers: [],
+  providers: [],
+})
+export class AppModule {
+
+}
+
+```
+
+# Crear modelos y esquema
+
+Renombramos al entidad Auth.entity.ts por user.entity.ts
+
+```typescript
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+
+@Schema()
+export class User {
+    @Prop({ unique: true, required: true })
+    email: string;
+
+    @Prop({ required: true })
+    name: string;
+    
+    @Prop({ minlength:6, required: true })
+    password: string;
+    
+    @Prop({ default: true })
+    isActive: boolean;
+    
+    @Prop({ type: [String], default: ['user']})
+    role: string[];
+}
+
+export const UserSchema = SchemaFactory.createForClass(User);
+```
+
+Algunas anotaciones, primero **@Schema()** Cada esquema se asigna a una colección de **MongoDB** y define la forma de los documentos dentro de esa colección.
+
+Cada propiedad de la clase contiene un @Prop, por medio del cual definimos las caracteristicas de dicha propiedad, por ejemplo si es un valor único en la colección, si es requerido, si tiene un ancho mínimo, etc. 
+
+En el caso del **role**, dado que es un arreglo, definimos el tipo de datos **String** de la base de datos y el valor inicial.
+
+Para finalizar en el **AuthModule**, en la sección de Imports, le indicamo que deseamos agregar el Schema a Mongoose.
+
+```typescript
+...
+imports: [
+    MongooseModule.forFeature([
+    { name: 'User', schema: UserSchema }])
+  ]
+  })
+export class AuthModule {}
+```
+
+Esto hará que el Schema y la entidad users se muestren en MongoDB
+
+
+<img src="./imagenes/11-NestJS-Angular02.png" alt="" style="margin-right: 10px; max-width: 100%; height: auto; border: 1px solid black" />

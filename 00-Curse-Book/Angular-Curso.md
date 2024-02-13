@@ -12393,3 +12393,89 @@ Esto hará que el Schema y la entidad users se muestren en MongoDB
 
 
 <img src="./imagenes/11-NestJS-Angular02.png" alt="" style="margin-right: 10px; max-width: 100%; height: auto; border: 1px solid black" />
+
+# Validaciones en los DTO 
+
+Renombramos el create-auth.dto.ts por create-user.dto.ts y definimos los campos que esperamos en el request.
+
+Instalamos un par de clases para realizar validaciones en el DTO.
+
+```
+npm install class-validator class-transformer
+```
+
+Luego en nuestro Main.ts, agregamos el validator, como un useGlobalPipes con dos paremetros
+
+
+```typescript
+  sync function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+  }));
+  await app.listen(3000);
+```
+
+
+**whitelist**: significa que la instancia del objeto validado devuelto después de la validación solo contendrá propiedades que tengan decoradores de validación aplicados. En otras palabras, se eliminarán del objeto todas las propiedades que no estén asociadas a algún decorador de validación.
+
+
+**forbidNonWhitelisted**: Cuando forbidNonWhitelisted se establece en true, la validación generará un error si se encuentran propiedades no permitidas en el objeto validado. En otras palabras, si whitelist está activado y forbidNonWhitelisted está configurado en true, la validación fallará si el objeto contiene propiedades que no tienen decoradores de validación y que, por lo tanto, no deberían estar presentes según la configuración de whitelist.
+
+
+Agregamos las propiedades en nuestro DTO (**create-user.dto.ts**) y las reglas de validación
+```typescript
+import { IsEmail, IsString, MinLength } from 'class-validator';
+
+export class CreateUserDto {
+    
+    @IsEmail()
+    email:string;
+    
+    @IsString()
+    name:string;
+    
+    @MinLength(8)
+    password:string;
+ }
+```
+
+# Crear registro en Mongo DB
+
+Primero debemos inyectar, en nuestro servicio **AuthService** el modelo a usar, en este caso el USER
+
+```typescript
+   constructor(@InjectModel(User.name) private userModel: Model<User> ) {}
+```
+
+Usamos el decorador **@InjectModel** y le pasamos dos parametros 
+
+**User.name** User ese el modelo de datos, y name devuelve el nombre de la clase, que generalmente es el nombre del modelo de Mongoose
+
+Luego declaramos una variable privada **userModel** del tipo **Model<User>**  Model es una clase proporcionada por Mongoose que representa un modelo para una colección MongoDB específica. En este caso, es un modelo para la colección 'users' que se ha definido previamente.
+
+Hacemos una prueba, sin validaciones adicionales ni encriptación de password, únicamente para probar la interaccón con MongoDB
+
+```typescript
+create(createAuthDto: CreateUserDto) : Promise<User> {
+    const user = new this.userModel(createAuthDto);
+    return user.save();
+  }
+```
+
+Al ejecutar este curl
+
+```
+curl --location 'http://localhost:3000/auth' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "email": "myemail@gmail.com",
+    "name": "Juan el Terrible",
+    "password": "A_NoS?!///"
+}'
+```
+
+Comprobamos en Mongo Compass:
+
+<img src="./imagenes/11-NestJS-Angular03.png" alt="" style="margin-right: 10px; max-width: 70%; height: auto; border: 1px solid black" />

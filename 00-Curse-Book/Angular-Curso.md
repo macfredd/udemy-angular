@@ -12479,3 +12479,201 @@ curl --location 'http://localhost:3000/auth' \
 Comprobamos en Mongo Compass:
 
 <img src="./imagenes/11-NestJS-Angular03.png" alt="" style="margin-right: 10px; max-width: 70%; height: auto; border: 1px solid black" />
+
+# Encriptar Contraseña
+
+Instalamos el paquete bcryptJS
+
+```
+npm install bcryptjs
+npm i --save-dev @types/bcryptjs
+```
+
+Luego usamos `bcryptjs.hashSync` para generar el password encriptado.
+
+```typescript
+async create(createAuthDto: CreateUserDto) : Promise<User> {
+  const { password } = createAuthDto;
+  createAuthDto.password = bcryptjs.hashSync(password, 10);
+  
+  const createdUser = new this.userModel(createAuthDto);
+  
+  await createdUser.save()
+
+  // Remove password from the response
+  const { password: pass, ...result } = createdUser.toJSON();
+  return result;
+}
+```
+
+Esta petición
+
+```json
+{
+    "email": "Felipe@gmail.com",
+    "name": "Felipe Cruz",
+    "password": "felipecruz"
+}
+```
+
+Genera este registro
+
+```json
+{
+    "email": "Felipe@gmail.com",
+    "name": "Felipe Cruz",
+    "isActive": true,
+    "role": [
+        "user"
+    ],
+    "_id": "65cb8490f5f37a69a17f668a",
+    "__v": 0
+}
+```
+
+Como se puede observar, el método **create** ha eliminado el password de la respuesta. Pare ello fue necesario hacer opcional el campo password en la Entidad, porque el create retorna `Promise<User>`
+
+# Login 
+
+Creamos el DTO especial para el Login
+
+```typescript
+import { IsEmail, Min, MinLength } from "class-validator";
+
+export class LoginDto {
+    @IsEmail()
+    email: string;
+    
+    @MinLength(8)
+    password: string;
+}
+```
+
+Agregamos un controlador
+
+```typescript
+  @Post('login')
+  login(@Body() LoginDto: LoginDto) {
+    return this.authService.login(LoginDto);
+  }
+```
+
+Y agregamos el servicio
+
+```typescript
+async login(loginDto: LoginDto) {
+    const { email, password } = loginDto;
+    const user = await this.userModel
+      .findOne({ email });
+
+    if (!user) {
+      throw new UnauthorizedException(`User with email ${email} not found`);
+    }
+
+    if (!bcryptjs.compareSync(password, user.password)) {
+      throw new UnauthorizedException('Invalid password');
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('User is not active');
+    }
+
+    const { password: pass, ...result } = user.toJSON();
+
+    return {
+      message: 'User logged in successfully',
+      user,
+      "token": "_token_"
+    }
+    
+  }
+```
+
+# Token JWT
+
+El estándar **RFC 7519** se refiere a JSON Web Token (JWT), que es un formato compacto y seguro para transmitir información entre dos partes. Es como un pequeño paquete de datos que se utiliza para enviar información de forma segura a través de la web.
+
+Un **JWT** consiste en tres partes separadas por puntos: **el encabezado, la carga útil y la firma**. El **encabezado** proporciona información sobre cómo se debe procesar el token, la **carga útil** contiene los datos que se están transmitiendo y la **firma** se utiliza para verificar que el remitente del token es quien dice ser.
+
+<aside class="nota-informativa">
+<p>JWT se utiliza comúnmente en autenticación y autorización en aplicaciones web. Por ejemplo, después de que te autenticas en un sitio web, recibes un JWT que contiene información sobre tu sesión. Este token se adjunta a tus solicitudes posteriores para que el servidor pueda verificar tu identidad y autorizar tus acciones. Es una forma eficiente y segura de manejar la información entre diferentes partes de una aplicación web.</p>
+</aside>
+
+Instalamos las librerias:
+
+```
+npm install --save @nestjs/jwt
+```
+
+Necesatiamos un Secreet, lo creamos en nuestro .env.template y generamos un valor en nuestro .env, 
+
+```
+// JWT Secret
+// node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+JWT_SECRET=Add_strong_secret_here
+```
+
+COnfiguramos el módulo:
+
+```typescript
+@Module({
+  controllers: [AuthController],
+  providers: [AuthService],
+  imports: [
+    ConfigModule.forRoot(),
+
+    MongooseModule.forFeature([
+    { name: 'User', schema: UserSchema }]),
+    
+    JwtModule.register({
+      global: true,
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: '6h' }
+    })
+  ]
+  })
+export class AuthModule {}
+```
+
+Registramos el **JwtModule.register()** y como necesitamos acceder al **process.env.JWT_SECRET** es requerido importar la **ConfigModule.forRoot()**
+
+Creamos una interfaz
+
+```typescript
+export interface JwtPayload {
+    id: string,
+    created_at?: number,
+    expires_at?: number
+}
+```
+
+En el constructro del **AuthService** inyectamos el JwtService
+
+```typescript
+private jwtService: JwtService
+```
+
+Creamos un método para generar el JWT
+
+```typescript
+getJwtToken(payload: JwtPayload): string {
+    const token = this.jwtService.sign(payload);
+    return token;
+  }
+```
+
+Y ahora en lugar de regresar
+
+```
+"token": "_token_"
+```
+
+Regresamos el token real:
+
+```typescript
+return {
+  message: 'User logged in successfully',
+  user,
+  "token": this.getJwtToken({ id: user.id })
+};
+```

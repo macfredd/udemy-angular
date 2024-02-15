@@ -12677,3 +12677,100 @@ return {
   "token": this.getJwtToken({ id: user.id })
 };
 ```
+
+# Registro de un usuario
+
+Reutilizaremos el Create, para implementar un nuevo endpoint, el de registrar un usuario:
+
+
+Primero debemos crear una interfaz
+
+```typescript
+export interface LoginResponse {
+    user: User;
+    token: string;
+}
+```
+
+Esta interfaz la usaremos como respuesta tanto en el Login como en el register.
+
+Luego crearemos un nuevo DTO, 
+
+```typescript
+export class RegisterUserDto {
+    
+    @IsEmail()
+    email:string;
+    
+    @IsString()
+    name:string;
+    
+    @MinLength(8)
+    password:string;
+ }
+```
+
+Este es igual al CreateUserDto, pero lo manejamos en un DTO separado porque en un futuro podriamos usar el register como operacion pública y el create como de solo acceso para adminsitradores.
+
+Luego implementamos el Register en el controller:
+
+```typescript
+@Post('register')
+  register(@Body() registerUserDto: RegisterUserDto) {
+    return this.authService.register(registerUserDto);
+  }
+```
+
+También implementamos el servicio:
+
+
+```typescript
+async register(registerUserDto: RegisterUserDto): Promise<LoginResponse> {
+
+    var user = await this.create(registerUserDto);
+    
+    return {
+      user: user,
+      token: this.getJwtToken({ id: user._id })
+    };
+  }
+```
+
+NOTA: Debimos agregar la siguiente propiedad en User.Entity.ts para poder acceder al id generado por MongoDb
+
+
+```typescript
+_id?: string;
+```
+
+
+
+## Barrel index.ts
+
+podemos crear un archivo index.ts, en un directorio especifico, e importar todas las clases de una vez, por ejemplo en el DTO
+
+
+```typescript
+export * from './create-user.dto';
+export * from './login.dto';
+export * from './register-user.dto';
+export * from './update-auth.dto';
+```
+
+Luego, en lugar de hacer estas importaciones:
+
+```typescript
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateAuthDto } from './dto/update-auth.dto';
+import { LoginDto } from './dto/login.dto';
+import { RegisterUserDto } from './dto/register-user.dto';
+```
+
+Lo cambiamos por:
+
+```typescript
+import { CreateUserDto, LoginDto, RegisterUserDto, UpdateAuthDto } from './dto/';
+```
+
+Aplicamos el mismo cambio en el Servicio.
+

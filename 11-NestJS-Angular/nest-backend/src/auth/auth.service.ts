@@ -46,8 +46,6 @@ export class AuthService {
 
     const { password: pass, ...result } = user.toJSON();
 
-
-
     return {
       user,
       "token": this.getJwtToken({ id: user.id })
@@ -64,8 +62,15 @@ export class AuthService {
     };
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  findAll(): Promise<User[]> {
+    return this.userModel.find();
+  }
+
+  async findUserById(id: string): Promise<User> {
+    const user = await this.userModel.findById(id);
+    const  { password, ...result } = user.toJSON();
+
+    return result;
   }
 
   findOne(id: number) {

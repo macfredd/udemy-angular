@@ -12774,3 +12774,143 @@ import { CreateUserDto, LoginDto, RegisterUserDto, UpdateAuthDto } from './dto/'
 
 Aplicamos el mismo cambio en el Servicio.
 
+## Guards: Protección de Rutas
+
+Vamos a proteger ciertas rutas, solamente los usuarios logeados deben de tener permiso para ejecutar ciertos enporints. 
+
+
+Este endpoint, retorna toda la lista de usuario, aún sin estare logeado.
+```bash
+curl --location 'http://localhost:3000/auth'
+```
+
+Para proteger este endpoint debemos implementar un **guards** lo haremos con el comando siguiente
+
+```bash
+nest g gu auth/guards/auth
+CREATE src/auth/guards/auth/auth.guard.spec.ts (160 bytes)
+CREATE src/auth/guards/auth/auth.guard.ts (299 bytes)
+
+```
+
+
+Implementamos el Guard
+
+```typescript
+
+@Injectable()
+export class AuthGuard implements CanActivate {
+  
+  constructor(@InjectModel(User.name) private userModel: Model<User>,
+  private jwtService: JwtService ) {}
+
+  async canActivate(
+    context: ExecutionContext,
+  ): Promise<boolean> {
+    
+    const request = context.switchToHttp().getRequest();
+    
+    const token = this.extractTokenFromHeader(request);
+    
+    if (!token) {
+      throw new UnauthorizedException('Token not found');
+    }
+
+    try {
+      const payload = await this.jwtService.verifyAsync<JwtPayload>(
+        token,
+        {
+          secret: process.env.JWT_SECRET
+        }
+      );
+
+      var user = await this.authService.findUserById(payload.id);
+
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      if (!user.isActive) {
+        throw new UnauthorizedException('User is not active');
+      }
+      
+      request['user'] = user
+
+    } catch (e) {
+      throw new UnauthorizedException(e)
+    }
+
+    return true;
+  }
+
+  private extractTokenFromHeader(request: Request): string | undefined {
+    const [ type, token ] = request.headers['authorization']?.split(' ') ?? [];
+    return type === 'Bearer' && token ? token : undefined;
+  }
+}
+```
+
+Si hacemos una llamada, e imprimimos el request `console.log(request.headers);` obentemos:
+
+```js
+{
+  authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1Y2I4NDkwZjVmMzdhNjlhMTdmNjY4YSIsImlhdCI6MTcwODAwOTM1MCwiZXhwIjoxNzA4MDMwOTUwfQ.OCsxtEMGLQ_BcoHZ7He5A0GDRtIpPs2hO2Uu0auLkHE',
+  'user-agent': 'PostmanRuntime/7.36.1',
+  accept: '*/*',
+  'postman-token': '0da21e00-e832-4393-8d03-12226280e590',
+  host: 'localhost:3000',
+  'accept-encoding': 'gzip, deflate, br',
+  connection: 'keep-alive'
+}
+
+```
+El método **extractTokenFromHeader** obtiene el token 
+
+
+Si el token existe lo validamos con **verifyAsync**, le debemos de pasar el SecretKey para validarlo.
+
+Finalmente si el token es válido, guardamos el user  en el request.
+
+```typescript
+request['user'] = user;
+```
+
+**findUserById**:
+
+```typescript
+async findUserById(id: string): Promise<User> {
+    const user = await this.userModel.findById(id);
+    const  { password, ...result } = user.toJSON();
+
+    return result;
+  }
+```
+
+Hasta este punto hemos intercepado el request, se extrajo el Token, se validó y se guardo el User ID en la variable User del request.
+
+Implementamos el Guard en el Controllador.
+
+```typescript
+@UseGuards(AuthGuard)
+  @Get()
+  findAll(@Request() req: Request) {
+    console.log(req['user']);
+    return this.authService.findAll();
+  }
+```
+
+El console.log imprimirá los datos del usuario, sin el password:
+
+```js
+{
+  _id: new ObjectId('65cb8490f5f37a69a17f668a'),
+  email: 'Felipe@gmail.com',
+  name: 'Felipe Cruz',
+  isActive: true,
+  role: [ 'user' ],
+  __v: 0
+}
+```
+
+
+

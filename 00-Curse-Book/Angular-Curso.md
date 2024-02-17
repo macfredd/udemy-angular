@@ -13067,5 +13067,227 @@ const routes: Routes = [
 ];
 ```
 
+Descargamos los diseños para **auth-layout.component.html** 
+
+```html
+<div class="limiter">
+  <div class="container-login100" style="background-image: url('../../../../assets/images/bg-01.jpg');">
+      <div class="wrap-login100 p-l-55 p-r-55 p-t-65 p-b-54">
+
+          <router-outlet />
+
+      </div>
+  </div>
+</div>
+```
+
+Y también para **login-page.component.html **
+
+```html
+<form class="login100-form"
+      autocomplete="off">
+
+    <span class="login100-form-title p-b-49">
+        Login
+    </span>
+
+    <div class="wrap-input100 m-b-23">
+        <span class="label-input100">Correo</span>
+        <input class="input100"
+               type="email"
+               placeholder="Correo electrónico">
+        <span class="focus-input100"></span>
+    </div>
+
+    <div class="wrap-input100">
+        <span class="label-input100">Contraseña</span>
+        <input class="input100"
+               type="password"
+               placeholder="Ingrese su contraseña">
+        <span class="focus-input100"></span>
+    </div>
+
+    <div class="text-right p-t-8 p-b-31"></div>
+
+    <div class="container-login100-form-btn">
+        <div class="wrap-login100-form-btn">
+            <div class="login100-form-bgbtn"></div>
+            <button class="login100-form-btn"
+                    type="submit">
+                Login
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-col-c p-t-60">
+        <span class="txt1 p-b-17">
+            ¿No tienes cuenta?
+        </span>
+
+        <a routerLink="/auth/register" class="txt2">
+            Crear una aquí
+        </a>
+    </div>
+</form>
+```
+Resultado:
+
+<img src="./imagenes/11-NestJS-Angular04.png" alt="" style="margin-right: 10px; max-width: 50%; height: auto; border: 1px solid black" />
 
 
+A continuación usaremos **ReactiveFormsModule** y dado que solo lo usaremos en nuestro AuthModule, lo vamos a importar en ese módulo.
+
+```typescript
+NgModule({
+  declarations: [
+    // Declaraciones
+  ],
+  imports: [
+    // Otros imports
+    ReactiveFormsModule,
+  ]
+})
+export class AuthModule { }
+```
+
+Luego enlazamos el formulario del HTML con el Form en nuestro componente
+
+```typescript
+export class LoginPageComponent {
+
+  private formBuilder = inject(FormBuilder);
+
+  public form: FormGroup = this.formBuilder.group({
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]]
+  });
+
+  onSubmit(): void {
+
+  }
+}
+```
+
+Y en el HTML aplicamos los cambios 
+
+```html
+<form  [formGroup]="form" (ngSubmit)="onSubmit()"/>
+<!-- Otros tags html-->
+<input formControlName="email" type="email">
+<input formControlName="password" type="password">
+```
+
+# Creando el Servicio
+
+En el app Modulo importamos el **HttpClientModule**
+
+Creamos dos interfaces
+
+```typescript
+import { User } from "./user.interface";
+
+export interface LoginResponse {
+    user:  User;
+    token: string;
+}
+```
+
+```typescript
+export interface User {
+    _id:      string;
+    email:    string;
+    name:     string;
+    password: string;
+    isActive: boolean;
+    role:     string[];
+}
+```
+
+Creamos un Enum
+
+```typescript
+export enum AuthStatus {
+    CHEKING         = 'CHEKING',
+    AUTHENTICATED   = 'AUTHENTICATED',
+    UNAUTHENTICATED = 'UNAUTHENTICATED',
+};
+```
+
+Y luego implementamos el servicio 
+
+```typescript
+export class AuthService {
+
+  private readonly baseUrl = environment.baseUrl;
+  private httpClient: HttpClient = inject(HttpClient);
+  private _currentUser = signal<User | null>(null);
+  private _authStatus = signal<AuthStatus>(AuthStatus.CHEKING);
+  // No exponemos el current User directamente, sino que lo exponemos a través de una propiedad computada
+  public currentUser = computed(() => this._currentUser);
+  // No exponemos el authStatus directamente
+  public authStatus = computed(() => this._authStatus);
+
+  constructor() { }
+
+  login(email: string, password: string): Observable<boolean> {
+
+    const url = `${this.baseUrl}/auth/login`;
+    const body = { email, password };
+
+    return this.httpClient.post<LoginResponse>(url, body)
+    .pipe(
+      tap(({user, token}) => {
+        this._currentUser.set(user);
+        this._authStatus.set(AuthStatus.AUTHENTICATED);
+        localStorage.setItem('token', token);
+        console.log({user, token});
+      }),
+      map(() => true)
+    );
+  }
+}
+```
+
+Y cuando el usuario hace click en el botón login llamamos el onSubmit:
+
+```typescript
+onSubmit() {
+    console.log('Vino ACA');
+    return this.authSerice.login(this.form.value.email, this.form.value.password)
+    .subscribe((result) => {
+      console.log('Result **', result);
+    });
+  }
+```
+
+# CORS
+
+Si intentamos logearnos, vamos a tener un error:
+
+<aside class="nota-importante">
+<p>Access to XMLHttpRequest at 'http://localhost:3000/auth/login' from origin 'http://localhost:4200' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.</p>
+</aside>
+
+Una solución válida para entronos de desarrollos consiste en configura rel CORS en el API, 
+
+```typescript
+    app.enableCors();
+```
+Pero en producción debemos ser más específicos e indicar quienes son los origenes habilitados:
+
+```typescript
+// Configura CORS en tu aplicación NestJS
+const allowedOrigins = ['http://localhost:4200'];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Verifica si el origen de la solicitud está en la lista de dominios permitidos
+      const isAllowed = allowedOrigins.includes(origin);
+      callback(null, isAllowed);
+    },
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  }),
+);
+```

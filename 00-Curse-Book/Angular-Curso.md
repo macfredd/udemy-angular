@@ -12914,3 +12914,158 @@ El console.log imprimirá los datos del usuario, sin el password:
 
 
 
+<div style="page-break-after: always;"></div>
+
+# Nueva Sección: Nueva Aplicación: Auth App
+
+## ¿Qué veremos en esta sección?
+
+Esta sección principalmente busca conectar el Frontend (Angular) con el backend (Node+Nest) que hicimos en la sección anterior, pero puntualmente veremos:
+
+
+- Functional Guards
+- Manejo de autenticación
+- Señales
+- Effectos
+- Manejo de errores
+- SweetAlert
+- Determinar estado de autenticación
+- Manejo de JWTs
+- Headers de petición Http
+
+Vamos a crear la APP que consumirá nuestro backend:
+
+```bash
+ng new AuthApp --standalone false --routing
+```
+
+Ambas APP comparte el mismo directorio.
+
+```bash
+11-NestJS-Angular/
+├── AuthApp       -> Port 3001
+└── nest-backend  -> Port 3000
+```
+
+NOTA: Esta APP usa un style.css y unos assets descargados del curso.
+
+Agreamos todos los elementos que vamos a necesitar
+
+```bash
+# Modulos
+$ ng g m auth --routing
+$ ng g m dashboard --routing
+
+# Components
+$ ng g c dashboard/layouts/dashboard-layout --skip-selector
+$ ng g c auth/pages/loginPage --skip-selector
+$ ng g c auth/pages/registerPage --skip-selector
+$ ng g c auth/layouts/authLayout --skip-selector
+
+# Services
+$ ng g s auth/services/auth
+
+```
+
+```bash
+app
+├── app.component.css
+├── app.component.html
+├── app.component.spec.ts
+├── app.component.ts
+├── app.module.ts
+├── app-routing.module.ts
+├── auth
+│   ├── auth.module.ts
+│   ├── auth-routing.module.ts
+│   ├── components
+│   ├── guards
+│   ├── interfaces
+│   ├── layouts
+│   │   └── auth-layout
+│   │       ├── auth-layout.component.css
+│   │       ├── auth-layout.component.html
+│   │       └── auth-layout.component.ts
+│   ├── pages
+│   │   ├── login-page
+│   │   │   ├── login-page.component.css
+│   │   │   ├── login-page.component.html
+│   │   │   └── login-page.component.ts
+│   │   └── register-page
+│   │       ├── register-page.component.css
+│   │       ├── register-page.component.html
+│   │       └── register-page.component.ts
+│   └── services
+│       └── auth.service.ts
+└── dashboard
+    ├── dashboard.module.ts
+    ├── dashboard-routing.module.ts
+    ├── layouts
+    │   └── dashboard-layout
+    │       ├── dashboard-layout.component.css
+    │       ├── dashboard-layout.component.html
+    │       └── dashboard-layout.component.ts
+    └── pages
+```
+
+# Sistema de Rutas
+
+**AuthRoutingModule** va a contener:
+
+```typescript
+const routes: Routes = [
+  {
+    path: '',
+    component: AuthLayoutComponent,
+    children: [
+      {
+        path: 'login',
+        component: LoginPageComponent
+      },
+      {
+        path: 'register',
+        component: RegisterPageComponent
+      },
+      {
+        path: '**',
+        redirectTo: 'login',
+      }
+    ]
+  }
+];
+```
+
+El **DashBoardRoutingModule**:
+
+```typescript
+const routes: Routes = [
+  {
+    path: '',
+    component: DashboardLayoutComponent
+  
+  }
+];
+```
+
+
+Y nuestro **AppRoutingModule**:
+
+```typescript
+const routes: Routes = [
+  {
+    path: 'auth',
+    loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)
+  },
+  {
+    path: 'dashboard',
+    loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule)
+  },
+  {
+    path: '**',
+    redirectTo: 'auth'
+  }
+];
+```
+
+
+

@@ -24,23 +24,12 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Get()
   findAll(@Request() req: Request) {
-    console.log(req['user']);
     return this.authService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    console.log('findOne:' + id);
-    return this.authService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+  @UseGuards(AuthGuard)
+  @Get('check-token')
+  checkToken(@Request() req: Request) {
+    return this.authService.checkToken(req['user']);
   }
 }

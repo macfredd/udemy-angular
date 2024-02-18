@@ -13291,3 +13291,75 @@ app.use(
   }),
 );
 ```
+
+## Manejo de Errores
+
+Con la implementación actual, no estamos manejando adecuadamente los errores, por ejeplo, al ingresar un password incorrecto, vemos un error en la consola, pero el usuario no se percata del error.
+
+
+```json
+{
+    "headers": {
+        "normalizedNames": {},
+        "lazyUpdate": null
+    },
+    "status": 401,
+    "statusText": "Unauthorized",
+    "url": "http://localhost:3000/auth/login",
+    "ok": false,
+    "name": "HttpErrorResponse",
+    "message": "Http failure response for http://localhost:3000/auth/login: 401 Unauthorized",
+    "error": {
+        "message": "Invalid password",
+        "error": "Unauthorized",
+        "statusCode": 401
+    }
+}
+```
+
+
+
+Para manejar el error, Instalemos el sweetalert2 para mostrar el mensaje al usuario:
+```bash
+npm install sweetalert2
+```
+
+Luego agregaramos un CatchError (funcion de rxJs) como última función en el pipe
+
+```typescript
+catchError((err) => {
+  return throwError(() => err.error.message);
+})
+```
+
+Y en el componente, en el onSubmit 
+
+```typescript
+onSubmit() {
+    return this.authSerice.login(this.form.value.email, this.form.value.password)
+    .subscribe({
+      next: () => console.log('Logged in'),
+      error: (error) => {
+
+        var errMessage = '';
+
+        if (error instanceof Array) {
+          error.forEach((err) => {
+            errMessage += err + '<br>';
+          });
+          error = errMessage;
+        } else {
+          errMessage = error.message;
+        }
+        Swal.fire('Error', error, 'error')
+      }
+    });
+  }
+```
+
+Cualquier error será mostrado en un Alert:
+
+
+<img src="./imagenes/11-NestJS-Angular05.png" alt="" style="margin-right: 10px; max-width: 50%; height: auto; border: 1px solid black" />
+
+

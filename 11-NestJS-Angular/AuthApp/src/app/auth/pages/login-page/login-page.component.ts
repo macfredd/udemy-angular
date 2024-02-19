@@ -3,6 +3,7 @@ import { Form, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { Observable } from 'rxjs';
 import Swal from 'sweetalert2';
+import { Router } from '@angular/router';
 
 @Component({
   templateUrl: './login-page.component.html',
@@ -14,6 +15,8 @@ export class LoginPageComponent {
 
   private authSerice = inject(AuthService);
 
+  private router = inject(Router);
+
   public form: FormGroup = this.formBuilder.group({
     email: ['Felipe@gmail.com', [Validators.required, Validators.email]],
     password: ['felipecruz', [Validators.required, Validators.minLength(6)]]
@@ -22,7 +25,7 @@ export class LoginPageComponent {
   onSubmit() {
     return this.authSerice.login(this.form.value.email, this.form.value.password)
     .subscribe({
-      next: () => console.log('Logged in'),
+      next: () => this.router.navigate(['/dashboard']),
       error: (error) => {
 
         var errMessage = '';

@@ -13363,3 +13363,194 @@ Cualquier error será mostrado en un Alert:
 <img src="./imagenes/11-NestJS-Angular05.png" alt="" style="margin-right: 10px; max-width: 50%; height: auto; border: 1px solid black" />
 
 
+## Funciones Guards, protección de rutas:
+
+Primero haremos el redirect al Dashboard, cuando el usuario se ha logeado. En el **LoginPageComponent** inyectamos el router y luego lo usamos en el **Next** del **subscribe** en el método **onSubmit**
+
+```typescript
+private router = inject(Router);
+
+return this.authSerice.login(this.form.value.email, this.form.value.password)
+    .subscribe({
+      next: () => this.router.navigate(['/dashboard']),
+      error: // Manejo de error.
+    });
+```
+
+Una vez que el usuario se autentica, es redirigido correctamente al Dashboard.
+
+Pero el Dashboard no tiene protección alguna, podriamos acceder al url sin estar Logeados. Esa protecció la implementaremos con un Guard.
+
+
+Otra situación es que el Usuario logeado no se mantiene en memoria. Si agregamos este cambio en el **DashboardLayoutComponent**
+
+
+```typescript
+export class DashboardLayoutComponent {
+  private authService = inject(AuthService);
+  public user = computed(() => this.authService.currentUser());
+}
+```
+
+y mostramos en el template 
+
+```html
+<pre>
+    {{ user() | json }}
+</pre>
+```
+
+Veremos que luego de logearnos y ser redirigidos, podremos ver la información de usario en pantalla, pero si recargamos el dashbiard se piede la información.
+
+
+Vamos a implementar el Guard primeramente:
+
+
+```bash
+$ ng g g auth/guards/is-authenticated --functional
+? Which type of guard would you like to create? CanActivate
+CREATE src/app/auth/guards/is-authenticated.guard.spec.ts (506 bytes)
+CREATE src/app/auth/guards/is-authenticated.guard.ts (139 bytes)
+```
+
+Agreguemos el Guard
+
+```typescript
+import { CanActivateFn, Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
+import { inject } from '@angular/core';
+
+export const isAuthenticatedGuard: CanActivateFn = (route, state) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (authService.authStatus() === 'AUTHENTICATED') 
+    return true;
+  
+  router.navigate(['/auth/login']);
+  return false;
+}
+```
+
+Este guard lo podemos usar en aquellas rutas que queremos proteger, por ejemoplo el del dashboard. Para ello actualizamos nuestro sistema de rutas, en el **AppRoutingModule**
+
+```typescript
+{
+    path: 'dashboard',
+    loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule),
+    canActivate: [isAuthenticatedGuard]
+},
+```
+
+Cómo funciona el Guard? Esta es la secuencia de eventos:
+- El Usuario se logea
+- El servicio tiene un Signal Computed public llamado authStatus, este es actualizado a **AUTHENTICATED** solo si el usuario ha proporcionado credenciales correctas
+- El router redirige al usuario al **Dashboard**
+- Cuando se carga el **Dashboard** el Guard entra en acción, y verifica que el usuario esté autenticado. Caso contrario es redirigido al Login.
+
+
+## Check Token
+
+Vamos a crear una interfaz
+
+```typescript
+import { User } from "./user.interface";
+
+export interface LoginResponse {
+    user:  User;
+    token: string;
+}
+```
+
+Y aregaremos un nuevo método en el serivcio AuthService para validar el estado del token,
+
+
+```typescript
+checkAuth(): Observable<boolean> {
+
+    const url = `${this.baseUrl}/auth/check-token`;
+    const token = localStorage.getItem('token');
+
+    const header = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    return this.httpClient.get<CheckTokenReponse>(url, { headers: header })
+    .pipe( 
+      map(({token, user}) => {
+        this._currentUser.set(user);
+        this._authStatus.set(AuthStatus.AUTHENTICATED);
+        localStorage.setItem('token', token);
+        return true;
+      }),
+      catchError((err) => {
+        
+        if (401 === err.status) {
+          this._currentUser.set(null);
+          this._authStatus.set(AuthStatus.UNAUTHENTICATED);
+          localStorage.removeItem('token');
+          this.router.navigate(['/auth/login']);
+        }
+        return of(false);
+      })
+    );
+  }
+```
+
+Si durante la validación del token, esté sigue siendo válido, usaremos el nuevo token en nuestra app. Si por el contrario es un token expirado, limpiaremos las variables necesarios y vamos a redireccionar al usuario al Login.
+
+
+
+## Reaccionando a los cambios de Autenticación
+
+Vamos a implementar un fujo que valide el estado de la autenticacion, primero agregamos esto en el 
+
+
+```typescript
+export class AppComponent {
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
+  public checkAuthStatus = computed(() => {
+    if (this.authService.authStatus() === AuthStatus.CHECKING) {
+      return false;
+    }
+    return true;
+  });
+
+  public authStatusChangeEffect = effect(() => {
+    this.authService.authStatus();
+  });
+  
+}
+```
+
+En el template principal  **app.component.html**
+
+```html
+<h1 *ngIf="!checkAuthStatus()">Loading...</h1>
+<router-outlet *ngIf="checkAuthStatus()"></router-outlet>
+```
+
+Y en el constructor del servicio de autenticacion:
+
+```typescript
+constructor() {
+    this.checkAuth().subscribe();
+  }
+```
+
+
+- Cuando se crea una instancia del servicio (constructor), se inicia automáticamente el proceso de verificación de autenticación (**checkAuth()**).
+    
+- Mientras se verifica la autenticación, el componente principal (AppComponent) puede mostrar un mensaje de carga 
+```html
+<h1 *ngIf="!checkAuthStatus()">Loading...</h1>
+```
+    
+- Cuando la verificación de autenticación se completa (ya sea éxito o error), se emite un valor a través del observable al que se suscribió en el constructor (`this.checkAuth().subscribe()`).
+    
+- Dependiendo del resultado de la verificación, el componente principal decide mostrar el contenido principal o redirigir al componente de inicio de sesión (
+  
+```html
+<router-outlet *ngIf="checkAuthStatus()"></router-outlet>)
+```
+

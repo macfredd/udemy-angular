@@ -8,12 +8,14 @@ import { JwtPayload } from './interfaces/jwt-payload';
 import { LoginResponse } from './interfaces/login-response';
 
 import { CreateUserDto, LoginDto, RegisterUserDto, UpdateAuthDto } from './dto';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class AuthService {
 
   constructor(@InjectModel(User.name) private userModel: Model<User>,
   private jwtService: JwtService ) {}
+  
 
   async create(createAuthDto: CreateUserDto) : Promise<User> {
       const { password } = createAuthDto;

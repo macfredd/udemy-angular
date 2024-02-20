@@ -6,46 +6,77 @@
 
 # Curso de Angular
 
-## C O N T E N I D O
+<strong>
+Plataforma: Udemy   |Instructor: Fernando Herrera |Fecha: Diciembre 2023
+</strong>
 
-El siguiente documento presenta una descripción detallada de los conocimientos adquiridos y prácticas realizadas durante el curso de Angular de la plataforma Udemy. [Mas información Aquí: https://www.udemy.com/course/angular-fernando-herrera](https://www.udemy.com/course/angular-fernando-herrera)
+
+<br/><br/>
+## Nota del Autor:
+
+El siguiente documento constituye una exhaustiva recopilación de los conocimientos y prácticas derivados del curso de Angular ofrecido en la plataforma Udemy. Su propósito fundamental radica en servir como un recurso detallado y de fácil acceso para futuras referencias en mi trayectoria profesional.
+
+Además de presentar el código proporcionado por el instructor, este documento incluye explicaciones detalladas de ciertos conceptos que, aunque se abordaron en el curso de Angular, no fueron explorados en profundidad. Se ha procurado enriquecer la comprensión de estos temas mediante análisis más detallados. Esta extensión va más allá de la enseñanza estándar del curso, proporcionando una perspectiva más completa y facilitando la asimilación de conceptos clave. Así, este material no solo actúa como una recopilación de lo aprendido, sino también como un recurso complementario que busca ofrecer una comprensión más holística de los temas tratados en el curso.
+
+Quisiera enfatizar que este material no tiene como finalidad generar lucro alguno. En lugar de ello, busca únicamente consolidar y mantener frescos los conocimientos adquiridos durante el curso. Es importante señalar que la mayor parte del código presente en este documento ha sido proporcionado por el instructor, **Fernando Herrera**. Solo en casos excepcionales se han incorporado modificaciones o funcionalidades adicionales como resultado de prácticas complementarias.
+
+Esta recopilación se presenta como una herramienta personal, creada con el objetivo de fortalecer y consolidar los conceptos aprendidos en el curso de Angular. Agradezco profundamente al instructor por compartir su experiencia y conocimientos, los cuales han sido fundamentales para mi desarrollo en esta tecnología.
+
+Espero que este documento no solo sirva como recordatorio para mí, sino también como una fuente de conocimiento para otros estudiantes interesados en profundizar en Angular. Cabe destacar que cualquier beneficio derivado de este material debe ser atribuido principalmente al esfuerzo y dedicación del instructor y la plataforma Udemy, a quienes agradezco por facilitar este valioso aprendizaje.
+
+[Mas información Aquí: https://www.udemy.com/course/angular-fernando-herrera](https://www.udemy.com/course/angular-fernando-herrera)
+
+
+
+__Diciembre 2023 - En proceso...__
+
+<div style="page-break-after: always;"></div>
+
+## C O N T E N I D O
+<hr/>
+
+
+
+<div style="page-break-after: always;"></div>
 
 ## Instalación
 
 Se requiere:
 
-Google Chrome
-Visual Studio Code
-Postman o extensión REST CLIENT de Code.
-Mongo Compass
-Git
-Tener una cuenta en github o bitbucket, etc.
+- Google Chrome
+- Visual Studio Code
+- Postman o extensión REST CLIENT de Code.
+- Mongo Compass
+- Docker
+- Docker Desktop
+- Git
+- Tener una cuenta en github o bitbucket, etc.
 
-Para Mongo Compass ir al sitio https://www.mongodb.com/try/download/compass descargar y luego instalar el rpm ( o el ejecutable dependiendo de su sistema operativo)
+
+Para __Mongo Compass__ ir al sitio [https://www.mongodb.com/try/download/compass](https://www.mongodb.com/try/download/compass) descargar y luego instalar el rpm ( o el ejecutable dependiendo de su sistema operativo)
 
 Extensiones recomendadas para VSCode
 
-    Angular Snippets
-    Angular Language Service
-    Angular Inline
-    Auto Close Tag
-    TypeScript importer
-    Rest Client
+- Angular Snippets
+- Angular Language Service
+- Angular Inline
+- Auto Close Tag
+- TypeScript importer
+- Rest Client
 
-Installing Angular CLI
+### Installing Angular CLI
 
 NOTA: Ver comentarios al final de esta sección para instalar la versión LTS compatible con Angular Cli.
 
 Como usuario normal, Instalar o actualiza a la última versión de Node
 
-```
+```bash
 $ nvm install node
 ```
 
-
 Si la versión instalada es > 18.0.0 debe instalar la 16.10.x
 
-```
+```bash
 $ nvm install 16.10.0
 $ nvm use 16.10.0
 $ nvm alias default 16.10.0  (Esto hará que los editores como code usen la versión or default)
@@ -53,13 +84,13 @@ $ nvm alias default 16.10.0  (Esto hará que los editores como code usen la vers
 
 Instalar angular-CLI
 
-```
+```bash
 $ npm install -g @angular/cli
 ```
 
 Probar Versión:
 
-```
+```bash
 $ ng --version
 
 Angular CLI: 13.3.4
@@ -69,14 +100,18 @@ OS: linux x64
 ```
 
 
-NOTA: Luego de retomar el curso debí instalar la última versión estable soportada por Angular con este comando:
+<aside>
+  <p class="nota-importante">NOTA: Luego de retomar el curso debí instalar la última versión estable soportada por Angular con este comando:</p>
+</aside>
 
-```
+```bash
  nvm install --lts
  vm alias default 20.9.0
  npm uninstall -g @angular/cli
  npm install -g @angular/cli
 ```
+
+<div style="page-break-after: always;"></div>
 
 ## Introducción a Angular
 
@@ -125,7 +160,7 @@ Permiten agrupar componentes, incluso otros módulos. Se pueden descargar módul
 
 Usaremos el Angular CLI (Command Line) de la siguiene manera
 
-```
+```bash
 $ npm install -g @angular/cli
 ```
 
@@ -133,7 +168,7 @@ $ npm install -g @angular/cli
 
 para crear un nuevo proyecto con el CLI usamos el siguiente comando:
 
-```
+```bash
 $ ng new 01-bases --standalone false
 ```
 
@@ -141,7 +176,7 @@ $ ng new 01-bases --standalone false
 
 Esto genera el proyecto de pruebas y puede ejecutrase con el siguiente comando
 
-```
+```bash
 $ ng serve -o
 ```
 
@@ -166,7 +201,6 @@ El proyecto cuenta con varios directorios y archivos
 ### Directorios
 
 `.angular` archivo oculto que pocas veces se modifican, Ayuda a angular para detectar cambios, maneja el cache del proyecto, etc. 
-
 
 `.vscode` Archivo del editor
 
@@ -248,13 +282,15 @@ Y consumirlo de la siguiente forma en el template:
 <button (click)=" acumular(-1) ">-1</button>
 ```
 
+<div style="page-break-after: always;"></div>
+
 ## Creando nuevos componentes.
 
 Cuando la aplicación comienza a crecer, es necesario crear una estructura de directorios para organizar nuestro código. Cada componente con todos sus elementos se crea en sus propios directorios
 
 Supongamos que vamos a crear un componente llamado `Heroe` pero este componente tiene una vista para renderizar información de un Heroe específico y tambien otro componente para mostrar información de los heroes en forma de lista, en este caso podriamos crear la siguiente estructura
 
-```
+```bash
 └── heroes
 │       ├── heroe
 │       │   ├── heroe.component.html
@@ -327,13 +363,13 @@ Los métodos **cambiarNombre()** y **cambiarEdad()** cambian las propiedades nom
 
 Para crear un componente con el ngCLI, usaremos el generador de componentes:
 
-```
+```bash
 $ ng generate component heroes/listado
 ```
 
 Podemos usar la forma simplificada, por ejemplo
 
-```
+```bash
 $ ng g c heroes/listado
 ```
 
@@ -344,8 +380,8 @@ El último valor se refiere al path y nombre del componente. Si soloamente se es
 
 Las salida del comando anterior debe ser:
 
-```
-[fcruz@dev05 01-bases]$ ng generate component heroes/listdado
+```bash
+$ ng generate component heroes/listdado
 CREATE src/app/heroes/listdado/listdado.component.css (0 bytes)
 CREATE src/app/heroes/listdado/listdado.component.html (23 bytes)
 CREATE src/app/heroes/listdado/listdado.component.spec.ts (640 bytes)
@@ -411,7 +447,7 @@ Y nuestro Template:
 </ul>
 ```
 
-Recorremos el arreglo Heroes y luego imprimimos el contenido en un _<ul>_
+Recorremos el arreglo Heroes y luego imprimimos el contenido en un _ul_
 
 ## Directivas \*ngIf y else
 
@@ -507,7 +543,7 @@ export class HeroesModule {}
 
 Este archivo se crea en la raíz del directorio Heroes, con el nombre: **heroes.module.ts**
 
-```
+```bash
 └── heroes
     ├── heroes.module.ts
     ├── heroe
@@ -530,8 +566,8 @@ NOTA: el **CommonModule** se importa en aquellos componentes que utilizan direct
 
 Ejecute el comando:
 
-```
-[fcruz@dev05 01-bases]$ ng generate module dbz
+```bash
+$ ng generate module dbz
 CREATE src/app/dbz/dbz.module.ts (189 bytes)
 ```
 
@@ -550,8 +586,8 @@ export class DbzModule {}
 
 A continuación  agregamos un compomente al módulo recién creado:
 
-```
-[fcruz@dev05 01-bases]$ ng generate component dbz/mainPage
+```bash
+$ ng generate component dbz/mainPage
 CREATE src/app/dbz/main-page/main-page.component.css (0 bytes)
 CREATE src/app/dbz/main-page/main-page.component.html (24 bytes)
 CREATE src/app/dbz/main-page/main-page.component.spec.ts (641 bytes)
@@ -804,7 +840,7 @@ Cuando un componente crece en complejidad, una señal puede ser muchos métodos 
 
 Es probable que lo ideal sería separar el listado y el formulario en componentes separados. Vamos a proceder a reliazar dicha separación de componentes. En la línea de comandos generamos el nuevo componente
 
-```
+```bash
 $ ng generate component dbz/personajes --skipTests
 ```
 
@@ -909,7 +945,7 @@ Listo todo debeía de funcionar exactamente igual.
 
 Vamos a extraer el formulario y la acción agregar en un componente hijo,
 
-```
+```bash
 $ ng generate component dbz/agregar
 ```
 
@@ -1074,7 +1110,7 @@ Presione F5, en el archivo que se muestra cambiar el puerto al puerto donde corr
 
 Cerrar Archivo y presionar nuevamente F5, para esto necesita que se esté ejecutando:
 
-```
+```bash
 $ ng server -o
 ```
 
@@ -1460,14 +1496,14 @@ agregar() {
 
 ## Generar Build de la Applicación
 
-```
+```bash
 $ ng build --prod
 ```
 
 En versiones recientes, no es necesario el parametro --prod
 
-```
-[fcruz@dev05 01-bases]$ ng build --prod
+```bash
+$ ng build --prod
 Option "--prod" is deprecated: No need to use this option as this builder defaults to configuration "production".
 ✔ Browser application bundle generation complete.
 ✔ Copying assets complete.
@@ -1495,8 +1531,8 @@ El hash en el nombre del archivo garantiza que se utilice la última versión de
 
 Esta información es almacenada en el directorio /dist
 
-```
-[fcruz@dev05 01-bases]$ tree dist/
+```bash
+$ tree dist/
 dist/
 └── bases
     ├── 3rdpartylicenses.txt
@@ -1595,7 +1631,7 @@ Vamos a construir una nueva applicación que consiste en un buscador de GIF, con
 
 Creamos el nuevo proyecto
 
-```
+```bash
 $ ng new 02-gifsApp
 ```
 
@@ -1664,11 +1700,11 @@ Y listo, tenemos un diseño básico de lo que será nuestras APP. En contenedor 
 
 Creamos el Modulo y el Componente:
 
-```
-fcruz@dev05 02-gifsApp]$ ng g m shared
+```bash
+$ ng g m shared
 CREATE src/app/shared/shared.module.ts (192 bytes)
 
-[fcruz@dev05 02-gifsApp]$ ng g c shared/sidebar
+$ ng g c shared/sidebar
 CREATE src/app/shared/sidebar/sidebar.component.css (0 bytes)
 CREATE src/app/shared/sidebar/sidebar.component.html (22 bytes)
 CREATE src/app/shared/sidebar/sidebar.component.spec.ts (633 bytes)
@@ -1690,8 +1726,8 @@ Vamos a incluir todas las utilidades referente a los gifs en este módulo.
 
 Generamos el módulo
 
-```
-[fcruz@dev05 02-gifsApp]$ ng g m gifs
+```bash
+$ ng g m gifs
 CREATE src/app/gifs/gifs.module.ts (190 bytes)
 ```
 
@@ -1701,8 +1737,8 @@ Y seguidamente lo importamos en el app.module.ts
 
 Creamo el componente:
 
-```
-[fcruz@dev05 02-gifsApp]$ ng g c gifs/gifsPage --skip-tests -is
+```bash
+$ ng g c gifs/gifsPage --skip-tests -is
 CREATE src/app/gifs/gifs-page/gifs-page.component.html (24 bytes)
 CREATE src/app/gifs/gifs-page/gifs-page.component.ts (259 bytes)
 UPDATE src/app/gifs/gifs.module.ts (284 bytes)
@@ -1720,8 +1756,8 @@ Creamos nuestra etiqueta app-gifs-page en nuestro main template
 
 La barra de búsquedas será un componente aparte, dentro del módulo de gifs, procedemos:
 
-```
-[fcruz@dev05 02-gifsApp]$ ng g c gifs/search --skip-tests -is
+```bash
+$ ng g c gifs/search --skip-tests -is
 CREATE src/app/gifs/search/search.component.html (21 bytes)
 CREATE src/app/gifs/search/search.component.ts (275 bytes)
 UPDATE src/app/gifs/gifs.module.ts (406 bytes)
@@ -2799,7 +2835,7 @@ Se agregan los iconos al template del _sideBarComponent_
 ```
 
 <div style="page-break-after: always;"></div>
-## Nueva Seccion - Image Loader 
+# Nueva Seccion - Image Loader 
 
 ¿Qué veremos en esta sección?
 
@@ -3094,8 +3130,8 @@ Mostrando información de un País en específico:
 
 Configuraciones iniciales:
 
-```
-[fcruz@fedora udemy-angular]$ ng new 03-countryApp --standalone=false
+```bash
+$ ng new 03-countryApp --standalone=false
 ? Which stylesheet format would you like to use? CSS
 ? Do you want to enable Server-Side Rendering (SSR) and Static Site Generation (SSG/Prerendering)? No
 ```
@@ -3124,12 +3160,11 @@ Agregar Bootstrap, Animate y fontawesome
   ## Modulos
   Vamos a crear un SPA (Single Page Application) y nos vamos a basar en dos módulos con varias páginas cada uno. Por el momento creamos ambos módulos:
 
-```
-[fcruz@fedora 03-countryApp]$ ng g m countries
+```bash
+$ ng g m countries
 CREATE src/app/countries/countries.module.ts (195 bytes)
-[fcruz@fedora 03-countryApp]$ ng g m shared
+$ ng g m shared
 CREATE src/app/shared/shared.module.ts (192 bytes)
-[fcruz@fedora 03-countryApp]$ 
 ```
 
 La carga del *countries.module* se hará de modo LazyLoading, es decir, no se va a cargar inicialmente, en cambio el módulo *shared.module* se será cargado desde un inicio, por lo tanto, agregaremos el *shared.module* en la sección de _imports_ de nuestro *app.module*
@@ -3264,8 +3299,8 @@ Vamos a crear la estructura de directorios y a la vez agregaremos componentes y 
 Comenzamos creando algunas carpetas _components_, _services_, _pages_, _interfaces_ y agregamos componentes:
 
 
-```
-[fcruz@fedora 03-countryApp]$ ng g c countries/pages/byCapitalPage --inline-style   --skip-tests 
+```bash
+$ ng g c countries/pages/byCapitalPage --inline-style   --skip-tests 
 CREATE src/app/countries/pages/by-capital-page/by-capital-page.component.html (30 bytes)
 CREATE src/app/countries/pages/by-capital-page/by-capital-page.component.ts (200 bytes)
 UPDATE src/app/countries/countries.module.ts (317 bytes)
@@ -3273,7 +3308,7 @@ UPDATE src/app/countries/countries.module.ts (317 bytes)
 
 De la misma forma crearemos los siguientes componentes:
 
-```
+```bash
 $ ng g c countries/pages/byCountryPage --inline-style   --skip-tests 
 $ ng g c countries/pages/byRegionPage --inline-style   --skip-tests 
 $ ng g c countries/pages/countryPage --inline-style   --skip-tests 
@@ -3452,7 +3487,7 @@ Los cambios realizados permiten cargar de manera perezosa el módulo *CountriesM
 
 Esto lo podemos ver también en el *build*, podemos notar que existe una sección *Lazy Chunk Files*, este se carga tan pronto hacemos click por primera vez en uno de los links nuevo.
 
-```
+```bash
 fcruz@fedora 03-countryApp]$ ng build
 
 Initial Chunk Files   | Names            |  Raw Size | Estimated Transfer Size
@@ -3612,8 +3647,8 @@ Verificamos las interfaces creadas.
 
 Con el Angular CLI Creamos un nuevo servicio
 
-```
-[fcruz@fedora app]$ ng g s countries/services/countries.service.ts
+```bash
+$ ng g s countries/services/countries.service.ts
 CREATE src/app/countries/services/countries.service.ts.service.spec.ts (419 bytes)
 CREATE src/app/countries/services/countries.service.ts.service.ts (147 bytes)
 ```
@@ -3742,8 +3777,8 @@ El resultado para el término _San_ es:
 ## Country Table
 Implementaremos un nuevo control, para mostrar los países en una tabla.
 
-```
-[fcruz@fedora app]$ ng g c countries/countryTable
+```bash
+$ ng g c countries/countryTable
 ```
 
 En el template del nuevo componente creamos por el momento una tabla HTML
@@ -4204,8 +4239,8 @@ Aquí continuaremos la aplicación de países, pero enfocados en la parte de las
 
 Vamos agregar un componente que muestre un Spinner mientras cargamos un componente, en este caso la tabla de paises.
 
-```
-fcruz@fedora 03-countryApp]$ ng g c shared/components/loadingSpinner
+```bash
+$ ng g c shared/components/loadingSpinner
 CREATE src/app/shared/components/loading-spinner/loading-spinner.component.css (0 bytes)
 CREATE src/app/shared/components/loading-spinner/loading-spinner.component.html (30 bytes)
 CREATE src/app/shared/components/loading-spinner/loading-spinner.component.spec.ts (658 bytes)
@@ -4579,8 +4614,8 @@ npm install leaflet @asymmetrik/ngx-leaflet leaflet-minimap
 
 Agregamos un componente básico:
 
-```
-[fcruz@fedora 03-countryApp]$ ng g c shared/components/map
+```bash
+$ ng g c shared/components/map
 CREATE src/app/shared/components/map/map.component.css (0 bytes)
 CREATE src/app/shared/components/map/map.component.html (18 bytes)
 CREATE src/app/shared/components/map/map.component.spec.ts (580 bytes)
@@ -4935,8 +4970,8 @@ Conultar el sitio [https://primeng.org/button](https://primeng.org/button) para 
 
 Dado que estaremos importando muchos módulos de PrimeNg, una idea es crear un módulo personalizado y agregar los imports de primeNg en un solo lugar, esto es una idea, pueden existir otras implementaciones:
 
-```
-[fcruz@fedora 04-pipesApp]$ ng g m primeNg
+```bash
+$ ng g m primeNg
 CREATE src/app/prime-ng/prime-ng.module.ts (193 bytes)
 ```
 
@@ -4955,8 +4990,8 @@ Verificamo que el sharedModule este importado en el App.module.ts
 
 Luego, dentro de la carpeta shared creamos la carpeta **components** y agregamos el componente Menu
 
-```
-[fcruz@fedora 04-pipesApp]$ ng g c shared/components/menu
+```bash
+$ ng g c shared/components/menu
 CREATE src/app/shared/components/menu/menu.component.css (0 bytes)
 CREATE src/app/shared/components/menu/menu.component.html (19 bytes)
 CREATE src/app/shared/components/menu/menu.component.spec.ts (587 bytes)
@@ -5092,8 +5127,8 @@ Verificamos el resultado:
 
 Crearemos un módulo para relizar la carga perezosa, 
 
-```
-[fcruz@fedora 04-pipesApp]$ ng g m products --routing
+```bash
+$ ng g m products --routing
 CREATE src/app/products/products-routing.module.ts (251 bytes)
 CREATE src/app/products/products.module.ts (288 bytes)
 ```
@@ -5102,7 +5137,7 @@ CREATE src/app/products/products.module.ts (288 bytes)
 
 Dentro del directorio **products** crearemos el directorio **pages** y dentro del mismo agregaremos nuestros componentes
 
-```
+```bash
 ng g c products/pages/basicsPage --skip-tests
 ng g c products/pages/numbersPage --skip-tests
 ng g c products/pages/uncommonPage --skip-tests
@@ -5110,8 +5145,8 @@ ng g c products/pages/uncommonPage --skip-tests
 
 Resultado
 
-```
-[fcruz@fedora 04-pipesApp]$ tree src/app/products/pages/
+```bash
+$ tree src/app/products/pages/
 src/app/products/pages/
 ├── basics-page
 │   ├── basics-page.component.css
@@ -5784,15 +5819,15 @@ Este es un breve listado de los temas fundamentales:
 Vamos a crear un módulo para tener nuestros customs Pipes en un lugar independiente
 
 
-```
-[fcruz@fedora 04-pipesApp]$ ng g m custom-pipes
+```bash
+$ ng g m custom-pipes
 CREATE src/app/custom-pipes/custom-pipes.module.ts
 ```
 
 Procedemos a crear el Custom Pipe
 
-```
-[fcruz@fedora 04-pipesApp]$ ng g p custom-pipes/toggle-case/toggle-case
+```bash
+$ ng g p custom-pipes/toggle-case/toggle-case
 CREATE src/app/custom-pipes/toggle-case/toggle-case.pipe.spec.ts (204 bytes)
 CREATE src/app/custom-pipes/toggle-case/toggle-case.pipe.ts (225 bytes)
 UPDATE src/app/custom-pipes/custom-pipes.module.ts (284 bytes)
@@ -5874,7 +5909,8 @@ Creemos un nuevo Pipe, uno que reciba un string, y tres parámetros, el primero 
 
 Creamos el Pipe
 
-```[fcruz@fedora 04-pipesApp]$ ng g p custom-pipes/random-password/random-password
+```bash
+$ ng g p custom-pipes/random-password/random-password
 CREATE src/app/custom-pipes/random-password/random-password.pipe.spec.ts (220 bytes)
 CREATE src/app/custom-pipes/random-password/random-password.pipe.ts (233 bytes)
 UPDATE src/app/custom-pipes/custom-pipes.module.ts (421 bytes)
@@ -6183,7 +6219,7 @@ Todo lo demás se hará con LazyLoad.
 
 Agregamos la estructura básica de los compomentes para el módulo **Auth**
 
-```
+```bash
 $ ng g c auth/pages/layout-page --skip-tests
 $ ng g c auth/pages/login-page --skip-tests
 $ ng g c auth/pages/register-page --skip-tests
@@ -6191,7 +6227,7 @@ $ ng g c auth/pages/register-page --skip-tests
 
 Creamos los componentes para el módulo **Heros**
 
-```
+```bash
 $ ng g c heros/pages/hero-page --skip-tests
 $ ng g c heros/pages/layout-page --skip-tests
 $ ng g c heros/pages/list-page --skip-tests
@@ -6201,7 +6237,7 @@ $ ng g c heros/pages/search-page --skip-tests
 
 Creamos los componentes para el módulo **Shared**
 
-```
+```bash
 $ ng g c shared/pages/Error404-page --skip-tests
 ```
 En este caso si vamos a exportar el  **Error404PageComponent** en el módulo **SharedModule** porque vamos a usarlos en una ruta por default en el **app.routing.module.ts**
@@ -6514,13 +6550,13 @@ Vamos a usar dos cosas
 
 De Angular Materials vamos a usar sus componentes y de PrimerFlex algunos estilos.
 
-```
+```bash
 $ ng add @angular/material
 ```
 
 Salida del Comando:
 
-```
+```bash
 ℹ Using package manager: npm
 ✔ Found compatible package version: @angular/material@17.0.4.
 ✔ Package information loaded.
@@ -7044,8 +7080,8 @@ otra opción sería agregar un PIPE, el cual recibe le `hero.id` y genera el URL
 
 En la línea de comandos:
 
-```
-[fcruz@fedora 05-herosApp]$ ng g p heros/pipes/hero-image --flat --skip-tests
+```bash
+$ ng g p heros/pipes/hero-image --flat --skip-tests
 CREATE src/app/heros/pipes/hero-image.pipe.ts (223 bytes)
 UPDATE src/app/heros/heros.module.ts (1043 bytes)
 ```
@@ -8024,16 +8060,16 @@ Editamos el archivo _package.json_ y agreamos el parámetro **-o** al script sta
 
 Creamos tres módulos
 
-```
-ng g m auth --routing
+```bash
+$ ng g m auth --routing
 CREATE src/app/auth/auth-routing.module.ts (247 bytes)
 CREATE src/app/auth/auth.module.ts (272 bytes)
 
-[fcruz@fedora 06-formsApp]$ ng g m reactive --routing
+$ ng g m reactive --routing
 CREATE src/app/reactive/reactive-routing.module.ts (251 bytes)
 CREATE src/app/reactive/reactive.module.ts (288 bytes)
 
-ng g m shared
+$  g m shared
 CREATE src/app/shared/shared.module.ts (192 bytes)
 ```
 
@@ -9547,7 +9583,7 @@ export enum Region {
 
 Creamos un srevicio:
 
-```
+```bash
 $ ng g s country/services/countries --skip-tests
 CREATE src/app/country/services/countries.service.ts (138 bytes)
 ```
@@ -10100,7 +10136,7 @@ Agregamos en el index.html la referencias a bootstrap y fontawesome
 
 Creamos un módulo:
 
-```
+```bash
 $ ng g m maps --routing
 CREATE src/app/maps/maps-routing.module.ts (247 bytes)
 CREATE src/app/maps/maps.module.ts (272 bytes)
@@ -10108,7 +10144,7 @@ CREATE src/app/maps/maps.module.ts (272 bytes)
 
 Componentes
 
-```
+```bash
 ng g c maps/components/mini-map
 ng g c maps/components/site-menu
 
@@ -10132,8 +10168,8 @@ export class MapsLayoutComponent {
 
 Esta es la estructura actual:
 
-```
-[fcruz@fedora src]$ tree app
+```bash
+$ tree app
 app
 ├── app.component.css
 ├── app.component.html
@@ -13553,4 +13589,51 @@ constructor() {
 ```html
 <router-outlet *ngIf="checkAuthStatus()"></router-outlet>)
 ```
+
+## Logout
+
+El logout consiste en limpiar el token y la información del usuario que manejamos en memoria.
+
+Cremos un método en el Servicio
+
+```typescript
+logout() {
+    this._currentUser.set(null);
+    this._authStatus.set(AuthStatus.UNAUTHENTICATED);
+    localStorage.removeItem('token');
+  }
+```
+
+Y simplemente lo mandamos a llamar desde el componente 
+
+
+<div style="page-break-after: always;"></div>
+
+# Nueva Seccion - Deploy en Producción
+
+### ¿Qué veremos en esta sección?
+
+
+El objetivo de esta sección es desplegar a producción nuestra base de datos, backend y frontend para poder ser consumidos en cualquier parte del mundo.
+
+Puntualmente veremos:
+
+- Aprovisionamiento de base de datos MongoDB
+- Railway y MongoAltas
+- Variables de entorno para producción
+- Hash Strategy
+- Publicar aplicación de Node (Nest)
+- Publicar aplicación de Angular
+- Seleccionar bases de datos
+- Pruebas reales.
+
+
+## Aprovisionamiento MongoDB
+
+Realizaremos el aprovisionamiento de la base de datos en Railway, pero hay varios servicios que les permiten preparar la base de datos Mongo de formas gratuita.
+
+
+[https://railway.app/](https://railway.app/)
+
+Abrimos una cuenta en Railway y creamos un nuevo proyecto, **Provisional Mongo DB**.
 

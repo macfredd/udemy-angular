@@ -51,6 +51,12 @@ export class AuthService {
     );
   }
 
+  logout() {
+    this._currentUser.set(null);
+    this._authStatus.set(AuthStatus.UNAUTHENTICATED);
+    localStorage.removeItem('token');
+  }
+
   checkAuth(): Observable<boolean> {
 
     const url = `${this.baseUrl}/auth/check-token`;

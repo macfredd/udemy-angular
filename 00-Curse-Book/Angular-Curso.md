@@ -13637,3 +13637,70 @@ Realizaremos el aprovisionamiento de la base de datos en Railway, pero hay vario
 
 Abrimos una cuenta en Railway y creamos un nuevo proyecto, **Provisional Mongo DB**.
 
+Creamos una base de datos nueva  **auth-db** con una colección llamada **demo**
+
+Luego copiamos la cadena de conección, ubicada en la pestaña **Variables**, copiar el contenido de **MONGO_URL**
+
+Abrimos localmente  **mongoDB Compass** y agregamos una nueva conección.
+
+
+## Configuración del Backend
+
+En el archivo .env de nuestro backend vamos a comentar la línea:
+
+```
+# MONGO_URI=mongodb://localhost:27017/mean-db
+```
+
+Y vamos a agregar la cadena de conexión de Railway.
+
+**RailWay** crea una base de datos **test** por default, y si no se especifica el nombre de la base de datos que nuestro backend va a utilizar, todos los objetos van a ser creado en **test**, por lo tanto debemos agregar una nueva variable de Environment en nuestro .env y .evn.template
+
+```
+// Used for railWay
+MONGO_DB_NAME=auth-db
+```
+
+Luego debemos especificar este nombre de base de datos en nuestro backend service, específicamente en el **AppModule**
+
+```typescript
+Module({
+  imports: [
+    ConfigModule.forRoot(),
+    MongooseModule.forRoot(process.env.MONGO_URI, 
+      process.env.MONGO_DB_NAME ?
+      {
+        dbName: process.env.MONGO_DB_NAME,
+      }: {}),
+    AuthModule,],
+  controllers: [],
+  providers: [],
+})
+export class AppModule {
+
+}
+```
+
+Si MONGO_DB_NAME está definido, lo usamos, caso contrario no se configura el dbName.
+
+
+## Configuración del Puertos
+
+Cuando se despliegan servicios en la nuber, el puerto donde corre la APP es asignado por el proveedor del servicio, por lo tanto debmos preparar nuestra APP para que tome dicho puerto, esto lo hacemos con este cambio
+
+```typescript
+await app.listen(process.env.PORT || 3000);
+```
+
+Si el entorno de despliegue ha definido un puerto, lo hará por medio de la variable de entorno  **process.env.PORT**, si no existe usamos el puerto 3000
+
+Localmente, si no definimos PORT simplemente seguirá usando el puerto 3000.
+
+
+
+
+
+
+
+
+

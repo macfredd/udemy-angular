@@ -13697,10 +13697,45 @@ Si el entorno de despliegue ha definido un puerto, lo hará por medio de la vari
 Localmente, si no definimos PORT simplemente seguirá usando el puerto 3000.
 
 
+## Desplegar Backend en RailWay
+
+En el Package.Json vamos a cambiar el script start por estos comandos:
+```json
+"start": "node dist/main",
+```
+
+Subimos ese cambio al repositorio y abrimos Railway.
+
+Agregamos un nuevo proyecto, y seleccionamos **Github Repo** y seleccionamos el repositorio de nuestro backend.
+
+Conectamos nuestro repositorio y antes de hacer el deploy debemos de agregar las variables de entorno que nuestro backend necesita
+
+
+<img src="./imagenes/11-NestJS-Angular06.png" alt="" style="margin-right: 10px; max-width: 50%; height: auto; border: 1px solid black" />
 
 
 
+Las variables de entorno son las mismas que hemos definido en nuestro .env, apuntando a la base de datos en la nube
+
+<img src="./imagenes/11-NestJS-Angular07.png" alt="" style="margin-right: 10px; max-width: 50%; height: auto; border: 1px solid black" />
+
+NOTA: Debemos generar un nuevo Secret para JWT.
+
+<aside class="nota-importante">
+    <p>El repositorio únicamente debe de contender el proyecto a deployar.</p>
+</aside>
+
+Luego en la pestaña de deployment, veremos como se completa el proceso:
+
+<img src="./imagenes/11-NestJS-Angular08.png" alt="" style="margin-right: 10px; max-width: 50%; height: auto; border: 1px solid black" />
+
+Una vez finalizado el deployment, vamos a Settings y buscamos la configuración del Dominio. Por default, el servicio no esta disponible, es un servicio interno.
 
 
+<img src="./imagenes/11-NestJS-Angular09.png" alt="" style="margin-right: 10px; max-width: 50%; height: auto; border: 1px solid black" />
 
+Generamos un Dominio. y luego copiamos dicho domino y lo configuragmos en nuestras app's 
 
+<aside class="nota-importante">
+    <p>El URL debe contener el https://</p>
+</aside>

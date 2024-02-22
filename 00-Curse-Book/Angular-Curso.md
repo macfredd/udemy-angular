@@ -13739,3 +13739,143 @@ Generamos un Dominio. y luego copiamos dicho domino y lo configuragmos en nuestr
 <aside class="nota-importante">
     <p>El URL debe contener el https://</p>
 </aside>
+
+
+## Desplegar FrontEnd en RailWay
+
+Usaremos Netlify para desplegar nuestro frontEnt
+
+Primero debemos cambiar el URL de nuestro API en el .env del proyecto de Angular
+
+Luego debemos agregar la opción `useHash: true` en el **AppRoutingModule**
+
+
+```typescript
+@NgModule({
+  imports: [RouterModule.forRoot(routes, {useHash: true})],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }
+```
+
+Posteriormente hacemos el build
+
+```basg
+ng build
+```
+
+Y finalmente, luego de abrir una cuenta en Netlify, subimos la carpeta build de nuestro proyecto.
+
+
+<aside class="nota-importante">
+<p> Se han eliinado los servicios creados en la nube. Solamente se usaron con el propósito de seguir el curso.</p>
+</aside>
+
+<div style="page-break-after: always;"></div>
+
+# Nueva Sección: Novedades de Angular 17
+
+
+## ¿Qué veremos en esta sección?
+
+Esta sección está dedicada a explorar nuevas funcionalidades en Angular, puntualmente quiero que veamos sobre:
+
+
+  - Señales
+      - Observables a señales
+      - Señales para estados en servicios
+      - Señales de solo lectura (asReadOnly)
+      - Señales computadas
+  - Defer
+      - Funcionalidad
+      - Triggers
+  - Control Flow
+      - @if
+      - @for
+      - @else
+      - @empty
+      - @switch
+      - @case
+      - @default
+  - View Transition API (Aún no compatible con todos los navegadores)
+  - Nuevo sistema de detección de cambios
+  - Tailwind con Angular
+  - Configuración de Path alias en TypeScript
+
+## Nueva Aplicación
+
+Creamos una aplicación:
+
+```bash
+ng new 12-NewFeatures
+```
+
+<aside class="nota-importante">
+<p>Se ha creado la nueva aplicación usando el estandar sin Modulos, es decir usaremos el standalone true por defecto</p>
+</aside>
+
+Esto introduce algunos cambios importantes, primero es que no tenemos el **AppModule** ya que la aplicación en sí no se construye como un módulo.
+
+Otro aspecto importante es que ahora tenemos un archivo **appConfig**
+
+
+```typescript
+import { ApplicationConfig } from '@angular/core';
+import { provideRouter } from '@angular/router';
+
+import { routes } from './app.routes';
+
+export const appConfig: ApplicationConfig = {
+  providers: [provideRouter(routes)]
+};
+```
+
+Anteriormente nuestro iniciador o bootstrap en el **main.ts** únicamente incluía el AppModule, tal como se indica a continuación:
+
+```typescript
+platformBrowserDynamic().bootstrapModule(AppModule)
+  .catch(err => console.error(err));
+```
+
+Ahora lo que pasamos como parámetro es el **AppComponent** standalone y el **appConfig**
+
+```typescript
+bootstrapApplication(AppComponent, appConfig)
+  .catch((err) => console.error(err));
+```
+
+## Tailwind en Angular
+
+Instalamos Tailwind para angular
+
+```bash
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init
+```
+
+Este último comando crea el archivo **tailwind.config.ts** en el cual debemos actualizar el **content** para indicar las rutas de nuestros archivos html y ts.
+
+```typescript
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./src/**/*.{html,ts}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+```
+
+Agfregamos estas directivas a nuestro archivio **src/style.css**
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+<aside class="nota-informativa">
+<p> Si el editor muestra un error, Primero debemos instalar una extensión en VCode <strong>Tailwind CSS IntelliSense</strong> y luego debemos asociar el archivo CSS con Tailwind CSS. Abrimos el archivo CSS donde importas Tailwind CSS, presiona: <pre>Ctrl + Shift + P</pre> y busca <strong>Change Language Mode</strong>. Dentro de la barra de búsqueda, escribe tailwindcss y selecciónalo</p>
+</aside>

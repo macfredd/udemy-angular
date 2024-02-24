@@ -13879,3 +13879,240 @@ Agfregamos estas directivas a nuestro archivio **src/style.css**
 <aside class="nota-informativa">
 <p> Si el editor muestra un error, Primero debemos instalar una extensión en VCode <strong>Tailwind CSS IntelliSense</strong> y luego debemos asociar el archivo CSS con Tailwind CSS. Abrimos el archivo CSS donde importas Tailwind CSS, presiona: <pre>Ctrl + Shift + P</pre> y busca <strong>Change Language Mode</strong>. Dentro de la barra de búsqueda, escribe tailwindcss y selecciónalo</p>
 </aside>
+
+
+## Creando elementos de la APP
+
+Creamos un componente
+
+```bash
+$ ng g c dashboard/dashboard --skip-selector --skip-tests --flat
+$ ng g c dashboard/pages/change-detection --skip-selector --skip-tests 
+$ ng g c dashboard/pages/control-flow --skip-selector --skip-tests
+$ ng g c dashboard/pages/deferred-options --skip-selector --skip-tests
+$ ng g c dashboard/pages/deferred-views --skip-selector --skip-tests
+$ ng g c dashboard/pages/user --skip-selector --skip-tests
+$ ng g c dashboard/pages/users --skip-selector --skip-tests 
+$ ng g c dashboard/pages/view-transition --skip-selector --skip-tests
+$ ng g c shared/heavy-loaders-slow --skip-tests --inline-style
+```
+
+Renombramos la carpeta **heavy-loaders-slow** por **heavy-loaders** y agresmos otro componente:
+
+```bash
+$ ng g c shared/heavy-loaders/heavy-loaders-fast --skip-tests --inline-style
+$ ng g c shared/heavy-loaders/users-loader --skip-tests --inline-style --flat
+$ ng g c shared/menu/side-menu --skip-tests --flat
+$ ng g c shared/titles --skip-tests
+```
+
+Creamos carpetas para las interfaces, servicios, etc.
+
+La estructura de directorios en este momento debe de verse de la siguiente forma
+
+
+<aside class="nota-informativa">
+<p> He borrado los CSS y HTML para simplificar la estructura de directorios y archivos</p>
+</aside>
+
+
+```bash
+src/app/
+├── app.component.css
+├── app.component.html
+├── app.component.spec.ts
+├── app.component.ts
+├── app.config.ts
+├── app.routes.ts
+├── dashboard
+│   ├── dashboard.component.ts
+│   └── pages
+│       ├── change-detection
+│       │   └── change-detection.component.ts
+│       ├── control-flow
+│       │   └── control-flow.component.ts
+│       ├── deferred-options
+│       │   └── deferred-options.component.ts
+│       ├── deferred-views
+│       │   └── deferred-views.component.ts
+│       ├── user
+│       │   └── user.component.ts
+│       ├── users
+│       │   └── users.component.ts
+│       └── view-transition
+│           └── view-transition.component.ts
+├── interfaces
+├── services
+└── shared
+    ├── heavy-loaders
+    │   ├── heavy-loaders-fast.component.ts
+    │   ├── heavy-loaders-slow.component.ts
+    │   └── users-loader.component.ts
+    ├── menu
+    │   └── side-menu.component.ts
+    └── titles
+        └── titles.component.ts
+```
+
+## Agregando las Rutas
+
+Podemos agregar la ruta al dashboar de dos formas:
+
+```typescript
+{
+  path: 'dashboard',
+  loadComponent: () => import('./dashboard/dashboard.component').then(c => c.DashboardComponent)
+}
+```
+
+Si queremos cargar directament el componente, podemos hacerlo de esta forma
+
+```typescript
+{
+    path: 'dashboard',
+    loadComponent: () => import('./dashboard/dashboard.component') 
+}
+```
+Para que acepte esta segunda forma, en el export debemos especificar que sea el **default** class.
+
+```typescript
+export default class DashboardComponent {
+
+}
+```
+
+
+Completamos todas las rutas
+
+```typescript
+export const routes: Routes = [{
+path: 'dashboard',
+loadComponent: () => 
+  import('./dashboard/dashboard.component')
+  .then(c => c.DashboardComponent),
+    children: [
+      {
+        path: 'change-detection', 
+        title: 'Change Detection', 
+        loadComponent: () => 
+          import('./dashboard/pages/change-detection/change-detection.component')
+          .then(c => c.ChangeDetectionComponent)
+      },
+      {
+        path: 'control-flow', 
+        title: 'Control Flow', 
+        loadComponent: () => 
+          import('./dashboard/pages/control-flow/control-flow.component')
+          .then(c => c.ControlFlowComponent)
+      },
+      {
+        path: 'deferred-options', 
+        title: 'Deferred Options', 
+        loadComponent: () => 
+          import('./dashboard/pages/deferred-options/deferred-options.component')
+          .then(c => c.DeferredOptionsComponent)
+      },
+      {
+        path: 'deferred-views', 
+        title: 'Deferred Views', 
+        loadComponent: () => 
+          import('./dashboard/pages/deferred-views/deferred-views.component')
+          .then(c => c.DeferredViewsComponent)
+      },
+      {
+        path: 'user/:id', 
+        title: 'User', 
+        loadComponent: () => 
+          import('./dashboard/pages/user/user.component')
+          .then(c => c.UserComponent)
+      },
+      {
+        path: 'user-list', 
+        title: 'Users List', 
+        loadComponent: () => 
+          import('./dashboard/pages/users/users.component')
+          .then(c => c.UsersComponent)
+      },
+      {
+        path: 'view-transition', 
+        title: 'View Transition', 
+        loadComponent: () => 
+          import('./dashboard/pages/view-transition/view-transition.component')
+          .then(c => c.ViewTransitionComponent)
+      },
+      {
+        path: '',
+        redirectTo: 'change-detection',
+        pathMatch: 'full'
+      }
+    ]
+},
+{
+  path: '',
+  redirectTo: '/dashboard',
+  pathMatch: 'full'
+},
+{
+  path: '**',
+  redirectTo: '/dashboard',
+}
+];
+```
+
+Agregamos **router-outlet** al dashboard.component.html
+
+```html
+<router-outlet></router-outlet>
+```
+
+## Dashboard Tailwind
+
+Vamos a usar un template para nuestro dashboard, obtenemos el código de aca:
+
+[https://tailwindcomponents.com/component/dashboard-navigation](https://tailwindcomponents.com/component/dashboard-navigation)
+
+Eliminaremos los imports que aparecen en el inicio del HTML y solo usaremos el siguiente codigo para el Dashboard template:
+
+```html
+<div class="flex bg-slate-100 overflow-y-scroll w-screen h-screen antialiased text-black selection:bg-blue-600 selection:text-white">
+    <div class="flex relative w-screen">
+        <app-side-menu></app-side-menu>
+
+        <div class="text-black px-2 mt-2 w-full">
+            <router-outlet></router-outlet>
+        </div>
+
+        
+    </div>
+</div>
+```
+
+Y vamos a extraer el HTML del `<div id="menu">` y lo vamos a copiar en nuestro **sideMenuComponent**
+
+Se aplicaron un par de cambios menores para mostrar el Componente hijo en el area del dashboard.
+
+## Menu Items 
+
+Vamos a extraer de las rutas las opciones para crear un menu en nuestro dashboard.
+
+
+```typescript
+export class SideMenuComponent {
+
+  public menuItems = [
+    routes
+      .map(route => route.children ?? [])
+      .flat()
+      .filter(route => route && route.path !== '')
+      .filter(route => !route.path?.includes(':'))
+  ];
+  
+}
+```
+
+Usaremos este arreglo para crear nuestras opciones del Menu
+
+## Control Flow: 
+
+## @For @If
+

@@ -57,7 +57,7 @@ export const routes: Routes = [
             },
             {
                 path: '',
-                redirectTo: 'change-detection',
+                redirectTo: 'control-flow',
                 pathMatch: 'full'
             }
         ]

@@ -14182,4 +14182,173 @@ Estas son estructuras de control, para mas información:
 
 https://angular.io/guide/control_flow
 
-## 
+## Novedades en el @Input
+
+### Required
+
+Hace que el valor input sea requerido, es decir se necesita enviar un valor desde la implementación del conponente.
+
+```typescript
+@Input({ required: true}) title!: string
+```
+
+### Transform
+
+Transoforma el Valor del Atributo
+
+```typescript
+@Input({ transform: booleanAttribute }) flag: boolean = false;
+```
+
+Esto permique que si envío el flag lo colocara en true, caso contrario en falso
+
+```html
+<app-some-component flag>
+```
+
+Eso enviaría TRUE al componente
+
+```html
+<app-some-component>
+```
+
+Y eso enviaría FALSE al componente
+
+## Change Detection on Push
+
+El sistema de detección de cambios (Change Detection) es el proceso por el cual Angular identifica y aplica los cambios en el modelo y actualiza la vista en consecuencia. La estrategia "OnPush" es una de las estrategias de detección de cambios en Angular.
+
+Cuando se utiliza la estrategia "OnPush" en un componente, este solo se vuelve a renderizar cuando se detectan cambios en las referencias de entrada (@Input) o cuando se emite un evento (@Output). Esto es diferente de la estrategia predeterminada, que vuelve a renderizar un componente cada vez que se realiza cualquier cambio en cualquier parte del árbol de componentes.
+
+La estrategia "OnPush" puede ayudar a mejorar el rendimiento de la aplicación al reducir la cantidad de ciclos de detección de cambios, ya que los componentes solo se volverán a renderizar cuando sea necesario. 
+
+Agreguemos esto a nuestro componente
+
+```typescript
+@Component({
+  standalone: true,
+  imports: [TitlesComponent, CommonModule],
+  templateUrl: './change-detection.component.html',
+  styleUrl: './change-detection.component.css'
+})
+export class ChangeDetectionComponent {
+
+  public frameworkAsSignal = signal({
+    name: 'Angular',
+    version: '12.0.0'
+  });
+
+  public frameworkAsProperty = {
+    name: 'Angular',
+    version: '12.0.0'
+  };
+
+  constructor() { 
+    setTimeout(() => {
+      this.frameworkAsProperty.name = 'React';
+      console.log('ChangeDetectionComponent: setTimeout');
+    }, 3000);
+  }
+}
+```
+
+Template:
+
+```html
+<app-titles title="Change Detection on Push!"></app-titles>
+
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+        <span>frameworkAsSignal</span>
+        <pre>{{ frameworkAsSignal() | json }}</pre>
+
+        <span>frameworkAsProperty</span>
+        <pre>{{ frameworkAsProperty | json }}</pre>
+    </div>
+  </div>
+```
+
+Cuando recargamos la página, ambos objetos son iguales:
+
+
+```json
+frameworkAsSignal
+{
+  "name": "Angular",
+  "version": "12.0.0"
+}
+frameworkAsProperty
+{
+  "name": "Angular",
+  "version": "12.0.0"
+}
+```
+
+Transcurridos 3 segundos, los objetos cambian:
+
+```json
+frameworkAsSignal
+{
+  "name": "Angular",
+  "version": "12.0.0"
+}
+frameworkAsProperty
+{
+  "name": "React",
+  "version": "12.0.0"
+}
+```
+
+Esta es la forma por default de trabajar del **changeDetection** renderiza todo cuando existen cambios en objetos referenciados desde la vista.
+
+El modo **Default** no se especifica en el componente, pero es el modo que se usa en Angular.
+```typescript
+changeDetection: ChangeDetectionStrategy.Default,
+```
+
+Existe otra estrategia **onPush**
+
+```typescript
+@Component({
+  standalone: true,
+  imports: [TitlesComponent, CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './change-detection.component.html',
+  styleUrl: './change-detection.component.css'
+})
+```
+
+En este caso hemos cambiado la estrategia a **ChangeDetectionStrategy.OnPush** el resultado es que al cargar los elementos siguen siendo iguales, incluso al pasar los 3 segundos siguen siendo iguales, es decir la vista no se renderiza.
+
+```json
+frameworkAsSignal
+{
+  "name": "Angular",
+  "version": "12.0.0"
+}
+frameworkAsProperty
+{
+  "name": "Angular",
+  "version": "12.0.0"
+}
+```
+
+Porque el OnPush no detecta el cambio del `this.frameworkAsProperty.name = 'React';`? 
+
+<aside class="nota-importante">
+ <p>Porqué se está modificando la propiedad <strong>name</strong> del objeto frameworkAsProperty, pero la referencia del objeto en sí no ha cambiado. Por lo tanto, la estrategia <strong>OnPush</strong> no detectará este cambio como una razón para volver a renderizar el componente.</p>
+</aside>
+
+Si en cambio, modificamos la señal, eso disparará la detección de cambios:
+
+```typescript
+this.frameworkAsSignal.update(value =>{
+  return {
+    ...value,
+    name: 'React'
+  };
+});
+```
+
+

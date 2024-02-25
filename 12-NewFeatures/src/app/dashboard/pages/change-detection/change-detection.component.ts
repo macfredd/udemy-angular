@@ -11,11 +11,6 @@ import { TitlesComponent } from '@shared/titles/titles.component';
 })
 export class ChangeDetectionComponent {
 
-  public frameworkAsSignal = signal({
-    name: 'Angular',
-    version: '12.0.0'
-  });
-
   public frameworkAsProperty = {
     name: 'Angular',
     version: '12.0.0'
@@ -23,21 +18,10 @@ export class ChangeDetectionComponent {
 
   constructor() { 
     setTimeout(() => {
+
+    
+      this.frameworkAsProperty = Object.assign({}, this.frameworkAsProperty, { name: 'React' });
       
-
-      this.frameworkAsProperty = {
-        ...this.frameworkAsProperty,
-        name: 'React'
-      };
-      
-
-      this.frameworkAsSignal.update(value =>{
-        return {
-          ...value,
-          name: 'React'
-        };
-      });
-
       console.log('ChangeDetectionComponent: setTimeout');
     }, 2000);
   }

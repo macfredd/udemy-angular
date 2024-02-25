@@ -57,7 +57,7 @@ export const routes: Routes = [
             },
             {
                 path: '',
-                redirectTo: 'control-flow',
+                redirectTo: 'deferred-views',
                 pathMatch: 'full'
             }
         ]

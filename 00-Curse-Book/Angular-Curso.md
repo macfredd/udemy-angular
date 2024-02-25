@@ -14352,3 +14352,90 @@ this.frameworkAsSignal.update(value =>{
 ```
 
 
+<img src="./imagenes/12-NewFeatures01.png" alt="" style="margin-right: 10px; max-width: 90%; height: auto; border: 1px solid black" />
+
+## Deferred Blocks
+
+**@defer** es una sintaxis en Angular que permite cargar partes de una plantilla solo cuando son necesarias, basándose en condiciones lógicas. Facilita el manejo de casos como cargar un componente grande después de que el usuario haya hecho scroll en la página, clickeado un botón, o precargado un componente mientras el usuario lee la página para que esté listo cuando haga clic en un botón. Proporciona control sobre la obtención de código desde el servidor (prefetching) y su aplicación en la página, permitiendo definir disparadores para cada uno de estos pasos. Con **@defer**, se puede utilizar disparadores predefinidos o definir disparadores personalizados según sea necesario, brindando flexibilidad en el proceso de carga y aplicación del código.
+
+Para ejemplificar el beneficio de los Deferred, vamos a simular un componente muy pesado, que bloquea la aplicación mientras la cargamos.
+
+En el **HeavyLoadersSlowComponent** agreguemos este código Bloqueante
+
+
+```typescript
+export class HeavyLoadersSlowComponent {
+
+  @Input({required: true}) public id!: string;
+  @Input({required: true}) public className!: string;
+
+  constructor() { 
+    // Código bloqueante, no hagas esto en casa!
+    const start = Date.now();
+    while (Date.now() - start < 3000) {
+    }
+  }
+}
+```
+
+Y luego en nuestro deferred View, agreguemos este template
+
+```html
+<app-titles title="@Deferred Blocks"></app-titles>
+
+<section class="grid grid-cols-1">
+    <app-heavy-loaders-slow></app-heavy-loaders-slow>
+</section>
+```
+
+Cuando se carga el componente **DeferredViewsComponent** veremos que durante 3 segundos se bloquea toda la applicación, no podemos navegar en otras opciones y tenemos que esperar que se cargue el componente. E
+
+<aside class="nota-importante">
+<p>El código bloqueante siempre va a bloquear el hilo de ejecución, lo que estamos intentando demostrar es que el Deferred puede aplicarse para hacer una carga perezosa de cierta parte de nuestra vista</p>
+</aside>
+
+Veamos esto con mas componentes en el VIEW
+
+```html
+<app-titles title="@Deferred Blocks"></app-titles>
+
+<section class="grid grid-cols-1">
+    @defer () {
+        <app-heavy-loaders-slow id="C-01" className="bg-lime-300"></app-heavy-loaders-slow>
+    } @placeholder {
+        <p class="h-[100px] w-full bg-gradient-to-r from-gray-200 to-gray-950 animate-pulse"> Loadding...</p>
+    }
+
+    @defer () {
+        <app-heavy-loaders-slow id="C-02" className="bg-yellow-300"></app-heavy-loaders-slow>
+    } @placeholder {
+        <p class="h-[100px] w-full bg-gradient-to-r from-blue-200 to-blue-950 animate-pulse"> Loadding...</p>
+    }
+
+    @defer () {
+        <app-heavy-loaders-slow id="C-03" className="bg-red-300"></app-heavy-loaders-slow>
+    } @placeholder {
+        <p class="h-[100px] w-full bg-gradient-to-r from-purple-200 to-purple-950 animate-pulse"> Loadding...</p>
+    }
+</section>
+```
+
+Si cargamos la applicación veremos esta secuencia, primero se muestra el **@placeholder** de los tres componentes, con una animación. Despues de 3 segundos aparece el primer componente (puede ser cualquiera de los 3), pasan 3 segundos más y se muestra el 2do componente y finalmnete luego de 3 segundos más se muestra el último componente.
+
+<img src="./imagenes/12-NewFeatures02.png" alt="" style="margin-right: 10px; max-width: 50%; height: auto; border: 1px solid black" />
+
+<img src="./imagenes/12-NewFeatures03.png" alt="" style="margin-right: 10px; max-width: 50%; height: auto; border: 1px solid black" />
+
+<img src="./imagenes/12-NewFeatures04.png" alt="" style="margin-right: 10px; max-width: 50%; height: auto; border: 1px solid black" />
+
+Insistimos en que el código bloqueante sigue bloqueando la vista, pero con el Deferred podemos cargar secciones independiente de la vista, colocar un @placeholder y mejorar la experiencia del usuario.
+
+## Deffer Triggers
+
+Los activadores proporcionan condiciones para cuando se produce un aplazamiento de la carga. Algunos permiten una variable de referencia de plantilla como parámetro opcional. Separe varios desencadenantes con un punto y coma.
+
+
+<img src="./imagenes/12-NewFeatures05.png" alt="" style="margin-right: 10px; max-width: 40%; height: auto; border: 1px solid black" />
+
+
+Más información [aquí](https://blog.angular-university.io/angular-defer/)

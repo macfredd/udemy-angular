@@ -1,1 +1,15 @@
-<p>deferred-options works!</p>
+<app-titles title="Deferred Options"></app-titles>
+
+<section>
+    <h1 class="text-xl">Interactions</h1>
+    <hr class="my-2">
+
+    <button #btnRef class="bg-blue-400 p-2 cursor-pointer">Click Me</button>
+
+
+    @defer(on interaction (btnRef)) {
+    <app-heavy-loaders-fast cssClass="bg-blue-500 h-20">
+        <span class="text-2x1 bg-yellow-200">On Interactions</span>
+    </app-heavy-loaders-fast>
+    }
+</section>

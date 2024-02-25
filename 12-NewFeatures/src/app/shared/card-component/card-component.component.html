@@ -1,0 +1,19 @@
+<section class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+    <div class="bg-white rounded shadow p-2 flex flex-col">
+
+        <div class="flex justify-between items-center mb-5">
+            <h2 class="text-3xl font-bold">{{cardTitle}}</h2>
+        
+            <span (click)="toggleContent()" class="cursor-pointer">
+                <i class="{{ displayIcon }} text-2xl text-blue-500"></i>
+            </span>
+        </div>
+    
+        @if (this.showContent()) {
+            <div class="mt-5 text-justify">
+                <p class="text-gray-600">{{cardContent}}</p>
+            </div>
+        }
+    </div>
+</section>

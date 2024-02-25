@@ -14439,3 +14439,72 @@ Los activadores proporcionan condiciones para cuando se produce un aplazamiento 
 
 
 Más información [aquí](https://blog.angular-university.io/angular-defer/)
+
+
+Si cambiamos nuestra plantilla y cargamos el último componente usando el **Defer on viewport** hasta que el componente entra en el viewPort (es visible para el usuario) se comenzará a renderizar.
+
+```typescript
+<section class="grid grid-cols-1">
+    @defer () {
+        <app-heavy-loaders-slow id="C-01" className="bg-lime-300"></app-heavy-loaders-slow>
+    } @placeholder {}
+
+    @defer (on idle) {
+        <app-heavy-loaders-slow id="C-02" className="bg-yellow-300"></app-heavy-loaders-slow>
+    } @placeholder {}
+
+    @defer (on viewport) {
+        <app-heavy-loaders-slow id="C-03" className="bg-red-300"></app-heavy-loaders-slow>
+    } @placeholder {}
+</section>
+```
+
+Hay otros tipos de triggers, por ejemplo el `on interactions` el cual hace que el compoente se renderize hasta que el usuario interacúa con el mismo, por ejemplo:
+
+Si tenemos esta plantilla:
+
+
+```html
+<app-titles title="Deferred Options"></app-titles>
+
+<section>
+    <h1 class="text-xl">Interactions</h1>
+    <hr class="my-2">
+    @defer(on interaction) {
+    <app-heavy-loaders-fast cssClass="bg-blue-500 h-20">
+        <span class="text-2x1 bg-yellow-200">On Interactions</span>
+    </app-heavy-loaders-fast>
+    } @placeholder {
+        <span class="bg-blue-400 p-2 cursor-pointer" >Click Me</span>
+    }
+</section>
+```
+
+Y la plantilla del componente **app-heavy-loaders-fast**:
+
+```html
+<section [ngClass]="['w-full', cssClass]">
+    <ng-content/>
+</section>
+```
+
+Cuando se renderiza el componente inicial lo que se muestra es el placeholder **Click Me**, y hasta que hacemos click se muestra el contenido **On Interactions** que es parte del componente
+
+En Angular, `ng-content` es una directiva que se utiliza para crear puntos de inserción de contenido en un componente. Permite que el contenido externo se proyecte dentro del componente, lo que proporciona una forma flexible de estructurar y reutilizar componentes.
+
+Cuando defines un componente en Angular, puedes utilizar la etiqueta `<ng-content></ng-content>` en la plantilla del componente para indicar dónde debe insertarse el contenido externo.
+
+Continuando con el trigger **on interaction** se puede delegar a un componente externo o boton por ejemplo
+
+```html
+<button #btnRef class="bg-blue-400 p-2 cursor-pointer">Click Me</button>
+
+@defer(on interaction (btnRef)) {
+<app-heavy-loaders-fast cssClass="bg-blue-500 h-20">
+    <span class="text-2x1 bg-yellow-200">On Interactions</span>
+</app-heavy-loaders-fast>
+}
+```
+
+En este caso eliminamos el placeholder y colocamos un botón, con una referencia **#btnRef** y al definir el defer lo hacemos de esta forma `@defer(on interaction (btnRef))` el efecto es el mismo, el componente se renderiza hasta que interactuamos con el botón.
+  

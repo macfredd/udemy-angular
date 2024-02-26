@@ -14507,4 +14507,32 @@ Continuando con el trigger **on interaction** se puede delegar a un componente e
 ```
 
 En este caso eliminamos el placeholder y colocamos un botón, con una referencia **#btnRef** y al definir el defer lo hacemos de esta forma `@defer(on interaction (btnRef))` el efecto es el mismo, el componente se renderiza hasta que interactuamos con el botón.
-  
+
+
+## View transition API
+
+Esto mejora visualmente la transicion entre pantallas. En el **ApplicationConfig* agregamos un **provideRouter** más
+
+```typescript
+roviders: [provideRouter(
+  routes,
+  withViewTransitions(),
+)]
+```
+
+Esto suaviza la transicion entre pantallas, no hay que hacer nada más. Podríamos llamarla con parámetros, por ejemplo: 
+
+```typescript
+providers: [provideRouter(
+    routes,
+    withViewTransitions({
+      onViewTransitionCreated: (t) => {
+        console.log('View transition created', t);
+      }
+    }),
+    )]
+```
+
+Esto imprime un objeto el cual contiene información de la ruta origen / destino.
+
+Se pueden hacer muchas cosas más con el ViewTransition, agregar mas animaciones entre elementos, etc.

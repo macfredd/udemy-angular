@@ -14536,3 +14536,6 @@ providers: [provideRouter(
 Esto imprime un objeto el cual contiene información de la ruta origen / destino.
 
 Se pueden hacer muchas cosas más con el ViewTransition, agregar mas animaciones entre elementos, etc.
+
+## Servicios con Signals
+

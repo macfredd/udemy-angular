@@ -14539,3 +14539,95 @@ Se pueden hacer muchas cosas más con el ViewTransition, agregar mas animaciones
 
 ## Servicios con Signals
 
+EL siguiente servicio obtiene una lista de usuario del api `https://reqres.in/api/users`, tiene un delay intencional de 2 segundos. 
+
+```typescript
+nterface state {
+  users: User[];
+  loading: boolean;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class UsersService {
+
+  private httpClient = inject(HttpClient);
+  #state = signal<state>({
+    loading: true,
+    users: []
+  });
+
+  public users = computed(() => this.#state().users);
+  public loading = computed(() => this.#state().loading);
+
+  constructor() {
+    this.httpClient.get<UsersResponse>('https://reqres.in/api/users')
+    .pipe(delay(2000))
+    .subscribe(res => {
+      this.#state.set({
+        users: res.data,
+        loading: false
+      });
+    })
+  }
+}
+```
+
+`#state` es declarada con numeral para mantenerla como privada luego de la transpilación. (Nota: Estoy hay que investigarlo bien, no me queda claro)
+
+Dato que `state` es privada, declaramos dos variables computadas para acceder a la lista de usuarios y al flag loadding.
+
+`UsersResponse` es una interface que tiene definido los campos de la respuesta (no relevante en esta explicación)
+
+En nuestro componente vamos a injectar el servicio
+
+```typescript
+export class UserComponent {
+
+  public userService = inject(UsersService);
+
+}
+```
+
+Y luego podemos acceder al servicio en el template del componente
+
+```html
+@if (userService.loading()) {
+    <p>Loading...</p>
+} @else {
+    <ul class="flex items-center">
+        @for (user of userService.users(); track user.id) {
+            <li class="my-2 cursor-pointer">
+                <img [srcset]="user.avatar" [alt]="user.first_name" class="rounded w-34" />
+    
+                <a [routerLink]="['/dashboard/user/', user.id]" 
+                    class="mx-5 hover:underline">
+                    {{ user.first_name }} {{ user.last_name }}
+                </a>
+            </li>
+        }
+    </ul>
+}
+```
+
+Cuando hacemos la comprobación `userService.loading()` accedemos a la variable publica computada que expone el servicio. Lo mismo sucede con `userService.users()`
+
+## Transformar un Observable en Signal
+
+
+
+<div style="page-break-after: always;"></div>
+
+# Fin del Curso
+
+## Libro de Angular
+
+Hay un libro gratuito de Angular que les puede servir para tener más ejemplo y otro punto de vista sobre el Framework, se encuentra aquí
+
+[Angular2Book](Angular2NotesForProfessionals.pdf)
+
+
+También les dejo la guía de estilos recomendada por el equipo de Angular para nombres de componentes, servicios y buenas prácticas para programar utilizando Angular. También se los dejo como material adjunto.
+
+[Guía de estilos - Oficial](https://angular.io/guide/styleguide)

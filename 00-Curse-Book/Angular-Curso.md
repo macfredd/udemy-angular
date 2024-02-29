@@ -14615,6 +14615,62 @@ Cuando hacemos la comprobación `userService.loading()` accedemos a la variable 
 
 ## Transformar un Observable en Signal
 
+Agregamos el siguiente método al servicio:
+
+```typescript
+getUserById(id: string) {
+    return this.httpClient.get<UserResponse>(`https://reqres.in/api/users/${id}`)
+    .pipe(
+      delay(2000),
+      map( res => res.data) 
+    )
+  }
+```
+
+Cuando navegamos al userl `/user/:id` vamos a obtener el ID del `Router` y lo usaremos para obtener los datos de ese usuario. 
+
+En nuestro **UserComponent** injectamos el Router
+
+```typescript
+private route = inject(ActivatedRoute);
+```
+
+Y luego debemos obtener los **params** usando `this.route.params` pero esto regresa un Observable. Y De nuestro lado lo que necesitamos es implementar un **Signal** para mostrar información del usuario. En resumen, debemos transformar el Observable a un Signal
+
+
+```typescript
+public user = toSignal(
+    this.route.params.pipe(
+      switchMap(({ id }) => this.userService.getUserById(id))
+    )
+  );
+```
+
+Nota: `toSignal` se importa de 
+
+```typescript
+import { toSignal } from '@angular/core/rxjs-interop'
+```
+
+Y finalmente en el template mostramos la información del usuario cuando la señal cambia:
+
+```html
+<app-titles [title]="fullName()"></app-titles>
+
+@if (user()) {
+    <section>
+        <img [srcset]="user()?.avatar" alt="User Image">
+        <div>
+            <h3>{{ user()?.first_name}} {{ user()?.last_name}}</h3>
+            <p>{{ user()?.email}}</p>
+        </div>
+    </section>
+} @else {
+    <p>Loading...</p>
+}
+```
+
+De esta forma transformamos un Observable, que nos dá la información de los parametros, en una señal para mostrar la información en la vista.
 
 
 <div style="page-break-after: always;"></div>

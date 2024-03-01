@@ -14675,6 +14675,138 @@ De esta forma transformamos un Observable, que nos dá la información de los pa
 
 <div style="page-break-after: always;"></div>
 
+# Nueva Sección: Nueva Aplicación de Mapas y Rutas:
+
+Creamos una nueva APP
+
+```bash
+ng new mapasApp --standalone false
+```
+
+Agregamos el CDN de bootstrap
+
+```html
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+```
+
+
+```bash
+ng g m maps
+```
+
+Agregamos en el Import de **AppModule**
+
+Y creamos una estructura de directrios y componentes.
+
+
+```bash
+$ mkdir components
+$ mkdir api
+$ mkdir services
+$ mkdir interfaces
+$ mkdir screens
+```
+
+Agregamos componente
+
+```bash
+$ ng g c maps/screens/screen-map --skip-tests
+```
+
+Exportamos este componente en el **MapsModule**
+
+```typescript
+exports: [
+    ScreenMapComponent
+  ]
+```
+
+Y luego lo podemos usar en nuestro **app.component.html**
+
+```html
+<app-screen-map></app-screen-map>
+```
+
+
+## Geolocalizacion 
+
+Para obtener la geolocalización del usuario, vamos a validar si el navegador tiene permisos para usar la geolocalizacion. En el main.ts agregamos la validación
+
+```typescript
+if (!navigator.geolocation) {
+  const error:string = 'Navegador no soporte GeoLocation';
+  alert(error);
+  throw new Error(error);
+}
+```
+
+Luego agregamos un nuevo servicio
+
+```bash
+$ ng g s maps/services/places
+```
+
+En el mismo directorio de services creamos un **index.ts** por el momento solo tenemos un servicio.
+
+```typescript
+export { PlacesService } from "./places.service";
+```
+
+
+Agregamos el código del servicio
+
+```typescript
+export class PlacesService {
+
+  public userLocation: [number, number] | undefined = undefined
+
+  get isUserLocationReady(): boolean {
+    return !! this.userLocation;
+  }
+
+  constructor() { 
+    this.getUserLocation();
+  }
+
+  public async getUserLocation(): Promise<[number, number]> {
+    return new Promise( (resolve, reject) => {
+       navigator.geolocation.getCurrentPosition(
+        ({coords}) => {
+          this.userLocation = [ coords.longitude, coords.longitude]
+          resolve(this.userLocation);
+        },
+        (error) => {
+          alert(error);
+          reject();
+        });
+    });
+  }
+}
+```
+
+Explicación:
+
+
+
+La clase `PlacesService` es un servicio que se encarga de obtener la ubicación del usuario utilizando la geolocalización del navegador.
+
+Propiedades:
+
+- `userLocation: [number, number] | undefined`: Almacena las coordenadas de la ubicación del usuario en un array de dos números (longitud y latitud). Inicialmente se establece como `undefined` y se actualiza cuando se obtiene la ubicación del usuario.
+
+Métodos:
+
+- `isUserLocationReady: boolean`: Un getter que devuelve `true` si la propiedad `userLocation` tiene un valor (ubicación del usuario), y `false` en caso contrario.
+
+- `constructor()`: El constructor de la clase. Al instanciar la clase, se llama automáticamente al método `getUserLocation()` para obtener la ubicación del usuario.
+
+- `async getUserLocation(): Promise<[number, number]>`: Un método asíncrono que utiliza la API de geolocalización del navegador para obtener la ubicación actual del usuario. Devuelve una promesa que resuelve con un array de dos números representando la longitud y la latitud de la ubicación del usuario. En caso de éxito, actualiza la propiedad `userLocation` y resuelve la promesa. En caso de error, muestra una alerta con el mensaje de error y rechaza la promesa.
+
+
+
+
+<div style="page-break-after: always;"></div>
+
 # Fin del Curso
 
 ## Libro de Angular

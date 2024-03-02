@@ -14947,13 +14947,13 @@ this.addMarker(this.placesService.userLocation!, popup, {draggable: true});
 
 
 <aside class="nota-informativa">
-<p>Otra forma puede ser aplicando la propiedad <strong>encapsulation: ViewEncapsulation.None</strong> a nivel del componente principal</p>
+  <p>Otra forma puede ser aplicando la propiedad <strong>encapsulation: ViewEncapsulation.None</strong> a nivel del componente principal</p>
 
-<code>
-  @Component({
-    encapsulation: ViewEncapsulation.None
-  })
-</code>
+  
+    @Component({
+      encapsulation: ViewEncapsulation.None
+    })
+  
 </aside>
 
 Supongo que al desactivar la encapusulación, estos estilos pueden afectar a cualquier elemento en la aplicación. Es el mismo efecto que se obtiene al mover los estilos al archivo **style.css**
@@ -15056,6 +15056,195 @@ constructor(private mapService: MapService,
 ```
 
 Y listo, al presionar el botón, vamos a navegar a la ubicación del usuario, la cual es proporcionada por el GeoLocation del Browser.
+
+
+## Nuevos Compoenentes Search Bar y Results
+
+```bash
+$ ng g c maps/components/search-bar --skip-tests
+$ ng g c maps/components/search-results --skip-tests
+```
+
+En el **SearchBar** HTML
+
+```html
+<div class="search-container">
+    <input type="text" class="form-control" placeholder="Search Place">
+    <app-search-results></app-search-results>
+</div>
+
+```
+
+Estilos
+
+```css
+.search-container {
+    background-color: white;
+    border-radius: 5px;
+    border:  1px solid #ccc;
+    box-shadow: 0 10px 10px 0 rgba(0, 0, 0, 0.3);
+    left: 20px;
+    padding: 5px;
+    position: fixed;
+    top: 20px;
+}
+```
+
+## Componente Seasrch Results 
+
+La comunicación **SearchBar => SearchResults** la implementaremos vía Servicios. Por el momento trabajamos en el diseño:
+
+El HTML del SearchResult:
+
+```html
+<div class="alert alert-primary mt-2 text-center">
+    <h6>Loading...</h6>
+    <span>Wait please!</span>
+</div>
+<ul class="list-group mt-2">
+    <li class="list-group-item lit-group-action pointer">
+        <h6>Place</h6>
+        <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Quaerat assumenda dignissimos et esse inventore commodi autem aut asperiores, dolorem enim minus quas perferendis non neque aliquid amet unde dolorum veritatis?</p>
+        <button class="btn btn-sm btn-outline-primary">Directions</button>
+    </li>
+</ul>
+```
+
+<img src="./imagenes/13-MapasApp03.png" alt="" style="margin-right: 10px; max-width: 70%; height: auto; border: 1px solid black" />
+
+
+## Debounce Manual
+Implementaremos una funcionalidad que permita escribir en el campo de búsqueda, pero que solo dispare la búsqueda hasta que pasa cierto tiempo sin que el usuario ingrese mas teclas.
+
+Para ello necesitamos agregar `"types": ["node"]` en nuestro archivo **tsconfig.app.json**
+
+
+```json
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/app",
+    "types": ["node"]
+  },
+  "files": [
+    "src/main.ts"
+  ],
+  "include": [
+    "src/**/*.d.ts"
+  ]
+}
+```
+
+`"types": ["node"]`: Esta línea indica que estás incluyendo los tipos de declaración para Node.js. Los tipos de declaración son archivos que describen la forma de los objetos y módulos en JavaScript, y se utilizan durante la compilación para proporcionar información sobre las APIs que están disponibles en tiempo de ejecución.
+
+
+En el HTML  del **SearchBarComponent** agregamos una referencia y un evento keyup
+
+```html
+<div class="search-container">
+    <input 
+        type="text" 
+        class="form-control" 
+        placeholder="Search Place"
+        #txtSearch
+        (keyup)="onQueryChange(txtSearch.value)">
+    <app-search-results></app-search-results>
+</div>
+```
+
+Y en el componente definimos un debounce manual:
+
+```typescript
+export class SearchBarComponent {
+
+  private debounceTime?: NodeJS.Timeout;
+
+  onQueryChange(query: string = '') {
+    if (this.debounceTime) {
+      clearTimeout(this.debounceTime);
+    }
+
+    this.debounceTime = setTimeout(() => {
+      //Search API
+    }, 1000);
+
+  }
+}
+```
+
+Aca usamos el `NodeJS.Timeout` para definir una variable privada para manejar los timeOut, y cada vez que se acumula 1 segundo, dispararemos una búsqueda.
+
+
+## API para obtener Lugares
+
+Haremos una petición http, importamos en **AppModule** el **HttpClientModule**
+
+
+Pero en lugar de usar el HTTPClient directamente, vamos a crear una API customizada, extenderemos de **HttpClient** y vamos a sobreescribir el método **get**
+
+```typescript
+import { HttpClient, HttpHandler, HttpHeaders, HttpParams } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { environment } from "../../../environments/environment";
+
+@Injectable({providedIn: 'root'})
+export class PlacesApiClient extends HttpClient {
+  
+    private mapboxBaseUrl = 'https://api.mapbox.com/geocoding/v5/mapbox.places';
+  
+    constructor(handler: HttpHandler) {
+        super(handler);
+    }
+
+    public override get<T>(url: string, options: {
+        params?: HttpParams | {
+            [param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>;
+        }
+    }) { 
+
+        url = `${this.mapboxBaseUrl}/${url}.json?`;
+
+        return super.get<T>(url, {
+            params: {
+                limit: '5',
+                language: 'es',
+                access_token: environment.mapbox_key,
+                ...options.params,
+            }
+        });
+    }
+}
+```
+
+Y luego podemos inyectar este API en el servicio **PlacesService**
+
+```typescript
+public getPlaces(query: string) {
+
+    this.isLoadingPlaces = true;
+
+    if (!this.userLocation) {
+      throw new Error('User location not found');
+    }
+
+    const params = {
+      proximity: this.userLocation.join(','),
+    };
+    
+    this.placesApiClient.get<PlacesResponse>(`/${query}.json`, 
+    {
+      params,
+    })
+    .subscribe( (response) => {
+      this.places = response.features;
+      this.isLoadingPlaces = false;
+    });
+  }
+```
+
+En este punto, al llamar el método **getPlaces** tendremos los resultados en **this.places**
+
+
 
 <div style="page-break-after: always;"></div>
 

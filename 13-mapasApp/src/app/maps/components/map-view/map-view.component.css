@@ -1,4 +1,37 @@
 #map {
     width: 100vw;
     height: 100vh;
-    }
+}
+
+ .popup-container {
+   font-family: Arial, sans-serif;
+   background-color: #fff;
+   border: 2px solid #ccc;
+   border-radius: 8px;
+   padding: 16px;
+   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+   max-width: 300px;
+}
+ 
+ .popup-title {
+   color: #333;
+   font-size: 24px;
+   margin-bottom: 10px;
+}
+ 
+ .popup-subtitle {
+   color: #555;
+   font-size: 18px;
+   margin-bottom: 8px;
+}
+ 
+ .popup-description {
+   color: #777;
+   font-size: 16px;
+   margin-bottom: 0;
+}
+ 
+ .mapboxgl-popup-close-button {
+    top: 20px;
+    right: 20px;
+}

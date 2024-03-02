@@ -14878,6 +14878,373 @@ Y luego lo usamos en nuestro template del **screenMapComponent**
 [Enlace a la sección "Instalar MapBox"](#instalar-mapbox)
 
 
+## Map Popup
+
+Podemos agregar un PopUp de esta forma
+
+```typescript
+const popup = new Popup()
+        .setHTML(`
+          <div class="popup-container">
+          <h1 class="popup-title">San Francisco</h1>
+          <h2 class="popup-subtitle">California</h2>
+          <p class="popup-description">Es una ciudad importante de California, 
+          cuarta en población del estado, decimosegunda de Estados Unidos y 
+          pieza central de la Bahía de San Francisco </p>
+      </div>
+        `)
+        .setLngLat(this.placesService.userLocation!);
+```
+
+Y luego asociarlo a un marcador. Creamos una función que agrega un marcador, pero esta vez agregamos un parámetro para que incluya un popUp
+
+```typescript
+private addMarker(lngLat: [number, number], popup: Popup  ,options: MarkerOptions) {
+
+    if (!this.map) {
+      return;
+    }
+    
+    const marker = new Marker({
+      ...options
+    })
+    .setLngLat(lngLat);
+
+    if (popup) {
+      marker.setPopup(popup);
+    }
+
+    marker.addTo(this.map);
+    
+    if (options.draggable) {
+      marker.on('drag', (ev) => {
+        console.log(marker.getLngLat());
+      });
+    }
+  }
+```
+
+Luego agregamos el marcador con el popUp
+
+```typescript
+this.addMarker(this.placesService.userLocation!, popup, {draggable: true});
+```
+
+
+<img src="./imagenes/13-MapasApp02.png" alt="" style="margin-right: 10px; max-width: 70%; height: auto; border: 1px solid black" />
+
+
+<aside class="nota-informativa">
+  <p>
+      Agregamos algunos estilos para el PopUp en nuestro Component CSS File, pero dado que el popUp es un Componente hijo, se agregó el prefijo <strong>::ng-deep</strong> a cada selector en el CSS para poder aplicarlo al componente hijo. Otra forma es mover el CSS del componente hijo al style.css principal
+  </p>
+  <code>
+    ::ng-deep .popup-title {
+        ## estilos aca.
+    }
+  </code>
+</aside>
+
+
+<aside class="nota-informativa">
+  <p>Otra forma puede ser aplicando la propiedad <strong>encapsulation: ViewEncapsulation.None</strong> a nivel del componente principal</p>
+
+  
+    @Component({
+      encapsulation: ViewEncapsulation.None
+    })
+  
+</aside>
+
+Supongo que al desactivar la encapusulación, estos estilos pueden afectar a cualquier elemento en la aplicación. Es el mismo efecto que se obtiene al mover los estilos al archivo **style.css**
+
+
+## Mas componentes
+
+```bash
+$ ng g c maps/components/btn-my-location --skip-tests
+$ ng g c maps/components/angular-logo --skip-tests
+```
+
+El logo de angular se carga a partid de una imagen base64
+
+```html
+<img
+    width="100"
+    alt="Angular Logo"
+    src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj4KICAgIDxwYXRoIGZpbGw9IiNERDAwMzEiIGQ9Ik0xMjUgMzBMMzEuOSA2My4ybDE0LjIgMTIzLjFMMTI1IDIzMGw3OC45LTQzLjcgMTQuMi0xMjMuMXoiIC8+CiAgICA8cGF0aCBmaWxsPSIjQzMwMDJGIiBkPSJNMTI1IDMwdjIyLjItLjFWMjMwbDc4LjktNDMuNyAxNC4yLTEyMy4xTDEyNSAzMHoiIC8+CiAgICA8cGF0aCAgZmlsbD0iI0ZGRkZGRiIgZD0iTTEyNSA1Mi4xTDY2LjggMTgyLjZoMjEuN2wxMS43LTI5LjJoNDkuNGwxMS43IDI5LjJIMTgzTDEyNSA1Mi4xem0xNyA4My4zaC0zNGwxNy00MC45IDE3IDQwLjl6IiAvPgogIDwvc3ZnPg=="
+  />
+  ```
+
+  Y algo de CSS
+
+```css
+img {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}
+```
+
+Esto solo aplica a los elementos **img** dentro del componente.
+
+
+Luego agregamos este HTML el **btn-my-location**
+
+```html
+<button class="btn btn-primary" (click)="goToMyLocation()">
+    My Location
+</button>
+```
+
+Pero para poder acceder al Mapa desde el componente **btn-my-location** y podes setear la ubicación usando la función **goToMyLocation()** debemos crear un servicio.
+
+
+## Servicio para controlar el Mapa
+
+Agregamos un servicio: 
+
+```bash
+$ ng g s maps/services/map-service
+```
+
+exportamos el servicio en nuestro barrel o index.html 
+
+```typescript
+export { MapService } from "./map.service";
+```
+
+El servicio únicamente define una propiedad privada **map** la cual debe ser seteada por el compoentne que crea el mapa y luego puede poner a disposición esta variable **map** por medio de un getter
+
+```typescript
+export class MapService {
+
+  private map: Map | undefined;
+
+  isMapReady(): boolean {
+    return !!this.map;
+  }
+
+  setMap(map: Map) {
+    this.map = map;
+  }
+
+  flyTo(coords: LngLatLike) {
+    this.map?.flyTo({ center: coords });
+  }
+}
+```
+
+En nuestro **MapViewComponent** la finalizar la creación del Mapa, hacemos esto:
+
+```typescript
+this.mapService.setMap(this.map);
+```
+
+A partir de este momento el Map está disponible en toda la APP, dado que el Servicio se inyectó en el Root.
+
+
+Entonces en el **BtnMyLocationComponent** podemos inyectar el **mapService** para acceder al objeto Mapa y a la vez inyectamos **PlacesService** para Obtener la ubicación del Usuario.
+
+```typescript
+constructor(private mapService: MapService,
+    private placesService: PlacesService) { }
+
+  public goToMyLocation() {
+    this.mapService.flyTo(this.placesService.userLocation!);
+  }
+```
+
+Y listo, al presionar el botón, vamos a navegar a la ubicación del usuario, la cual es proporcionada por el GeoLocation del Browser.
+
+
+## Nuevos Compoenentes Search Bar y Results
+
+```bash
+$ ng g c maps/components/search-bar --skip-tests
+$ ng g c maps/components/search-results --skip-tests
+```
+
+En el **SearchBar** HTML
+
+```html
+<div class="search-container">
+    <input type="text" class="form-control" placeholder="Search Place">
+    <app-search-results></app-search-results>
+</div>
+
+```
+
+Estilos
+
+```css
+.search-container {
+    background-color: white;
+    border-radius: 5px;
+    border:  1px solid #ccc;
+    box-shadow: 0 10px 10px 0 rgba(0, 0, 0, 0.3);
+    left: 20px;
+    padding: 5px;
+    position: fixed;
+    top: 20px;
+}
+```
+
+## Componente Seasrch Results 
+
+La comunicación **SearchBar => SearchResults** la implementaremos vía Servicios. Por el momento trabajamos en el diseño:
+
+El HTML del SearchResult:
+
+```html
+<div class="alert alert-primary mt-2 text-center">
+    <h6>Loading...</h6>
+    <span>Wait please!</span>
+</div>
+<ul class="list-group mt-2">
+    <li class="list-group-item lit-group-action pointer">
+        <h6>Place</h6>
+        <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Quaerat assumenda dignissimos et esse inventore commodi autem aut asperiores, dolorem enim minus quas perferendis non neque aliquid amet unde dolorum veritatis?</p>
+        <button class="btn btn-sm btn-outline-primary">Directions</button>
+    </li>
+</ul>
+```
+
+<img src="./imagenes/13-MapasApp03.png" alt="" style="margin-right: 10px; max-width: 70%; height: auto; border: 1px solid black" />
+
+
+## Debounce Manual
+Implementaremos una funcionalidad que permita escribir en el campo de búsqueda, pero que solo dispare la búsqueda hasta que pasa cierto tiempo sin que el usuario ingrese mas teclas.
+
+Para ello necesitamos agregar `"types": ["node"]` en nuestro archivo **tsconfig.app.json**
+
+
+```json
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/app",
+    "types": ["node"]
+  },
+  "files": [
+    "src/main.ts"
+  ],
+  "include": [
+    "src/**/*.d.ts"
+  ]
+}
+```
+
+`"types": ["node"]`: Esta línea indica que estás incluyendo los tipos de declaración para Node.js. Los tipos de declaración son archivos que describen la forma de los objetos y módulos en JavaScript, y se utilizan durante la compilación para proporcionar información sobre las APIs que están disponibles en tiempo de ejecución.
+
+
+En el HTML  del **SearchBarComponent** agregamos una referencia y un evento keyup
+
+```html
+<div class="search-container">
+    <input 
+        type="text" 
+        class="form-control" 
+        placeholder="Search Place"
+        #txtSearch
+        (keyup)="onQueryChange(txtSearch.value)">
+    <app-search-results></app-search-results>
+</div>
+```
+
+Y en el componente definimos un debounce manual:
+
+```typescript
+export class SearchBarComponent {
+
+  private debounceTime?: NodeJS.Timeout;
+
+  onQueryChange(query: string = '') {
+    if (this.debounceTime) {
+      clearTimeout(this.debounceTime);
+    }
+
+    this.debounceTime = setTimeout(() => {
+      //Search API
+    }, 1000);
+
+  }
+}
+```
+
+Aca usamos el `NodeJS.Timeout` para definir una variable privada para manejar los timeOut, y cada vez que se acumula 1 segundo, dispararemos una búsqueda.
+
+
+## API para obtener Lugares
+
+Haremos una petición http, importamos en **AppModule** el **HttpClientModule**
+
+
+Pero en lugar de usar el HTTPClient directamente, vamos a crear una API customizada, extenderemos de **HttpClient** y vamos a sobreescribir el método **get**
+
+```typescript
+import { HttpClient, HttpHandler, HttpHeaders, HttpParams } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { environment } from "../../../environments/environment";
+
+@Injectable({providedIn: 'root'})
+export class PlacesApiClient extends HttpClient {
+  
+    private mapboxBaseUrl = 'https://api.mapbox.com/geocoding/v5/mapbox.places';
+  
+    constructor(handler: HttpHandler) {
+        super(handler);
+    }
+
+    public override get<T>(url: string, options: {
+        params?: HttpParams | {
+            [param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>;
+        }
+    }) { 
+
+        url = `${this.mapboxBaseUrl}/${url}.json?`;
+
+        return super.get<T>(url, {
+            params: {
+                limit: '5',
+                language: 'es',
+                access_token: environment.mapbox_key,
+                ...options.params,
+            }
+        });
+    }
+}
+```
+
+Y luego podemos inyectar este API en el servicio **PlacesService**
+
+```typescript
+public getPlaces(query: string) {
+
+    this.isLoadingPlaces = true;
+
+    if (!this.userLocation) {
+      throw new Error('User location not found');
+    }
+
+    const params = {
+      proximity: this.userLocation.join(','),
+    };
+    
+    this.placesApiClient.get<PlacesResponse>(`/${query}.json`, 
+    {
+      params,
+    })
+    .subscribe( (response) => {
+      this.places = response.features;
+      this.isLoadingPlaces = false;
+    });
+  }
+```
+
+En este punto, al llamar el método **getPlaces** tendremos los resultados en **this.places**
+
+
 
 <div style="page-break-after: always;"></div>
 

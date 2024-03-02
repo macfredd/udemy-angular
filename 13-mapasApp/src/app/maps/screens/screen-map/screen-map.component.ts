@@ -12,4 +12,8 @@ export class ScreenMapComponent {
     
   }
 
+  get isUserLocationReady(): boolean {
+    return this.placesService.isUserLocationReady;
+  }
+
 }

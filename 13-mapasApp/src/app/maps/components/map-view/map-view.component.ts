@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild, ViewEncapsulation } from '@angular/core';
 import { PlacesService } from '../../services';
 import { LngLat, Map, Marker, MarkerOptions, Popup } from 'mapbox-gl';
 import { environment } from '../../../../environments/environment';
@@ -6,7 +6,8 @@ import { environment } from '../../../../environments/environment';
 @Component({
   selector: 'app-map-view',
   templateUrl: './map-view.component.html',
-  styleUrl: './map-view.component.css'
+  styleUrl: './map-view.component.css',
+  encapsulation: ViewEncapsulation.None
 })
 export class MapViewComponent implements AfterViewInit {
 
@@ -27,7 +28,15 @@ export class MapViewComponent implements AfterViewInit {
       });
 
       const popup = new Popup()
-        .setHTML('<h1>Hello World!</h1>')
+        .setHTML(`
+          <div class="popup-container">
+          <h1 class="popup-title">San Francisco</h1>
+          <h2 class="popup-subtitle">California</h2>
+          <p class="popup-description">Es una ciudad importante de California, 
+          cuarta en población del estado, decimosegunda de Estados Unidos y 
+          pieza central de la Bahía de San Francisco </p>
+      </div>
+        `)
         .setLngLat(this.placesService.userLocation!);
 
       this.addMarker(this.placesService.userLocation!, popup, {draggable: true});

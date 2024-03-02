@@ -14884,8 +14884,16 @@ Podemos agregar un PopUp de esta forma
 
 ```typescript
 const popup = new Popup()
-  .setHTML('<h1>Hello World!</h1>')
-  .setLngLat(this.placesService.userLocation!);
+        .setHTML(`
+          <div class="popup-container">
+          <h1 class="popup-title">San Francisco</h1>
+          <h2 class="popup-subtitle">California</h2>
+          <p class="popup-description">Es una ciudad importante de California, 
+          cuarta en población del estado, decimosegunda de Estados Unidos y 
+          pieza central de la Bahía de San Francisco </p>
+      </div>
+        `)
+        .setLngLat(this.placesService.userLocation!);
 ```
 
 Y luego asociarlo a un marcador. Creamos una función que agrega un marcador, pero esta vez agregamos un parámetro para que incluya un popUp
@@ -14923,7 +14931,30 @@ this.addMarker(this.placesService.userLocation!, popup, {draggable: true});
 ```
 
 
+<img src="./imagenes/13-MapasApp02.png" alt="" style="margin-right: 10px; max-width: 70%; height: auto; border: 1px solid black" />
 
+
+<aside class="nota-informativa">
+  <p>
+      Agregamos algunos estilos para el PopUp en nuestro Component CSS File, pero dado que el popUp es un Componente hijo, se agregó el prefijo <strong>::ng-deep</strong> a cada selector en el CSS para poder aplicarlo al componente hijo. Otra forma es mover el CSS del componente hijo al style.css principal
+  </p>
+  <code>
+    ::ng-deep .popup-title {
+        ## estilos aca.
+    }
+  </code>
+</aside>
+
+
+<aside class="nota-informativa">
+<p>Otra forma puede ser aplicando la propiedad <strong>encapsulation: ViewEncapsulation.None</strong> a nivel del componente principal</p>
+
+<code>
+  @Component({
+    encapsulation: ViewEncapsulation.None
+  })
+</code>
+</aside>
 
 <div style="page-break-after: always;"></div>
 

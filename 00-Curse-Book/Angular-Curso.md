@@ -14878,6 +14878,52 @@ Y luego lo usamos en nuestro template del **screenMapComponent**
 [Enlace a la sección "Instalar MapBox"](#instalar-mapbox)
 
 
+## Map Popup
+
+Podemos agregar un PopUp de esta forma
+
+```typescript
+const popup = new Popup()
+  .setHTML('<h1>Hello World!</h1>')
+  .setLngLat(this.placesService.userLocation!);
+```
+
+Y luego asociarlo a un marcador. Creamos una función que agrega un marcador, pero esta vez agregamos un parámetro para que incluya un popUp
+
+```typescript
+private addMarker(lngLat: [number, number], popup: Popup  ,options: MarkerOptions) {
+
+    if (!this.map) {
+      return;
+    }
+    
+    const marker = new Marker({
+      ...options
+    })
+    .setLngLat(lngLat);
+
+    if (popup) {
+      marker.setPopup(popup);
+    }
+
+    marker.addTo(this.map);
+    
+    if (options.draggable) {
+      marker.on('drag', (ev) => {
+        console.log(marker.getLngLat());
+      });
+    }
+  }
+```
+
+Luego agregamos el marcador con el popUp
+
+```typescript
+this.addMarker(this.placesService.userLocation!, popup, {draggable: true});
+```
+
+
+
 
 <div style="page-break-after: always;"></div>
 

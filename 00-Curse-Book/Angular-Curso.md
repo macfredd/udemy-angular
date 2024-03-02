@@ -10379,7 +10379,10 @@ y luego acceder a la propiedad requerida
 accessToken: environment.mapbox_key
 ```
 
+
 ## Instalar MapBox
+
+[Regresar a la Calse 13](#mapbox-clase-13)
 
 ```
 npm install --save mapbox-gl
@@ -14802,6 +14805,77 @@ Métodos:
 
 - `async getUserLocation(): Promise<[number, number]>`: Un método asíncrono que utiliza la API de geolocalización del navegador para obtener la ubicación actual del usuario. Devuelve una promesa que resuelve con un array de dos números representando la longitud y la latitud de la ubicación del usuario. En caso de éxito, actualiza la propiedad `userLocation` y resuelve la promesa. En caso de error, muestra una alerta con el mensaje de error y rechaza la promesa.
 
+
+Creamos dos componentes mas
+
+```bash
+$ ng g c maps/components/map-view --skip-tests
+$ ng g c maps/components/loading --skip-tests
+```
+
+## Personalizando el Componente Loading
+
+Agregamos el Template:
+
+```html
+<div class="loading-map d-flex justify-content-center align-items-center">
+    <div class="text-center">
+        <h3>Espere por favor!</h3>
+        <span>Localizando...</span>
+    </div>
+</div>
+```
+
+Y lo agregamos a nuestro **screenMapComponent**
+
+```html
+<app-loading></app-loading>
+```
+
+Por el momento podemos ver esto:
+
+<img src="./imagenes/13-MapasApp01.png" alt="" style="margin-right: 10px; max-width: 70%; height: auto; border: 1px solid black" />
+
+Se agrega un poco de Estilos en el **LoadingComponent**
+
+```css
+.loading-map {
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    height: 100vh;
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 100vw;
+}
+```
+
+
+## Screen Map Component
+
+En nuestro **ScreenMapComponent** vamos a agregar un getter que retorne el estado del la lectura de geolocalización.
+
+```typescript
+get isUserLocationReady(): boolean {
+  return this.placesService.isUserLocationReady;
+}
+```
+
+Y luego lo usamos en nuestro template del **screenMapComponent**
+
+
+```html
+@if (!isUserLocationReady) {
+    <app-loading></app-loading>
+} @else {
+    <app-map-view></app-map-view>
+}
+```
+
+
+## MapBox Clase 13
+
+[Enlace a la sección "Instalar MapBox"](#instalar-mapbox)
 
 
 

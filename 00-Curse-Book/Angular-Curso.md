@@ -14956,6 +14956,107 @@ this.addMarker(this.placesService.userLocation!, popup, {draggable: true});
 </code>
 </aside>
 
+Supongo que al desactivar la encapusulación, estos estilos pueden afectar a cualquier elemento en la aplicación. Es el mismo efecto que se obtiene al mover los estilos al archivo **style.css**
+
+
+## Mas componentes
+
+```bash
+$ ng g c maps/components/btn-my-location --skip-tests
+$ ng g c maps/components/angular-logo --skip-tests
+```
+
+El logo de angular se carga a partid de una imagen base64
+
+```html
+<img
+    width="100"
+    alt="Angular Logo"
+    src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj4KICAgIDxwYXRoIGZpbGw9IiNERDAwMzEiIGQ9Ik0xMjUgMzBMMzEuOSA2My4ybDE0LjIgMTIzLjFMMTI1IDIzMGw3OC45LTQzLjcgMTQuMi0xMjMuMXoiIC8+CiAgICA8cGF0aCBmaWxsPSIjQzMwMDJGIiBkPSJNMTI1IDMwdjIyLjItLjFWMjMwbDc4LjktNDMuNyAxNC4yLTEyMy4xTDEyNSAzMHoiIC8+CiAgICA8cGF0aCAgZmlsbD0iI0ZGRkZGRiIgZD0iTTEyNSA1Mi4xTDY2LjggMTgyLjZoMjEuN2wxMS43LTI5LjJoNDkuNGwxMS43IDI5LjJIMTgzTDEyNSA1Mi4xem0xNyA4My4zaC0zNGwxNy00MC45IDE3IDQwLjl6IiAvPgogIDwvc3ZnPg=="
+  />
+  ```
+
+  Y algo de CSS
+
+```css
+img {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}
+```
+
+Esto solo aplica a los elementos **img** dentro del componente.
+
+
+Luego agregamos este HTML el **btn-my-location**
+
+```html
+<button class="btn btn-primary" (click)="goToMyLocation()">
+    My Location
+</button>
+```
+
+Pero para poder acceder al Mapa desde el componente **btn-my-location** y podes setear la ubicación usando la función **goToMyLocation()** debemos crear un servicio.
+
+
+## Servicio para controlar el Mapa
+
+Agregamos un servicio: 
+
+```bash
+$ ng g s maps/services/map-service
+```
+
+exportamos el servicio en nuestro barrel o index.html 
+
+```typescript
+export { MapService } from "./map.service";
+```
+
+El servicio únicamente define una propiedad privada **map** la cual debe ser seteada por el compoentne que crea el mapa y luego puede poner a disposición esta variable **map** por medio de un getter
+
+```typescript
+export class MapService {
+
+  private map: Map | undefined;
+
+  isMapReady(): boolean {
+    return !!this.map;
+  }
+
+  setMap(map: Map) {
+    this.map = map;
+  }
+
+  flyTo(coords: LngLatLike) {
+    this.map?.flyTo({ center: coords });
+  }
+}
+```
+
+En nuestro **MapViewComponent** la finalizar la creación del Mapa, hacemos esto:
+
+```typescript
+this.mapService.setMap(this.map);
+```
+
+A partir de este momento el Map está disponible en toda la APP, dado que el Servicio se inyectó en el Root.
+
+
+Entonces en el **BtnMyLocationComponent** podemos inyectar el **mapService** para acceder al objeto Mapa y a la vez inyectamos **PlacesService** para Obtener la ubicación del Usuario.
+
+```typescript
+constructor(private mapService: MapService,
+    private placesService: PlacesService) { }
+
+  public goToMyLocation() {
+    this.mapService.flyTo(this.placesService.userLocation!);
+  }
+```
+
+Y listo, al presionar el botón, vamos a navegar a la ubicación del usuario, la cual es proporcionada por el GeoLocation del Browser.
+
 <div style="page-break-after: always;"></div>
 
 # Fin del Curso

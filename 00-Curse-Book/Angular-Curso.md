@@ -15320,6 +15320,77 @@ El resultado es:
 <img src="./imagenes/13-MapasApp04.png" alt="" style="margin-right: 10px; max-width: 70%; height: auto; border: 1px solid black" />
 
 
+## Agregando Marcadores a los resultados
+
+En el MapService vamos a crear un nuevo método, el cual se encargará de mostrar los marcadores en el mapa. Este método necesita obtener la lista de lugares que son el resultado de la búsqueda.
+
+
+```typescript
+createMarkersFromPlaces(places: Feature[], userCurrentLocation: LngLatLike) {
+
+    if (!this.map) {
+      throw new Error('Map not ready');
+    }
+
+    this.markers.forEach( (marker) => marker.remove() );
+    const newMarkers = [];
+
+    this.markers = places.map( (place) => {
+      const marker = new Marker()
+        .setLngLat([place.geometry.coordinates[0], place.geometry.coordinates[1]])
+        .setPopup(new Popup().setHTML(`
+          <h3>${place.text}</h3>
+          <p>${place.properties.address}</p>
+        `))
+        .addTo(this.map!);
+      return marker;
+    });
+  }
+```
+
+Este método debe ser llamado desde el servicio de Places, una vez se completa una búsqueda
+
+
+```typescript
+public getPlaces(query: string) {
+
+    // Toda la lóciga para prepara la búsqueda...
+    this.placesApiClient.get<PlacesResponse>(`/${query}.json`, 
+    {
+      params,
+    })
+    .subscribe( (response) => {
+      this.places = response.features;
+      // Una vez obtenemos los resultados, llamamos nuestro nuevo método.
+      this.mapService.createMarkersFromPlaces(this.places);
+      this.isLoadingPlaces = false;
+    });
+  }
+```
+
+
+## Mejorar el Zoom
+
+Cuando realizamos una búsqueda y los resultados no estan cerca del punto de proximidad, los marcadores no son visibles en el mapa. Para lograr que sean visibles, justo después de crear los marcadores, vamos a crear una lista de Límites, esto representa un arreglo de los pares de coordenadas de todos los marcadores que queremos visualizar
+
+Agregamo este código en el **createMarkersFromPlaces** luego de crear la lista de marcadores.
+
+```typescript
+if (this.markers.length === 0) {
+  return;
+}
+const bounds = new LngLatBounds();
+this.markers.forEach( (marker) => { bounds.extend(marker.getLngLat()) });
+bounds.extend(userCurrentLocation);
+this.map.fitBounds(bounds);
+```
+
+Nota: **userCurrentLocation** es la ubicación del usuario, la cual se pasa como parámetro al llamar el método **createMarkersFromPlaces** agregarla a los límites permite que nuestra ubicación sea parte de los resultados a mostrar.
+
+
+## Rutas entre dos puntos
+
+
 
 <div style="page-break-after: always;"></div>
 

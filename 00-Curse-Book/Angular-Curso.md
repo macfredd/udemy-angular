@@ -15244,6 +15244,81 @@ public getPlaces(query: string) {
 
 En este punto, al llamar el método **getPlaces** tendremos los resultados en **this.places**
 
+## Mostrar resultados de la búsqueda
+
+El componente **SearchResultsComponent** debe acceder tanto al **PlacesService** como al **MapService**
+
+El primero para acceder a la propiedad **isLoadingPlaces** y también para obtener la lista de **places** que son el resultado de la búsqueda.
+
+Y el segundo servicio lo usaremos para acceder al método **flyTo** para navegar al resultado seleccionado.
+
+El TS se detalla a continuación:
+
+
+```typescript
+export class SearchResultsComponent {
+
+  public selectedId: string = '';
+
+  constructor(private placesService: PlacesService,
+    private mapService: MapService) { }
+
+  get places(): Feature[] {
+    return this.placesService.places;
+  }
+
+  get isLoadingPlaces() {
+    return this.placesService.isLoadingPlaces;
+  }
+  
+  flyToPlace(place: Feature) {
+    this.selectedId = place.id;
+    const [lng, lat] = place.center as [number, number];
+    this.mapService.flyTo([lng, lat]);
+  }
+}
+```
+
+Y el Template:
+
+```html
+@if (isLoadingPlaces) {
+    <div class="alert alert-primary mt-2 text-center">
+        <h6>Loading...</h6>
+        <span>Wait please!</span>
+    </div>
+} @else {
+    <ul class="list-group mt-2">
+
+        @for (place of places; track $index) {
+            <li 
+                class="list-group-item lit-group-action pointer"
+                [class.active]="place.id === selectedId"
+                (click)="flyToPlace(place)"
+                >
+                <h6>{{ place.text_es }}</h6>
+                <p>{{ place.place_name }}</p>
+                <button class="btn btn-sm"
+                    [ngClass]=" place.id === selectedId ? 'btn-outline-light' : 'btn-outline-primary' ">
+                    Directions
+                </button>
+            </li>
+        }
+            
+    </ul>
+}
+```
+
+
+<aside class="nota-informativa">
+<p>El API de MapBox, hace las búsquedas usando como proximidad la localización del usuario. De modo que si buscamos <strong>Pizza</strong> mostrará los restaurantes de pizza en el área de San Francisco, que, anque no es mi ubicación actual, he modificado la latitud y longitud de mi browser manualmente.</p>
+</aside>
+
+
+El resultado es:
+
+<img src="./imagenes/13-MapasApp04.png" alt="" style="margin-right: 10px; max-width: 70%; height: auto; border: 1px solid black" />
+
 
 
 <div style="page-break-after: always;"></div>

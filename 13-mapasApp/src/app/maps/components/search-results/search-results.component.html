@@ -1,12 +1,26 @@
 
-<div class="alert alert-primary mt-2 text-center">
-    <h6>Loading...</h6>
-    <span>Wait please!</span>
-</div>
-<ul class="list-group mt-2">
-    <li class="list-group-item lit-group-action pointer">
-        <h6>Place</h6>
-        <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Quaerat assumenda dignissimos et esse inventore commodi autem aut asperiores, dolorem enim minus quas perferendis non neque aliquid amet unde dolorum veritatis?</p>
-        <button class="btn btn-sm btn-outline-primary">Directions</button>
-    </li>
-</ul>
+@if (isLoadingPlaces) {
+    <div class="alert alert-primary mt-2 text-center">
+        <h6>Loading...</h6>
+        <span>Wait please!</span>
+    </div>
+} @else {
+    <ul class="list-group mt-2">
+
+        @for (place of places; track $index) {
+            <li 
+                class="list-group-item lit-group-action pointer"
+                [class.active]="place.id === selectedId"
+                (click)="flyToPlace(place)"
+                >
+                <h6>{{ place.text_es }}</h6>
+                <p>{{ place.place_name }}</p>
+                <button class="btn btn-sm"
+                    [ngClass]=" place.id === selectedId ? 'btn-outline-light' : 'btn-outline-primary' ">
+                    Directions
+                </button>
+            </li>
+        }
+            
+    </ul>
+}

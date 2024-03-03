@@ -39,6 +39,12 @@ export class PlacesService {
 
   public getPlaces(query: string) {
 
+    if (query === '') {
+      this.places = [];
+      this.isLoadingPlaces = false;
+      return;
+    }
+
     this.isLoadingPlaces = true;
 
     if (!this.userLocation) {

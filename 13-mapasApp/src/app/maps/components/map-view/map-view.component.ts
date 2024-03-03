@@ -41,7 +41,7 @@ export class MapViewComponent implements AfterViewInit {
         `)
         .setLngLat(this.placesService.userLocation!);
 
-      this.addMarker(this.placesService.userLocation!, popup, {draggable: true});
+      this.addMarker(this.placesService.userLocation!, popup, {draggable: true, color: 'red'});
 
       this.mapService.setMap(this.map);
 

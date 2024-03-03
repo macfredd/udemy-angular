@@ -3,6 +3,7 @@ import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Feature, PlacesResponse } from '../interfaces/places-response.interface';
 import { PlacesApiClient } from '../api';
+import { MapService } from './map.service';
 
 
 
@@ -15,11 +16,13 @@ export class PlacesService {
   public isLoadingPlaces: boolean = false;
   public places: Feature[] = [];
 
+
   get isUserLocationReady(): boolean {
     return !! this.userLocation;
   }
 
-  constructor(private placesApiClient: PlacesApiClient) { 
+  constructor(private placesApiClient: PlacesApiClient, 
+    private mapService: MapService,) { 
     this.getUserLocation();
   }
 
@@ -61,6 +64,7 @@ export class PlacesService {
     })
     .subscribe( (response) => {
       this.places = response.features;
+      this.mapService.createMarkersFromPlaces(this.places, this.userLocation!);
       this.isLoadingPlaces = false;
     });
   }

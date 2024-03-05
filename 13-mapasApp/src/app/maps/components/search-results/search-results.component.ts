@@ -27,4 +27,16 @@ export class SearchResultsComponent {
     const [lng, lat] = place.center as [number, number];
     this.mapService.flyTo([lng, lat]);
   }
+
+  getDirections(place: Feature) {
+
+    if (!this.placesService.userLocation) {
+      throw new Error('User location not found');
+    }
+
+    const start = this.placesService.userLocation;
+    const end = place.center as [number, number];
+    
+    this.mapService.getRoutesBetweenPoints(start, end);
+  }
 }

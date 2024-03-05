@@ -15390,6 +15390,168 @@ Nota: **userCurrentLocation** es la ubicación del usuario, la cual se pasa como
 
 ## Rutas entre dos puntos
 
+Usaremos el Navigation API de MapBox, primero vamos al playground del API [https://docs.mapbox.com/playground/directions/](https://docs.mapbox.com/playground/directions/)
+
+Apagamos las rutas alternativas y usaremos geoJson. Agreguemos dos puntos y copiemos el URL generado por el API.
+
+Creamos una interfaz **Directions** usando Paste as Json
+
+
+Vamos a crear un DirectionsApiClient similar al PlacesApiClient, implementaremos nuestro propio método GET
+
+```typescript
+import { HttpClient, HttpHandler } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { environment } from "../../../environments/environment";
+
+@Injectable({providedIn: 'root'})
+export class DirectionsApiClient extends HttpClient {
+  
+    private mapboxBaseUrl = 'https://api.mapbox.com/directions/v5/mapbox/driving';
+  
+    constructor(handler: HttpHandler) {
+        super(handler);
+    }
+
+    public override get<T>(url: string) { 
+
+        url = this.mapboxBaseUrl + url;
+
+        return super.get<T>(url, {
+            params: {
+                alternatives: false,
+                geometries: 'geojson',
+                overview: 'simplified',
+                steps: false,
+                language: 'es',
+                access_token: environment.mapbox_key,
+            }
+        });
+    }
+}
+```
+
+Hemos removido los params, porque enviaremos cierta información en el URL.
+
+## Obtener Distancia y Duración del Recorrido
+
+En nuestro **MapService** inyectamos el nuevo API
+
+```typescript
+constructor(private directionApiClient: DirectionsApiClient) { }
+```
+
+Y usamos el API para crear el siguiente método:
+
+```typescript
+getRoutesBetweenPoints(start: [number, number], end: [number, number]) {
+    this.directionApiClient.get<Directions>(`/${start.join(',')};${end.join(',')}`)
+    .subscribe( (response) => console.log(response));
+  }
+```
+
+La idea es que al presionar el botón "Directions" que aparece que dada uno de los resultados, usemos como punto inicial nuestra ubicación y como punto final la dirección seleccionada. Entonces usaremos el método **getRoutesBetweenPoints** 
+
+Al presionar el boton directions enviamos el Place seleccionado:
+
+```html
+<button
+    (click)="getDirections(place)">
+    Directions
+</button>
+```
+
+Luego creamos el método:
+
+```typescript
+getDirections(place: Feature) {
+
+    if (!this.placesService.userLocation) {
+      throw new Error('User location not found');
+    }
+
+    const start = this.placesService.userLocation;
+    const end = place.center as [number, number];
+    
+    this.mapService.getRoutesBetweenPoints(start, end);
+  }
+```
+
+Ahora, al hacer click, podremos ver en consola el JSON response.
+
+## Dibujar Línea de dirección
+
+El siguiente método **drawPolilyne** hace un par de cosas, primero establece los límites del mapa, similar a lo que se hizo para mostrar todos los markeres, en este caso definimos los límites basados en todas las coordenadas de nuestra ruta, es posible que entre el punto inicial y final se siga una ruta que se salga del mapa.
+
+Posteriormente creamos el **anySourceData** que indica la fuente de datos de la ruta a dibujar y antes de dibujar la ruta, limpiamos cualquier ruta previa dibujada en el mapa
+
+
+```typescript
+private drawPolilyne(route: Route) {
+    console.log( {kms: route.distance/ 1000, Mins: route.duration/ 60});
+    
+    if (!this.map) {
+      throw new Error('Map not ready');
+    }
+
+    // Establecer los limites del mapa
+
+    const coords = route.geometry.coordinates;
+    const bounds = new LngLatBounds();
+
+    coords.forEach( (coord) => {
+      bounds.extend(coord as LngLatLike);
+    });
+
+    this.map.fitBounds(bounds, {
+      padding:200
+    });
+
+    // Dibujar la ruta
+
+    const anySourceData: AnySourceData = {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'LineString',
+              coordinates: coords
+            }
+          }
+        ]
+      }
+    }
+
+    // Limpiar ruta previa
+    if (this.map.getLayer('RouteString')) {
+      this.map.removeLayer('RouteString');
+      this.map.removeSource('RouteString');
+    }
+
+    this.map.addSource('RouteString', anySourceData);
+
+    this.map.addLayer({
+      id: 'RouteString',
+      type: 'line',
+      source: 'RouteString',
+      layout: {
+        'line-join': 'round',
+        'line-cap': 'round'
+      },
+      paint: {
+        'line-color': '#3887be',
+        'line-width': 3
+      }
+    });
+
+  }
+```
+
+
 
 
 <div style="page-break-after: always;"></div>

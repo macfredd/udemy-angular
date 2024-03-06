@@ -28,7 +28,7 @@ Espero que este documento no solo sirva como recordatorio para mí, sino tambié
 
 
 
-__Diciembre 2023 - En proceso...__
+__19/Diciembre 2023 - 05/Marzo 2024__
 
 <div style="page-break-after: always;"></div>
 
@@ -15550,6 +15550,21 @@ private drawPolilyne(route: Route) {
 
   }
 ```
+
+## Ocultar meú de resultados
+
+El objetivo es ocultar la barra de resultados cuando se hace click en ir a una dirección. La solución sencilla es limpiar la lista de resultados en **Places Services**
+
+```typescript
+deletePlaces() {
+    this.places = [];
+  }
+```
+
+Luego podemos llamar este método cuando el usuario hace clicks en directions.
+
+
+<img src="./imagenes/13-MapasApp05.png" alt="" style="margin-right: 10px; max-width: 80%; height: auto; border: 1px solid black" />
 
 
 

@@ -30,6 +30,8 @@ Espero que este documento no solo sirva como recordatorio para mí, sino tambié
 
 __19/Diciembre 2023 - 05/Marzo 2024__
 
+**160 hrs efectivas de clase**
+
 <div style="page-break-after: always;"></div>
 
 ## C O N T E N I D O

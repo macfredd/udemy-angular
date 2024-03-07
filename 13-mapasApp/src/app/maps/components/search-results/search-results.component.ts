@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { MapService, PlacesService } from '../../services';
-import { Feature, PlacesResponse } from '../../interfaces/places-response.interface';
+import { Feature } from '../../interfaces/places-response.interface';
 
 @Component({
   selector: 'app-search-results',
@@ -10,6 +10,8 @@ import { Feature, PlacesResponse } from '../../interfaces/places-response.interf
 export class SearchResultsComponent {
 
   public selectedId: string = '';
+
+  public showResults: boolean = true;
 
   constructor(private placesService: PlacesService,
     private mapService: MapService) { }
@@ -34,10 +36,14 @@ export class SearchResultsComponent {
       throw new Error('User location not found');
     }
 
-    this.placesService.deletePlaces();
+    this.showResults = false;
     const start = this.placesService.userLocation;
     const end = place.center as [number, number];
     
     this.mapService.getRoutesBetweenPoints(start, end);
+  }
+
+  toggleShowResults() {
+    this.showResults = !this.showResults;
   }
 }

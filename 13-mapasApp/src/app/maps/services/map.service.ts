@@ -65,7 +65,7 @@ export class MapService {
   }
 
   private drawPolilyne(route: Route) {
-    console.log( {kms: route.distance/ 1000, Mins: route.duration/ 60});
+    //console.log( {kms: route.distance/ 1000, Mins: route.duration/ 60});
     
     if (!this.map) {
       throw new Error('Map not ready');

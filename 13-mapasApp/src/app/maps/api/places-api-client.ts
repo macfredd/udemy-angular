@@ -19,8 +19,6 @@ export class PlacesApiClient extends HttpClient {
 
         url = `${this.mapboxBaseUrl}/${url}.json?`;
 
-        console.log(url);
-
         return super.get<T>(url, {
             params: {
                 limit: '5',

@@ -58,7 +58,7 @@ export class PlacesService {
       proximity: this.userLocation.join(','),
     };
     
-    this.placesApiClient.get<PlacesResponse>(`/${query}.json`, 
+    this.placesApiClient.get<PlacesResponse>(`${query}`, 
     {
       params,
     })
@@ -67,9 +67,5 @@ export class PlacesService {
       this.mapService.createMarkersFromPlaces(this.places, this.userLocation!);
       this.isLoadingPlaces = false;
     });
-  }
-
-  deletePlaces() {
-    this.places = [];
   }
 }

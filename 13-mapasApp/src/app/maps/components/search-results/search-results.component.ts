@@ -37,6 +37,8 @@ export class SearchResultsComponent {
     }
 
     this.showResults = false;
+    localStorage.setItem('selectedPlace', JSON.stringify(place));
+
     const start = this.placesService.userLocation;
     const end = place.center as [number, number];
     
@@ -44,6 +46,10 @@ export class SearchResultsComponent {
   }
 
   toggleShowResults() {
+    const savedPlace = localStorage.getItem('selectedPlace');
+    if (savedPlace) {
+      this.selectedId = JSON.parse(savedPlace).id;
+    }
     this.showResults = !this.showResults;
   }
 }

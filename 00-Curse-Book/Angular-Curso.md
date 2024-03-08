@@ -288,9 +288,9 @@ Y consumirlo de la siguiente forma en el template:
 
 ## Creando nuevos componentes.
 
-Cuando la aplicación comienza a crecer, es necesario crear una estructura de directorios para organizar nuestro código. Cada componente con todos sus elementos se crea en sus propios directorios
+Cuando la aplicación comienza a crecer, es necesario crear una estructura de directorios para organizar nuestro código. Cada componente con todos sus elementos se crea en sus propios directorios.
 
-Supongamos que vamos a crear un componente llamado `Heroe` pero este componente tiene una vista para renderizar información de un Heroe específico y tambien otro componente para mostrar información de los heroes en forma de lista, en este caso podriamos crear la siguiente estructura
+Si vamos a crear un componente llamado `Heroe` pero este componente tiene una vista para renderizar información de un Heroe específico y tambien otro componente para mostrar información de los heroes en forma de lista, en este caso podriamos crear la siguiente estructura
 
 ```bash
 └── heroes
@@ -300,11 +300,11 @@ Supongamos que vamos a crear un componente llamado `Heroe` pero este componente 
 │       └── listado
 ```
 
-El directorio Heroe contiene el componente que muestra información de un heroe específico, mientras que el directorio listado, va a contener el componente para mostrar un listado de heroes.
+El directorio **Heroe** contiene el componente que muestra información de un **heroe** específico, mientras que el directorio listado, va a contener el componente para mostrar un listado de **heroes**.
 
-De esta forma si necesitamos crear otro componente relacionado con heroes, creariamos un nuevo directorio dentro de heroes.
+De esta forma si necesitamos crear otro componente relacionado con **heroes**, creariamos un nuevo directorio dentro de **heroes**.
 
-Veamos el componente Heroe.component.ts.
+Veamos el componente **Heroe.component.ts**.
 
 ```typescript
 import { Component } from '@angular/core';
@@ -359,11 +359,11 @@ Y su template:
 
 Notar como se usan las propiedades **nombre** y **edad** asi como una propiedad especial **get** llamada **nombreCapitalizado** y un método **obtenerNombre** Observe como se consumen esos elementos en el template.
 
-Los métodos **cambiarNombre()** y **cambiarEdad()** cambian las propiedades nombre y edad del componente respectivamente. Al cambiar una propiedad, el componente volverá a renderizar todas aquellas partes (elementos del DOM) que dependen de la propiedad modificada.
+Los métodos **cambiarNombre()** y **cambiarEdad()** cambian las propiedades __nombre__ y __edad__ del componente respectivamente. Al cambiar una propiedad, el componente volverá a renderizar todas aquellas partes (elementos del DOM) que dependen de la propiedad modificada.
 
 ## Crear Componente de forma automática.
 
-Para crear un componente con el ngCLI, usaremos el generador de componentes:
+Para crear un componente con el **ngCLI**, usaremos el generador de componentes:
 
 ```bash
 $ ng generate component heroes/listado
@@ -375,10 +375,10 @@ Podemos usar la forma simplificada, por ejemplo
 $ ng g c heroes/listado
 ```
 
-g: Generate
-c: Component
+__g: Generate
+c: Component__
 
-El último valor se refiere al path y nombre del componente. Si soloamente se especifica un valor, el componente será creado en el directorio app/src.
+El último valor se refiere al **path** y nombre del componente. Si soloamente se especifica un valor, el componente será creado en el directorio **app/src**.
 
 Las salida del comando anterior debe ser:
 
@@ -409,7 +409,7 @@ export class ListdadoComponent implements OnInit {
 
 **ngOnInit** es parte del ciclo de vida de los componentes de angular, es un método que se dispara cuando el componente se ha inicializado, veremos estos ciclos de vida más adelante.
 
-Por el momento podemos borra la referencia al OnInit, el archivo CSS y el archivo de pruebas.
+Por el momento podemos borra la referencia al **OnInit**, el archivo CSS y el archivo de pruebas.
 
 ## Directiva \*ngFor
 
@@ -449,9 +449,9 @@ Y nuestro Template:
 </ul>
 ```
 
-Recorremos el arreglo Heroes y luego imprimimos el contenido en un _ul_
+Recorremos el arreglo **Heroes** y luego imprimimos el contenido en un _ul_
 
-## Directivas \*ngIf y else
+## Directivas ngIf y else
 
 Actualicemos nuestra plantilla con el siguiente código:
 
@@ -480,7 +480,7 @@ Actualicemos nuestra plantilla con el siguiente código:
 
 La derctiva **ng-if="expresion"** permite mostrar un elemento dependiendo del valor retornado al evaluar la expresión.
 
-En el caso de los botones, se mostrará uno u otro en dependencia de la expresión "this.heroes.length y "this.heroes.length == 0 respectivamente.
+En el caso de los botones, se mostrará uno u otro en dependencia de la expresión "**this.heroes.length y "this.heroes.length == 0** respectivamente.
 
 También podemos incorporar un **Else** con una referencia local (hacia una plantilla local) tal como se hace con el mensage de borrado:
 
@@ -493,6 +493,10 @@ También podemos incorporar un **Else** con una referencia local (hacia una plan
 ```
 
 Si **heroeBorrado.length** es true ejecutará el bloque inicial H2, caso contrario renderizará la plantilla con nombre **noBorrado** la cual imprimer un H2 con texto No Borrado.
+
+<aside class="nota-importante">
+ <p> Angular 17 introduce el <strong>controlFLow</strong> una forma mas sencilla y similar a los bloques de control de flujo de JS (if/el/For/Switch) </p>
+</aside>
 
 ## Modulos
 
@@ -543,7 +547,7 @@ import { ListadoComponent } from './listado/listdado.component';
 export class HeroesModule {}
 ```
 
-Este archivo se crea en la raíz del directorio Heroes, con el nombre: **heroes.module.ts**
+Este archivo se crea en la raíz del directorio **Heroes**, con el nombre: **heroes.module.ts**
 
 ```bash
 └── heroes
@@ -603,11 +607,14 @@ Ahora en la sección de **declarations** de nuestro módulo tenemos el nuevo com
 declarations: [MainPageComponent];
 ```
 
-Angula CLI no ingresa el nuevo componente en la lista de Exports del Módulo, ya que puede ser un componente privado.
+<aside class="nota-informativa">
+<p>Angula CLI no ingresa el nuevo componente en la lista de Exports del Módulo, ya que puede ser un componente privado.</p>
+</aside>
+
 
 ## Form Module
 
-El siguiente bloque HTML genera un formulario el cual al hacer click en el botón Agregar refresca toda la página. en SPA esto no es un comportammiento aceptado.
+El siguiente bloque HTML genera un formulario el cual al hacer click en el botón Agregar, refresca toda la página. en SPA esto no es un comportammiento aceptado.
 
 ```html
 <form>
@@ -617,7 +624,7 @@ El siguiente bloque HTML genera un formulario el cual al hacer click en el botó
 </form>
 ```
 
-Para evitar el evento de recargar la página durante el submit del Form podemos "prevenir" ese default event:
+Para evitar la recarga de la página durante el submit del Form podemos "prevenir" ese default event:
 
 ```html
 <form (submit)="agregar($event)">
@@ -644,9 +651,9 @@ agregar(event: Event) {
 
 La instrucción **event.preventDefault();** previene que el evento por default del Submit se ejecute, en este caso recargar la página por completo. Con estos cambios, logramos que al hacer click en el botón agregar (submit) no se recargue la página.
 
-Angular al ser un Framework dispone de una serie de herramientas que facilitan el desarrollo. En este caso especifico, podemos evitarnos el trabajo de enviar el evento y llamar el preventDefault. Para ellos usaremos el módulo **FormsModule**
+Angular, es un Framework dispone de una serie de herramientas que facilitan el desarrollo. En este caso especifico, podemos evitarnos el trabajo de enviar el evento y llamar el **preventDefault**. Para ellos usaremos el módulo **FormsModule**
 
-Dado que el componente donde vamos a usarlo está contenido en el módulo dbz, vamos a proceder a importar el _FormsModule_ en dicho módulo, de la siguiente forma:
+Dado que el componente donde vamos a usarlo está contenido en el módulo **dbz**, vamos a proceder a importar el _FormsModule_ en dicho módulo, de la siguiente forma:
 
 ```typescript
 imports: [
@@ -684,11 +691,14 @@ Modifiquemos nuestro input en el template para enlazar un campo del formulario c
 <input type="text" placeholder="Nombre" [value]="nuevo.nombre" />
 ```
 
-Notar el uso de [] en value, esto hace que la expresión del otro lado del signo igual sea evaluada como una propiedad o función que retorna un dato desde el componente y será enlazado al control input.
+<aside class="nota-importante">
+<p>Notar el uso de [] en value, esto hace que la expresión del otro lado del signo igual sea evaluada como una propiedad o función que retorna un dato desde el componente y será enlazado al control input.</p>
+</aside>
+
 
 Esto se denomina Enlace de datos unidireccional (**One Way Data Binding**) ya que el componente envía los datos al input, pero si cambiamos el input, el objeto en el componente NO cambia.
 
-Para lograr que cualquier cambio en el input afecte el valor del objeto a nivel de componente podriamos agregar un _evenListener_ y llamar un metodo para actualizar el valor:
+Para lograr que cualquier cambio en el input afecte el valor del objeto a nivel de componente podriamos agregar un _evenListener_ y llamar un método para actualizar el valor:
 
 ```html
 <input
@@ -708,7 +718,7 @@ cambiarNombre(event: any) {
 }
 ```
 
-Nuevamente angular viene al rescate y nos hace la vida mas simple, podemos usar el **ngModel**, este crea una instancia de **FormControl** a partir de un modelo de dominio y la vincula a un elemento de control de formulario.
+Nuevamente angular viene al rescate y nos hace la vida más simple, podemos usar el **ngModel**, este crea una instancia de **FormControl** a partir de un modelo de dominio y la vincula a un elemento de control de formulario.
 
 Cambiemos nuestro input a esto:
 
@@ -723,7 +733,7 @@ Cambiemos nuestro input a esto:
 
 ** [(ngModel)]="nuevo.nombre"**
 
-Primero, el uso de [] indica que haremos el binding y el uso de () indica que emitiremos un evento, al igual que antes, pero, ngModel se encargará de hacer todo el trabajo, no necesitamos crear un mètodo adicional que acepte el valor y lo guarde en el componente, lo cual aún podría ser necesario si hay que realizar algùn tratamiento especial del dato, pero en este caso el código es suficiente para hacer el binding en los dos sentidos.
+Primero, __el uso de [] indica que haremos el binding y el uso de () indica que emitiremos un evento__, al igual que antes, pero, **ngModel** se encargará de hacer todo el trabajo, no necesitamos crear un método adicional que acepte el valor y lo guarde en el componente, lo cual aún podría ser necesario si hay que realizar algún tratamiento especial del dato, pero en este caso el código es suficiente para hacer el binding en los dos sentidos.
 
 Agreguemos un arreglo en nuestro componente:
 
@@ -741,7 +751,7 @@ personajes: Personaje[] =
   ];
 ```
 
-Y el siguiente mètodo:
+Y el siguiente método:
 
 ```typescript
 agregar() {
@@ -757,7 +767,7 @@ agregar() {
   }
 ```
 
-Cambiemos nuestra template para renderizar la lista de personajes desde un arreglo con ngFor
+Cambiemos nuestra template para renderizar la lista de personajes desde un arreglo con **ngFor**
 
 ```html
 <h3>Personajes</h3>
@@ -769,15 +779,15 @@ Cambiemos nuestra template para renderizar la lista de personajes desde un arreg
 </ul>
 ```
 
-Notar que luego de personajes poder estamos usando un pipe, number, el cual hace que el valor **poder** se imprima como un nùmero (separador de miles, decimales, etc.)
+Notar que luego de personajes poder estamos usando un pipe, number, el cual hace que el valor **poder** se imprima como un número (separador de miles, decimales, etc.)
 
-Otro elemento a notar es el `let pos = index` dentro del ngFor, hay otras variables que se pueden usar como el _isFirst_, _isLast_, etc.
+Otro elemento a notar es el `let pos = index` dentro del **ngFor**, hay otras variables que se pueden usar como el _isFirst_, _isLast_, etc.
 
-Listo, con esto podemos agregar elementos a la lista al momento de presionar "agregar".
+Listo, con esto podemos agregar elementos a la lista al momento de presionar "**agregar**".
 
 ## nGClass
 
-Podemos aplicar una clase basada en una condición, por ejemplo si queremos agregar al _<li>_ un color de fondo, podríamos usar las variables del for y el ngClass.
+Podemos aplicar una clase basada en una condición, por ejemplo si queremos agregar al _li_ un color de fondo, podríamos usar las variables del for y el **ngClass**.
 
 ```html
 <h3>Personajes</h3>
@@ -862,7 +872,7 @@ Luego en el template del nuevo componente moveremos el HTML de la lista
 
 Luego necesitamos pasar la lista de personajes que es manejado por el componente main-page para el nuevo componente pueda renderizarlo.
 
-En el nuevo componente usaremos @Input para indicar que el objeto personajes será entregado por el componente padre.
+En el nuevo componente usaremos **@Input** para indicar que el objeto personajes será entregado por el componente padre.
 
 ```typescript
 import { Component, Input } from '@angular/core';
@@ -906,7 +916,7 @@ En La declaración siguiente sería idela usar la interfaz personaje que habiamo
   @Input('data') personajes: any[] = [];
 ```
 
-Asi que en lugar de any[] deberíamos de tener el tipo **Personaje[]** para ello vamos a crear nuestra interfaz en un nivel superior, de modo que ambos componentes pueda usarla.
+Asi que en lugar de **any[]** deberíamos de tener el tipo **Personaje[]** para ello vamos a crear nuestra interfaz en un nivel superior, de modo que ambos componentes pueda usarla.
 
 Crear directorio **interfaces** en el directorio **dbz** y luego crear el archivo **personaje.interface.ts** con el siguiente contenido:
 
@@ -917,13 +927,13 @@ export interface Personaje {
 }
 ```
 
-Finalmente eliminamos el any y colocamos el tipo correcto.
+Finalmente eliminamos el *any* y colocamos el tipo correcto.
 
 ```typescript
 @Input() personajes: Personaje[] = []
 ```
 
-Se tiene que corregir el main-page ya que alli estabamos usando la misma interfaz pero fue removida,
+Se tiene que corregir el main-page ya que allí estabamos usando la misma interfaz pero fue removida,
 
 ```typescript
 import { Personaje } from '../interfaces/dbz.interface';
@@ -1024,9 +1034,11 @@ Y nuestras plantilla html de nuestro main-page component quedará asi:
 </div>
 ```
 
-Todo debe de funcionar igual, pero tenemos un problema o un error de diseño, resulta que el metodo agregar del componente hijo recibe como referencia el arreglo de personajes y el componente hijo es el que se encarga de hacer el push al arreglo que se le pasa por medio del @Input, esto no es correcto, y lo que debería de suceder es que el componente hijo emita un eveto a su Padre y sea el quien modifique el arreglo, el cual esta definido en su scope.
+Todo debe de funcionar igual, pero tenemos un problema o un error de diseño, resulta que el método agregar del componente hijo recibe como referencia el arreglo de personajes y el componente hijo es el que se encarga de hacer el push al arreglo que se le pasa por medio del **@Input**, esto no es correcto, y lo que debería de suceder es que el componente hijo emita un eveto a su Padre y sea el quien modifique el arreglo, el cual esta definido en su scope.
 
-En otras palabras, si un objeto es manejado por un componente, y un segundo componente intenta modificarlos, la forma correcta es que el segundo componente emita algún tipo de evento que sea escuchado por el primer componente (el dueño del objeto) y sea éste el que al final actualice sus propiedades.
+<aside class="nota-informativa">
+<p>En otras palabras, si un objeto es manejado por un componente, y un segundo componente intenta modificarlos, la forma correcta es que el segundo componente emita algún tipo de evento que sea escuchado por el primer componente (el dueño del objeto) y sea éste el que al final actualice sus propiedades.<p>
+</aside>
 
 ## Outputs y EventEmiter
 
@@ -1122,7 +1134,7 @@ Los servicios es uno de los conceptos más fuertes de Angular, permite implement
 
 Los servicios es otra forma de organizar el código, a medida que nuestra APP crece en número de componentes, es posible que muchos de estos componentes dupliquen cierto código, cierta funcionalidad. Podemos extraer dicha funcionalidad a un servicio.
 
-Dado que los servicios son compartidos por varios componentes, suelen crearse dentro de módulos compartidos, que pueden llamarse common, shared, etc.
+Dado que los servicios son compartidos por varios componentes, suelen crearse dentro de módulos compartidos, que pueden llamarse **common**, **shared**, etc.
 
 Otra de las utilidades de los servicios parte del hecho de que los componentes no deberían buscar o guardar datos directamente, el acceso a los datos es una tarea que debe delegarse a un servicio.
 
@@ -1147,7 +1159,7 @@ export class DbzService {
 }
 ```
 
-Luego en el dbz.module.ts agregaremos una nueva sección:
+Luego en el **dbz.module.ts** agregaremos una nueva sección:
 
 ```typescript
 providers: [DbzService];
@@ -1202,7 +1214,7 @@ constructor(private dbzService: DbzService ) {
 }
 ```
 
-Esto inyecta el servicio y ejecutará el constructor del servicio. Si adicionamos el mismo contructor a otro componente, Angular solo creará una única vez el servicio y podrá ser usado por el sergundo componente. Es decir, nuestro constructor solo se ejecuta una sola vez.
+Esto inyecta el servicio y ejecutará el constructor del servicio. Si adicionamos el mismo contructor a otro componente, A**ngular solo creará una única vez el servicio y podrá ser usado por el sergundo componente**. Es decir, nuestro constructor solo se ejecuta una sola vez.
 
 Podríamos hacer estos cambios:
 
@@ -1212,13 +1224,13 @@ Podríamos hacer estos cambios:
 
 Eso funcionaría, Pero podríamos aplicar otro enfoque, el siguiente:
 
-- Establecer un método _get personajes()_ que retorne la lista de personajes que viene del servicio, este seria como la operación de búsqueda de la Data que queremos tener en el componente. Recordemos que este componente usa un componente hijo _personaje_ el cual crea la lista de personajes
+- Establecer un método _get personajes()_ que retorne la lista de personajes que viene del servicio, este sería como la operación de búsqueda de la Data que queremos tener en el componente. Recordemos que este componente usa un componente hijo _personaje_ el cual crea la lista de personajes
 
-Pero ciertamente el _main-page_ no necesita manejar la lista de personajes, esto podría hacerlo el componente _personaje_ quien es al final el que imprime la lista, entonce podemos inyectar el servicio directamente el el componente hijo.
+Pero ciertamente el _main-page_ no necesita manejar la lista de personajes, esto podría hacerlo el componente _personaje_ quien es al final el que imprime la lista, entonces podemos inyectar el servicio directamente el el componente hijo.
 
 ## Métodos en el Servicio
 
-Tal como lo hemos indicado, el servicio es el reponsable de actualizar los datos, en este caso necesitamos un método _AgregarPersonaje_ a nivel del servicio y èste debe ser llamado por el componente _AgregarPersonaje_.
+Tal como lo hemos indicado, el servicio es el reponsable de actualizar los datos, en este caso necesitamos un método _AgregarPersonaje_ a nivel del servicio y éste debe ser llamado por el componente _AgregarPersonaje_.
 
 Este componente anteriormente emitía un evento, y el _main-page_ caputaraba ese evento y actualizaba los datos, pues ahora no es necesario emitir evento puesto que el servicio es el que se encarga de agregar los datos.
 
@@ -1398,6 +1410,8 @@ eliminarPersonaje( index: number ) {
 ```
 
 En el template de la lista de personajes, agregamos un botón al final y adicionalmente reordenamos para mejorar la interfaz, incluimos algunas clases de bootstrap también
+
+<!--REVIEW-->
 
 ```html
 <h3>Personajes</h3>
@@ -2379,7 +2393,7 @@ Agregaremos una propiedad privada __tagsHistory_ para almacenar la lista de Tags
 private _tagHistory: string[] = [];
 ```
 
-A la vez, crearemos un metodo get para obtener la lista de tags (Arreglo)
+A la vez, crearemos un método get para obtener la lista de tags (Arreglo)
 
 
 ```
@@ -2448,7 +2462,7 @@ this.gifsService.searchGifs(newTag);
 
 ## Consumiendo el servicios desde el SideBar
 
-Vamos a imprimir la lista de elementos que tenemos en nuestro *_tagHistory* en el SideBar Component, para ello primero inyectamos el servicio en el componente y luego creamos un metodo publico GET para retornar la lista actual de elementos guardados.
+Vamos a imprimir la lista de elementos que tenemos en nuestro *_tagHistory* en el SideBar Component, para ello primero inyectamos el servicio en el componente y luego creamos un método publico GET para retornar la lista actual de elementos guardados.
 
 ```typescript
 export class SahredSidebarComponent {
@@ -2594,7 +2608,7 @@ export interface SearchResponse {
 
 _Data_ es un arreglo de gifs, y es el objeto que contiene los datos mas relevantes. Los almacenaremos en una variable pública `public gifsList: Gifs[] = [];`
 
-NOTA: en este caso usamos una propiedad pública y no una privada con su Get (usando desestructuración) porque esta lista es volátil, cada vez que hacemos una búsqueda, esta lista va a ser reemplazada. Por eso no tiene mucha importancia si un proceso externo al servicio la modifica. Aunque lo ideal es siempre usare el metodo GET con su propiedad privada tal como se hizo con el `private _tagHistory: string[] = [];`
+NOTA: en este caso usamos una propiedad pública y no una privada con su Get (usando desestructuración) porque esta lista es volátil, cada vez que hacemos una búsqueda, esta lista va a ser reemplazada. Por eso no tiene mucha importancia si un proceso externo al servicio la modifica. Aunque lo ideal es siempre usare el método GET con su propiedad privada tal como se hizo con el `private _tagHistory: string[] = [];`
 
 A continuación, vamos a tipar nuestro response, el código siguiente imprime únicamente el título de los gifs en la respuesta:
 
@@ -2729,7 +2743,7 @@ El SessionStorage también permite guardar grandes cantdidades de datos pero se 
 
 El cookies tambien persisten datos pero a diferencia de los métodos anteriores, el contenido es enviado al backend cuando interactuamos con el.
 
-Implementemos un metodo sencillo en el GigsService
+Implementemos un método sencillo en el GigsService
 
 ```typescript
 /**
@@ -7448,7 +7462,7 @@ Además el **this.heroForm.valid** es _false_ dado que no se han agregado los va
 
 ## Geter dentro del Componente
 
-El valor actual del **this.heroForm.value** aunque es muy similar a la interfaz de Heroe, realmente no es del mismo tipo, podemos crear un metodo GET, para retornar el valor del Heroe mostrado en el formulario.
+El valor actual del **this.heroForm.value** aunque es muy similar a la interfaz de Heroe, realmente no es del mismo tipo, podemos crear un método GET, para retornar el valor del Heroe mostrado en el formulario.
 
 ```typescript
 get currentHero(): Heroe {
@@ -8649,7 +8663,7 @@ Para la parte dinámica, tenemos originalmente este HTML
 
 Primero necesitamos 
 
-Y luego agregar un ngFor para renderizar los elementos de nuestro arreglo de controles, es decir **favoriteGames** de nuestro **form** para ellos usaremos nuestro metodo **get favoriteGames**
+Y luego agregar un ngFor para renderizar los elementos de nuestro arreglo de controles, es decir **favoriteGames** de nuestro **form** para ellos usaremos nuestro método **get favoriteGames**
 
 ```html
 <div class="col-sm-9" formArrayName="favoriteGames">
@@ -9220,7 +9234,7 @@ Luego el Template hace el Enlace (primeramente a nivel del FormGroup) y luego co
 
 Cuando el usuario escribe **admin** en el userName, al perder el focus se aplica las validaciones en este caso manda a llamar el **cantbeThisValue** este valor no cumple con la regla, por lo tanto el campo UserName tiene un error.
 
-Dado que el campo tiene un error, la llamada desde el template al metodo **isValidField('userName')** hace que el **span** con el texto _Nombre de usuario no permitido._ sea visible al usuario.
+Dado que el campo tiene un error, la llamada desde el template al método **isValidField('userName')** hace que el **span** con el texto _Nombre de usuario no permitido._ sea visible al usuario.
 
 
 Una vez aplicadas todos los cambios en el template veremos un formulario sin mensajes de errores y listo para aceptar datos

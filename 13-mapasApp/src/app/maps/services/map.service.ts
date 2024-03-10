@@ -54,9 +54,13 @@ export class MapService {
 
     bounds.extend(userCurrentLocation);
 
-    this.map.fitBounds(bounds, {
-      padding:200
-    });
+    try {
+      this.map.fitBounds(bounds, {
+        padding: 200
+      });
+    } catch (error) {
+      console.log('Error: ', error);
+    }
   }
 
   getRoutesBetweenPoints(start: [number, number], end: [number, number]) {
